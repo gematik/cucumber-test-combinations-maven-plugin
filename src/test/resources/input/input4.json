@@ -1,0 +1,20 @@
+[
+  {
+    "value": "Api1",
+    "tags": [
+      "client"
+    ],
+    "properties": {
+      "homeserver": "A"
+    }
+  },
+  {
+    "value": "Api2",
+    "tags": [
+      "orgAdmin"
+    ],
+    "properties": {
+      "homeserver": "A"
+    }
+  }
+]

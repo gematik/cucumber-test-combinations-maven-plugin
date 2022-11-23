@@ -1,0 +1,35 @@
+
+== Usage
+
+// TODO rewrite
+
+The plugin can be used by placing it in the build section of your pom.xml and parametrizing with the options shown above.
+Below there is an example of how it could be used:
+
+.example for pom.xml
+[source,xml]
+----
+...
+<build>
+    <plugins>
+      <plugin>
+        <groupId>de.gematik</groupId>
+        <artifactId>cucumber-test-combinations-maven-plugin</artifactId>
+        <version>1.0.0</version>
+        <configuration>
+          <outputDir>${project.build.directory}/features/</outputDir>
+          <templateDir>./src/test/resources/templates/</templateDir>
+          <combineItemsFile>./src/test/resources/combine_items.json</combineItemsFile>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-combine</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+...
+----

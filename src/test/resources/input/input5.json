@@ -1,0 +1,76 @@
+[
+  {
+    "value": "Api1",
+    "tags": [
+      "client"
+    ],
+    "properties": {
+      "homeserver": "A"
+    }
+  },
+  {
+    "value": "Api2",
+    "tags": [
+      "client"
+    ],
+    "properties": {
+      "homeserver": "A",
+      "os": "iOS",
+      "version": "1.0"
+    }
+  },
+  {
+    "value": "Api3",
+    "tags": [
+      "client"
+    ],
+    "properties": {
+      "homeserver": "A"
+    }
+  },
+  {
+    "value": "Api4",
+    "tags": [
+      "client"
+    ],
+    "properties": {
+      "homeserver": "B"
+    }
+  },
+  {
+    "value": "Api5",
+    "tags": [
+      "client"
+    ],
+    "properties": {
+      "homeserver": "B"
+    }
+  },
+  {
+    "value": "Api6",
+    "tags": [
+      "client"
+    ],
+    "properties": {
+      "homeserver": "B"
+    }
+  },
+  {
+    "value": "Api7",
+    "tags": [
+      "client"
+    ],
+    "properties": {
+      "homeserver": "B"
+    }
+  },
+  {
+    "value": "Api8",
+    "tags": [
+      "orgAdmin"
+    ],
+    "properties": {
+      "homeserver": "B"
+    }
+  }
+]

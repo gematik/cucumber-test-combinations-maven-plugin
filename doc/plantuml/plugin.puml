@@ -1,0 +1,11 @@
+@startuml
+rectangle "CuTest-Combinations-Plugin" as Plugin #lightblue
+rectangle "Gherkin scenarios with empty tables" as Gherkin #lightyellow
+rectangle "Combine items" as Items #lightgrey
+rectangle "Gherkin scenarios with filled tables" as Output #lightgreen
+
+Gherkin --> Plugin
+Items --> Plugin
+Plugin --> Output
+
+@enduml

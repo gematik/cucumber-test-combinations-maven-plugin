@@ -1,0 +1,45 @@
+# language: de
+Funktionalität:  test
+
+  @ShouldNotBeChanged
+  Szenariogrundriss: Override AllowDoubleLineup
+    Angenommen X
+    Wenn       Y
+    Dann       Z
+
+    @AllowSelfCombine(true)
+    @AllowDoubleLineup(false)
+    Beispiele:
+      | HEADER_1 | HEADER_2 |
+
+  @ShouldNotBeChanged
+  Szenariogrundriss: Override AllowSelfCombine
+    Angenommen X
+    Wenn       Y
+    Dann       Z
+
+    @AllowDoubleLineup(true)
+    @AllowSelfCombine(false)
+    Beispiele:
+      | HEADER_1 | HEADER_2 |
+
+  @ShouldNotBeChanged
+  Szenariogrundriss: Override AllowDoubleLineup
+    Angenommen X
+    Wenn       Y
+    Dann       Z
+
+    @AllowDoubleLineup(false)
+    @AllowSelfCombine(false)
+    Beispiele:
+      | HEADER_1 | HEADER_2 |
+
+  @ShouldNotBeChanged
+  Szenariogrundriss: Override MaxRows
+    Angenommen X
+    Wenn       Y
+    Dann       Z
+
+    @MaxRows(1)
+    Beispiele:
+      | HEADER_1 | HEADER_2 |

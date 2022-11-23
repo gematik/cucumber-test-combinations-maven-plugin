@@ -1,0 +1,28 @@
+@startuml
+rectangle "input" as input {
+  rectangle "Combine Items" as items #orange
+  rectangle "Gherkin Templates" as templates #lightgreen
+  rectangle "Configuration" as defaultConfig #lightblue
+}
+rectangle "Configuration Overrides" as configOverrides #lightblue
+rectangle "Resulting Configuration" as resultingConfig #lightblue
+rectangle "Table Filters" as tableFilters #yellow
+rectangle "Pre Filters" as preFilters #yellow
+rectangle "Full Table" as fullTable #orange
+rectangle "Filtered Table" as filteredTable #orange
+rectangle "output" as output {
+rectangle "filled Gherkin" as gherkin #lightgreen
+}
+templates --> configOverrides
+templates --> preFilters
+templates --> tableFilters
+configOverrides --> resultingConfig
+defaultConfig --> resultingConfig
+resultingConfig --> tableFilters
+preFilters --> fullTable
+items --> fullTable
+fullTable --> filteredTable
+tableFilters --> filteredTable
+filteredTable -> gherkin
+
+@enduml

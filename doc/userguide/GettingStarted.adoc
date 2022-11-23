@@ -1,0 +1,233 @@
+
+== Getting Started
+
+// TODO rewrite
+
+=== Configuration and parameters
+
+To configure the plugin the following options are available:
+
+[[options]]
+.options
+[cols="1,2,1"]
+|===
+|Option name|Description|Default
+|templateDir|Path to the directory of the templates|./src/test/resources/templates
+|outputDir|Path to the directory where the rendered templates got stored|./src/test/resources/features
+|input|Path to json file that contains the values to combine _(specifications below)_|./src/test/resources/combine_items.json
+|ending|The specific ending of the templates|.cute
+|skipScenariosWithoutExamples| If *true* plugin will add tags '@WIP' and '@EMPTY_EXAMPLES_TABLE' to an examples table where the plugin was not able to add at least one row |true
+|defaultExamplesTags|List of tags that are added to each table as default.
+@AllowDoubleLineup, @AllowSelfCombine and @MinimalTable are forbidden. Their default should be set in filterConfiguration.| empty
+|pluginTagCategory|Define a category to be placed before every plugin-specific tag, so they don't get mixed with all the other tags in the document with important information.|"Plugin"
+|filterConfiguration| Configuration for default filter behavior | see <<filter-configuration, filterConfiguration table>>
+|===
+
+[[filter-configuration]]
+.filterConfiguration
+[cols="1,2,1"]
+|===
+|Option name|Description|Default
+|allowSelfCombine|If *true* plugin will allow that an item can be combined with itself|false
+|allowDoubleLineup|If *true* plugin will allow that one combination of items can appear multiple times if differently sorted|false
+|minimalTable|If *true* plugin will always generate a table with minimal number of entries|false
+|maxTableRows|maximum of rows per table|Integer.MAX_VALUE
+|shuffleCombinations|If *true* plugin will shuffle the table rows|false
+|===
+
+
+=== What else do I need?
+
+==== An input file
+
+The file handed to the plugin via the `<input>` option (<<options, options>>.
+It must be a json file and contain an array of the items to combine.
+Each item needs a `value` field and can have a list of `tags` and a map of `properties`:
+
+.example input file
+[source,json]
+----
+[
+  {
+    "value": "http://item1",
+    "tags": [
+      "tag1",
+      "tag2"
+    ],
+    "properties": {
+      "homeserver": "A"
+    }
+  },
+  {
+    "value": "http://item2",
+    "tags": [],
+    "properties": {
+      "homeserver": "B"
+    }
+  }
+]
+----
+
+==== Templates
+
+In the template files you can specify an empty examples table with only header values.
+The plugin will insert the table body according to its configuration.
+Over the table you can use predefined gherkin tags to customize the table generation.
+If you choose no tags for a scenario, all items will be included in the table rendering.
+
+.example template file
+[source,gherkin]
+----
+...
+
+  Scenario Outline: Get devices
+    Given claim client gematik on api <ApiName1>
+    When get all devices
+    Then returns devices information
+
+    Examples:
+    |ApiName1|
+
+  Scenario Outline: Get orgAdmin devices
+    Given claim client gematik on api <ApiName1>
+    When get all devices
+    Then returns devices information
+
+    @Filter(ApiName1.hasTag("orgAdmin"))
+    Examples:
+    |ApiName1|
+
+...
+----
+
+===== Configuration Tags
+
+Configuration tags can override the default configuration values for a single examples table.
+Configuration tags with a boolean value have default values for which the value can be omitted e.g. `@Shuffle(true)` can also be written as `@Shuffle`
+
+.configuration tags
+[cols="2,1,4"]
+|===
+|Tag name|Default|Example
+|@AllowDoubleLineup(<boolean>)
+
+Example:
+@AllowDoubleLineup(true)|true|specifies if one combination of items can appear multiple times in the examples table, if differently sorted.
+
+e.g. Row "\|entry2\|entry1\|" will not appear if row "\|entry1\|entry2\|" is present.
+
+|@AllowSelfCombine(<boolean>)
+
+Example:
+@AllowSelfCombine(false)|true|Specifies if an item can be combined with itself.
+
+e.g. Row "\|entry1\|entry1\|" will not appear if SelfCombine is disabled.
+
+|@MinimalTable(<boolean>)
+
+Example:
+@MinimalTable(true)|true a|Generate a table with minimal number of entries. Each possible entry will have one occurrence in the resulting table as long as there are sufficient items to fill each row. If additional entries are needed to fill the last row, items will be reused.
+Cell and row filter can lead to more reused items.
+
+DoubleLineup will never appear in such a table.
+
+IMPORTANT: Only cell and row filters are evaluated in table generation.
+Table filters will be applied after table generation. Therefore, this table can not be filtered with table filter tags without loosing multiple entries completely.
+|
+[[config_tag_maxrows]]@MaxRows(<int>)
+
+Example:
+@MaxRows(1)|- a|maximum of rows in this table
+
+[IMPORTANT]
+====
+*"MaxRows" is also used for a <<table_filter_maxrows,TableFilter-Tag>>. The type of created filter is determined by the value for this tag:*
+
+* for simple integer values it is interpreted as configuration tag, that overrides maxRows-config
+* for everything else the table filter is used, which does not override the configuration value
+====
+
+|@Shuffle(<boolean>)
+
+Example:
+@Shuffle(true)|true|shuffle the table
+|===
+
+===== Row Filter Tags
+
+Row filter tags can filter out rows of the table by given parameters.
+
+.row filter tags
+[cols="1,2"]
+|===
+|Tag name|Description
+|@Filter(<expression>)
+
+Example:
+@Filter(HEADER_1.hasTag("orgAdmin")) a| The filter expression must return a boolean value. Evaluates given expression for each possible table row and removes it if expression does not evaluate to `true`.
+
+In the expression you can access the values with its header name and use it like a link:src/main/java/de/gematik/combine/model/CombineItem.java[CombineItem].
+The expression itself is a https://commons.apache.org/proper/commons-jexl/reference/syntax.html[JEXL-Expression].
+
+IMPORTANT: *expressions that evaluate only one field per row, are used as filters before generating the table and can reduce the amount of filtering significantly.*
+
+|@DistinctProperty(<propertyName>)
+
+Example:
+@DistinctProperty(homeserver)|No cell in a row can have the same value of the given property
+|===
+
+===== [[table_filter_tags]] Table Filter Tags
+
+Table filter tags can filter the whole table and are not bound to a row.
+
+.table filter tags
+[cols="1,2"]
+|===
+|Tag name|Description
+|@DistinctColumn(<columnName>)
+
+Example:
+@DistinctColumn(HEADER_1)| For the given column every value will have only one occurrence.
+|
+[[table_filter_maxrows]]@MaxRows(<expression>)
+
+Examples:
+
+@MaxRows(1+2)
+
+@MaxRows(HEADER_1.properties["homeserver"].distinct().count()*2)
+a| maximum of rows in this table
+
+this is an extended version of the config tag <<config_tag_maxrows,MaxRows>> that kan evaluate https://commons.apache.org/proper/commons-jexl/reference/syntax.html[JEXL-Expressions].
+
+In the expression you can access the columns with its header name and use it like a link:src/main/java/de/gematik/combine/filter/jexl/JexlFilterColumn.java[JexlFilterColumn].
+
+Additionally, the variables 'rowCount' and 'columnCount' are usable.
+
+IMPORTANT: This filter does not override the configuration value for maxRows.
+|@MaxSameColumnProperty(<columnName>,<propertyName>,<count>)
+
+Example:
+
+@MaxSameColumnProperty(HEADER_1,homeserver,2)
+a| counts the occurrences of the given property values in the given column and removes rows with property value occurrences over the given count.
+|@DistinctColumnProperty(<columnName>,<propertyName>)
+
+Example:
+
+@DistinctColumnProperty(HEADER_1,homeserver)
+a| Leaves only one row for each distinct property value in the given column.
+Works as MaxSameColumnProperty-Tag with count 1.
+|===
+
+===== Filter Order
+
+The filters are sorted before they are applied.
+Their order is determined by their orderKey defined in link:src/main/java/de/gematik/combine/filter/FilterOrder.java[FilterOrder]:
+
+. RowFilters (all filter which operate only on one row and therefore can not interfere with each other)
+. MaxSameColumnProperty
+. DistinctColumn
+. DoubleLineup
+. MaxRows

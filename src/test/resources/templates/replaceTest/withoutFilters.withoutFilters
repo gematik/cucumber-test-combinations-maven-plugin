@@ -1,0 +1,10 @@
+# language: de
+Funktionalität:  test
+
+  Szenariogrundriss: Anmeldung eines Akteurs
+    Angenommen Reservierung eines Test-Clients "<ClientName>" an der Schnittstelle "<HEADER_1>"
+    Wenn       Registrierung des Test-Client "<ClientName>" mit "<BenutzerName>" beim TI-Messenger-Dienst
+    Dann       Registrierung ist "<Status>"
+
+    Beispiele:
+      | HEADER_1 | HEADER_2 |

@@ -18,15 +18,18 @@ package de.gematik.prepare;
 
 import static de.gematik.combine.CombineMojo.TEST_RESOURCES_DIR;
 import static de.gematik.utils.Utils.getItemsToCombine;
+import static de.gematik.utils.Utils.writeErrors;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.gematik.combine.model.CombineItem;
 import de.gematik.prepare.request.ApiRequester;
+import io.cucumber.core.internal.com.fasterxml.jackson.core.JsonProcessingException;
+import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -53,6 +56,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class PrepareItemsMojo extends AbstractMojo {
 
+  public static final String WARN_MESSAGE = "=== Caution!!! The generated file have modified your input file significantly! ===";
   /**
    * Path to file that contains the values to combine
    */
@@ -98,12 +102,25 @@ public class PrepareItemsMojo extends AbstractMojo {
    */
   @Parameter(property = "clientCertStorePw")
   String clientCertStorePw;
-
+  /**
+   * Say if the build should break if at least one API is not reachable. If set to false it will
+   * generate a combine_items.json file without the not reachable API`s
+   */
+  @Parameter(property = "hardFail", defaultValue = "true")
+  boolean hardFail;
+  /**
+   * Say if the build should break if at least one manual set Tag/Property does not match the found
+   * value on info endpoint.
+   */
+  @Parameter(property = "configFail", defaultValue = "true")
+  boolean configFail;
   /**
    * Path to the directory where the combined items get stored
    */
   public static final String GENERATED_COMBINE_ITEMS_DIR =
       "target" + File.separator + "generated-combine";
+
+  private static final List<String> apiErrors = new ArrayList<>();
 
   @Getter
   @Setter
@@ -140,25 +157,42 @@ public class PrepareItemsMojo extends AbstractMojo {
     }
   }
 
-  protected void run() {
+  protected void run() throws MojoExecutionException {
     List<CombineItem> processedItems = items.stream()
         .map(this::processItem)
         .filter(Objects::nonNull)
         .collect(toList());
-
+    writeErrors(apiErrors, WARN_MESSAGE, false);
+    writeErrors(itemsCreator.getConfigErrors());
+    if (hardFail && !apiErrors.isEmpty()) {
+      throw new MojoExecutionException(
+          "Error occurred for following API`s ->\n" + String.join("\n", apiErrors));
+    }
+    if (configFail && !itemsCreator.getConfigErrors().isEmpty()) {
+      throw new MojoExecutionException(
+          "Different tags or properties where found ->\n" + String.join("\n",
+              itemsCreator.getConfigErrors()));
+    }
     writeItemsToFile(processedItems);
   }
 
+
   private CombineItem processItem(CombineItem item) {
+    String url = item.getUrl() == null ? item.getValue() : item.getUrl();
     try {
-      getLog().info("Connecting to " + item.getValue());
-      Map<?, ?> apiInfo = getApiInfo(item.getValue());
+      getLog().info("Connecting to " + url);
+      Map<?, ?> apiInfo = getApiInfo(
+          nonNull(infoResourceLocation) ? url + infoResourceLocation : url);
       itemsCreator.evaluateExpressions(item, apiInfo);
       return item;
     } catch (MojoExecutionException ex) {
-      getLog().error("Could not connect to " + item.getValue());
+      apiErrors.add(item.getValue() + (nonNull(item.getUrl()) ? " -> " + item.getUrl() : "")
+          + " -> not reachable");
+      getLog().error("Could not connect to api: " + item.getValue() + (nonNull(item.getUrl()) ?
+          " url: " + item.getUrl() : ""));
     } catch (JsonProcessingException ex) {
-      getLog().error("Could not parse JSON from " + item.getValue(), ex);
+      apiErrors.add(url + " -> could not parse JSON");
+      getLog().error("Could not parse JSON from " + url, ex);
     }
     return null;
   }

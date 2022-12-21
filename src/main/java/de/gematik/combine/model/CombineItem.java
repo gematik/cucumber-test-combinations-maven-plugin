@@ -39,6 +39,7 @@ public class CombineItem implements Comparable<CombineItem> {
   public static final String DEFAULT_PROPERTY = "";
 
   private String value;
+  private String url;
 
   @Singular
   @EqualsAndHashCode.Exclude

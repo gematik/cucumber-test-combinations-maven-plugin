@@ -17,6 +17,7 @@
 package de.gematik.combine.filter.table.row;
 
 import de.gematik.combine.model.TableCell;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -26,6 +27,9 @@ import java.util.function.Predicate;
  */
 public interface RowFilter extends Predicate<List<TableCell>> {
 
+  default List<String> getRequiredColumns(List<String> headers){
+    return Collections.emptyList();
+  }
   default RowFilter and(RowFilter other) {
     return row -> Predicate.super.and(other).test(row);
   }

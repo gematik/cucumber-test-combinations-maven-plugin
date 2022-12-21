@@ -18,12 +18,17 @@ package de.gematik.utils;
 
 import static de.gematik.prepare.PrepareItemsMojo.GENERATED_COMBINE_ITEMS_DIR;
 import static java.lang.String.format;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.nonNull;
 import static lombok.AccessLevel.PRIVATE;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import de.gematik.combine.CombineMojo;
 import de.gematik.combine.model.CombineItem;
+import de.gematik.prepare.PrepareItemsMojo;
+import io.cucumber.core.internal.com.fasterxml.jackson.core.JsonParseException;
+import io.cucumber.core.internal.com.fasterxml.jackson.databind.JsonMappingException;
+import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.datatable.internal.difflib.StringUtills;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -33,8 +38,10 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 
 @NoArgsConstructor(access = PRIVATE)
 public class Utils {
@@ -53,8 +60,7 @@ public class Utils {
     if (useCreated && generatedFile.exists()) {
       file = generatedFile;
     }
-    mojo.getLog()
-        .info(format("Fetching all items from input file '%s'", file.getAbsolutePath()));
+    mojo.getLog().info(format("Fetching all items from input file '%s'", file.getAbsolutePath()));
     try {
       br = new BufferedReader(new FileReader(file));
     } catch (FileNotFoundException e) {
@@ -70,5 +76,30 @@ public class Utils {
           file.getName(), e.getOriginalMessage()));
     }
     return new ArrayList<>(combineItems);
+  }
+
+  private static Log getLog() {
+    if (nonNull(CombineMojo.getInstance())) {
+      return CombineMojo.getPluginLog();
+    }
+    return PrepareItemsMojo.getPluginLog();
+  }
+
+  public static void writeErrors(List<String> errors) {
+    writeErrors(errors, null, true);
+  }
+
+  @SneakyThrows
+  public static void writeErrors(List<String> errors, String message, boolean shouldAppend) {
+    if (errors.isEmpty()) {
+      return;
+    }
+    if (nonNull(message)) {
+      getLog().warn(message);
+    }
+    errors.forEach(getLog()::warn);
+    File file = new File(GENERATED_COMBINE_ITEMS_DIR + File.separator + "errorLog.txt");
+    String errorString = StringUtills.join(errors, "\n") + "\n";
+    FileUtils.write(file, errorString, UTF_8, shouldAppend);
   }
 }

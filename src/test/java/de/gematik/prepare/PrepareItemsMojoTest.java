@@ -24,10 +24,13 @@ import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import de.gematik.combine.model.CombineItem;
 import de.gematik.prepare.request.ApiRequester;
@@ -51,6 +54,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class PrepareItemsMojoTest {
 
   public static final String ONLY_VALUE_JSON = "src/test/resources/input/inputOnlyValue.json";
+  public static final String URL_VALUE_JSON = "src/test/resources/input/inputValueAndUrl.json";
+
+
   @Mock
   ItemsCreator itemsCreator;
 
@@ -59,13 +65,13 @@ class PrepareItemsMojoTest {
 
   PrepareItemsMojo mojo;
 
+  @Mock
   Log log;
 
   @BeforeEach
   @SneakyThrows
   void setup() {
     mojo = spy(new PrepareItemsMojo(apiRequester));
-    log = mock(Log.class);
     lenient().when(mojo.getLog()).thenReturn(log);
     mojo.setItemsCreator(itemsCreator);
     lenient().doReturn("{}").when(apiRequester).getApiResponse(any());
@@ -88,6 +94,32 @@ class PrepareItemsMojoTest {
     long filesAfter = stream(requireNonNull(outputDir.listFiles()))
         .filter(e -> e.getName().endsWith(".json")).count();
     assertThat(filesBefore + 1).isEqualTo(filesAfter);
+  }
+
+  @Test
+  @SneakyThrows
+  void shouldUseUrlNotValue() {
+    // arrange
+    mojo.setCombineItemsFile(URL_VALUE_JSON);
+    mojo.setItems(getItemsToCombine(new File(URL_VALUE_JSON), mojo, false));
+    new File(GENERATED_COMBINE_ITEMS_DIR).mkdirs();
+    // act
+    mojo.run();
+    // assert
+    verify(apiRequester, times(3)).getApiResponse(startsWith("http://localhost:80"));
+  }
+
+  @Test
+  @SneakyThrows
+  void shouldUseValueBecauseUrlNotPresent() {
+    // arrange
+    mojo.setCombineItemsFile(ONLY_VALUE_JSON);
+    mojo.setItems(getItemsToCombine(new File(ONLY_VALUE_JSON), mojo, false));
+    new File(GENERATED_COMBINE_ITEMS_DIR).mkdirs();
+    // act
+    mojo.run();
+    // assert
+    verify(apiRequester, times(3)).getApiResponse(startsWith("API-"));
   }
 
 
@@ -125,7 +157,7 @@ class PrepareItemsMojoTest {
   @ParameterizedTest
   @SneakyThrows
   @MethodSource("getWrong")
-  void shouldThrowExceptionIfNoTagIsInProperty(String missingType,
+  void shouldThrowExceptionIfValueIsMissingInExpression(String missingType,
       List<PropertyExpression> properties, List<TagExpression> tags) {
     // arrange
 
@@ -136,5 +168,28 @@ class PrepareItemsMojoTest {
         .isInstanceOf(MojoExecutionException.class)
         .message().startsWith(
             "Erroneous configuration: missing " + missingType + " in ");
+  }
+
+
+  @Test
+  @SneakyThrows
+  void shouldThrowExceptionIfTagOrPropertyMismatch() {
+    when(itemsCreator.getConfigErrors()).thenReturn(List.of("Some Error"));
+    mojo.setItems(List.of());
+    mojo.configFail = true;
+    assertThatThrownBy(() -> mojo.run())
+        .isInstanceOf(MojoExecutionException.class)
+        .message().startsWith("Different tags or properties where found");
+  }
+
+  @Test
+  @SneakyThrows
+  @SuppressWarnings("java:S2699")
+  void shouldNotThrowExceptionIfTagOrPropertyMismatch() {
+    when(itemsCreator.getConfigErrors()).thenReturn(List.of("Some Error"));
+    mojo.setItems(List.of());
+    mojo.configFail = false;
+    mojo.combineItemsFile = ONLY_VALUE_JSON;
+    mojo.run();
   }
 }

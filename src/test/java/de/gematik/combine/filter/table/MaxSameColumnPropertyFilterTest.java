@@ -16,7 +16,7 @@
 
 package de.gematik.combine.filter.table;
 
-import static de.gematik.combine.MockPluginLog.withMockedPluginLog;
+import static de.gematik.utils.MockPluginLog.withMockedPluginLog;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 

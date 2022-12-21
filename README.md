@@ -21,7 +21,7 @@ Add the following to you `pom.xml` and configure the plugin as you need:
     <plugin>
       <groupId>de.gematik</groupId>
       <artifactId>cucumber-test-combinations-maven-plugin</artifactId>
-      <version>2.4.3</version>
+      <version>2.5.0</version>
     </plugin>
 
 To use the plugin you have to do two things:

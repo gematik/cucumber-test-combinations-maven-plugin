@@ -1,11 +1,14 @@
-
-== Getting Started
+:toc-title: Table of Contents
+:toc:
+:toclevels: 5
+= Getting Started
 
 // TODO rewrite
+== Combine goal
 
 === Configuration and parameters
 
-To configure the plugin the following options are available:
+To configure the combine goal the following options are available:
 
 [[options]]
 .options
@@ -14,9 +17,11 @@ To configure the plugin the following options are available:
 |Option name|Description|Default
 |templateDir|Path to the directory of the templates|./src/test/resources/templates
 |outputDir|Path to the directory where the rendered templates got stored|./src/test/resources/features
-|input|Path to json file that contains the values to combine _(specifications below)_|./src/test/resources/combine_items.json
+|combineItemsFile|Path to json file that contains the values to combine. <<combine_items,click here for further information>>|./src/test/resources/combine_items.json
 |ending|The specific ending of the templates|.cute
 |skipScenariosWithoutExamples| If *true* plugin will add tags '@WIP' and '@EMPTY_EXAMPLES_TABLE' to an examples table where the plugin was not able to add at least one row |true
+|minTableSize|Amount of minimal rows in one table. If table have less rows error log will be written. Can be conbined with *breakIfTableToSmall*|1
+|breakIfTableToSmall|If *true* the plugin will raise an error if it`s not able to add the minimal amount of rows that are requested in property minTableSize|true
 |defaultExamplesTags|List of tags that are added to each table as default.
 @AllowDoubleLineup, @AllowSelfCombine and @MinimalTable are forbidden. Their default should be set in filterConfiguration.| empty
 |pluginTagCategory|Define a category to be placed before every plugin-specific tag, so they don't get mixed with all the other tags in the document with important information.|"Plugin"
@@ -35,10 +40,9 @@ To configure the plugin the following options are available:
 |shuffleCombinations|If *true* plugin will shuffle the table rows|false
 |===
 
-
 === What else do I need?
 
-==== An input file
+==== [[combine_items]]An input file
 
 The file handed to the plugin via the `<input>` option (<<options, options>>.
 It must be a json file and contain an array of the items to combine.
@@ -224,10 +228,115 @@ Works as MaxSameColumnProperty-Tag with count 1.
 ===== Filter Order
 
 The filters are sorted before they are applied.
-Their order is determined by their orderKey defined in link:src/main/java/de/gematik/combine/filter/FilterOrder.java[FilterOrder]:
+Their order is determined by their orderKey defined in link:../src/main/java/de/gematik/combine/filter/FilterOrder.java[FilterOrder]:
 
 . RowFilters (all filter which operate only on one row and therefore can not interfere with each other)
 . MaxSameColumnProperty
 . DistinctColumn
 . DoubleLineup
 . MaxRows
+
+== Prepare goal
+
+It parses the info-endpoint and adds additional information and validates all given information automatically. It takes the base combine_items.json and creates a new one regarding the info-data endpoint and the given expressions. The info-point could be parsed by JSON-Path which are configured in expressions.
+
+Only if there is a configuration for a specific tag or property it will validate. All tags or properties that have no configuration will be copied 1 to 1 in the resulting combine_items.json.
+
+Depending on configuration the plugin exits with an error or overrides all information with the findings at the info-endpoint.
+
+Important:: This goal have to be executed before the combine goal.
+
+=== Configuration and parameters
+
+[[options]]
+.options
+[%header, cols="1,2,1"]
+|===
+|Option name|Description|Default
+|combineItemsFile|Path to json file that contains the values to combine. <<combine_items,click here for further information>>|./src/test/resources/
+|infoResourceLocation|Location to the info-endpoint, if this is not he root location. For example if the URL is localhost:8080 and the info-endpoint is at /app/info you have to provide app/info here.|
+|tagExpressions|This is a list of complex data and define which tags have to be set under what conditions. Read more here <<Expressions>>|
+|propertyExpressions|This is a list of complex data and define which property have to be set under what conditions. Read more here <<Expressions>>|
+|truststore|Path of truststore|
+|truststorePw|Truststore password|
+|clientCertStore|Path of client-cert-store|
+|clientCertStorePw|Client-cert-password|
+|hardFail|If one API is not reachable the plugin will raise an exception|true
+|configFail|If one tag or one property should be set or differs from the given the plugin will raise an exception. If set to false all information from the infopoint will override the given information|true
+|===
+
+==== [[Expressions]] Expressions
+
+Every single expression you configure is a check that should be done against the info-endpoint. This expression got executed and compared to the info-endpoint.
+
+A tag expression (JSON-Path) should have a true or false as result. If the result of the path is true the tag will be added or kept. If the result is false the tag will be ignored (no error) or unset if the tag is named in the base combine_item.json.
+
+This results in following table of outcomes:
+
+.Result table tags
+[%header,cols="2,2,2,1"]
+|===
+|Value in base|Value in api|result|error
+|is set|true|tag is set|no
+|is not set|true|tag is set|no
+|is set|false|tag is removed|yes
+|is not set|false|tag is ignored| no
+|===
+
+If the path for a property is existing, the value will be added. If the path does not exist but the property is set in the base combine_items.json the property stays. If no property is set in the base combine_items.json and the path does not exist, the property will be removed. In addition to the tag, the set value in the base combine_items.json will be compared to the value found at the info-endpoint and will raise an exception if configured, but at least noticed in error log.
+
+This results in following table of outcomes:
+
+.Result table properties
+[%header, cols="2,2,2,1"]
+|===
+|Value in base|Value in api|result|error
+|is set|found and is same|property is set|no
+|is set|found and differs from base|property got overwritten by api value|yes
+|is not set|found|property is set|no
+|is set|not found|property is removed|yes
+|is not set|not found|tag is ignored| no
+|===
+
+Everytime an expression is not successful (returns false or was not found) the build will break if `configFail` is set to true (default). If it's set to false the regarding tag or property will be removed if set. In this case an errorLog.txt file with all registered errors will be generated right next to the generated combine_items.json at `./target/generated-combine`.
+
+==== Configuration in pom.xml
+.Example tag and property Expression
+[source, xml]
+----
+<configuration>
+  <tagExpressions>
+    <tagExpression>
+      <tag>MyTag</tag>
+      <expression>$.my.Json.Path</expression>
+    </tagExpression>
+    <tagExpression>
+      ...
+    </tagExpression>
+  </tagExpressions>
+  <propertyExpressions>
+    <propertyExpression>
+      <property>myProperty</property>
+      <expression>$.my.Json.Path</expression>
+    </propertyExpression>
+    <propertyExpression>
+      ...
+    </propertyExpression>
+  </propertyExpressions>
+</configuration>
+----
+
+=== Using mTls
+
+For using mTls all 4 properties have to be set:
+
+. truststore
+. truststorePw
+. clientCertStore
+. clientCertStorePw
+
+If one of these properties is set and the others not, or it's mal configuration, the plugin will raise an error. For using only https none of this properties have to be set. The plugin uses the internal truststore as default.
+
+=== Error log
+
+Every error / mismatch that exist between the base combine_items.json will be logged to console and also to the folder ./target/generated-combine. This enables you for a proper investigation.

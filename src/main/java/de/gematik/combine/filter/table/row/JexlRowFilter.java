@@ -16,6 +16,8 @@
 
 package de.gematik.combine.filter.table.row;
 
+import static java.util.stream.Collectors.toList;
+
 import de.gematik.combine.filter.jexl.JexlFilter;
 import de.gematik.combine.model.TableCell;
 import java.util.List;
@@ -43,5 +45,12 @@ public class JexlRowFilter extends TableRowFilter {
   public boolean test(List<TableCell> tableRow) {
     jexlFilter.addToContext(tableRow);
     return this.jexlFilter.evaluate();
+  }
+
+  @Override
+  public List<String> getRequiredColumns(List<String> headers) {
+    return headers.stream()
+        .filter(header -> jexlFilter.toString().contains(header))
+        .collect(toList());
   }
 }

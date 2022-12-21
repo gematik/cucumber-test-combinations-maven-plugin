@@ -16,6 +16,7 @@
 
 package de.gematik.prepare;
 
+import static de.gematik.utils.MockPluginLog.withMockedPluginLog;
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
@@ -23,8 +24,8 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.gematik.combine.model.CombineItem;
+import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -103,6 +104,9 @@ class ItemsCreatorTest {
           arguments("set existing tag again", Set.of("initialTag"), "{\"key\": true}",
               new TagExpression("initialTag", "$.key"), Set.of("initialTag")),
           arguments("remove existing tag", Set.of("initialTag"), "{\"key\": false}",
+              new TagExpression("initialTag", "$.key"), Set.of()),
+          arguments("expression not found and remove", Set.of("initialTag"),
+              "{\"otherKey\": false}",
               new TagExpression("initialTag", "$.key"), Set.of())
       );
     }
@@ -131,6 +135,45 @@ class ItemsCreatorTest {
       // assert
       assertThat(combineItem.getTags()).isEqualTo(expectedTags);
     }
+
+    public Stream<Arguments> addErrorTests() {
+      return Stream.of(
+          arguments("Tag not found", new TagExpression("myTag", "$.target"),
+              "{\"differentTarget\": true}", Set.of("myTag")),
+          arguments("Tag found but false", new TagExpression("myTag", "$.target"),
+              "{\"target\": false}", Set.of("myTag")),
+          arguments("Nested tag not found", new TagExpression("myTag", "$.app.target"),
+              "{\"app\": {\"differentTarget\": false}}", Set.of("myTag")),
+          arguments("Nested tag found but false", new TagExpression("myTag", "$.app.target"),
+              "{\"app\": {\"target\": false}}", Set.of("myTag"))
+      );
+    }
+
+
+    @SneakyThrows
+    @MethodSource
+    @ParameterizedTest(name = "{0}")
+    void addErrorTests(String description, TagExpression expression, String json,
+        Set<String> initialTags) {
+      // arrange
+      creator = new ItemsCreator(PrepareItemsConfig.builder()
+          .tagExpressions(List.of(expression))
+          .propertyExpressions(List.of())
+          .build());
+      Map<?, ?> context = objectMapper.readValue(json, Map.class);
+
+      CombineItem combineItem = CombineItem.builder()
+          .value("http://myApi.com:8080")
+          .tags(initialTags)
+          .build();
+
+      // act
+      creator.evaluateExpressions(combineItem, context);
+
+      // assert
+      assertThat(creator.getConfigErrors()).as("Test \"" + description + "\" failed!").hasSize(1);
+    }
+
   }
 
   @Nested
@@ -150,6 +193,11 @@ class ItemsCreatorTest {
           arguments("add property from deep path", Map.of(),
               "{\"nested\":{\"prop\": \"newValue\"}}",
               new PropertyExpression("prop", "$.nested.prop"), Map.of("prop", "newValue")),
+          arguments("expression does not exist but was set", Map.of(),
+              "{\"prop\": \"newValue\"}",
+              new PropertyExpression("prop", "$.notExistingProp"), Map.of()),
+          arguments("expression does not exist and not set", Map.of(), "{\"prop\": \"newValue\"}",
+              new PropertyExpression("prop", "$.notExistingProp"), Map.of()),
           arguments("add property with expression", Map.of(), "{\"key\": true}}",
               new PropertyExpression("prop", "$.key==true ? 'yes' : 'no'"), Map.of("prop", "yes"))
       );
@@ -169,7 +217,47 @@ class ItemsCreatorTest {
       Map<?, ?> context = objectMapper.readValue(json, Map.class);
 
       CombineItem combineItem = CombineItem.builder()
-          .value("someItem")
+          .value("http://myApi.com:8080")
+          .properties(initialProperties)
+          .build();
+
+      // act
+      withMockedPluginLog(() -> creator.evaluateExpressions(combineItem, context));
+
+      // assert
+      assertThat(combineItem.getProperties().entrySet()).isEqualTo(expectedProperties.entrySet());
+    }
+
+    public Stream<Arguments> propertyErrorTests() {
+      return Stream.of(
+          arguments("property not found", Map.of(), "{\"otherTarget\": \"newValue\"}",
+              new PropertyExpression("prop", "$.target")),
+          arguments("different property", Map.of("prop", "jsonValue"),
+              "{\"target\": \"propValue\"}", new PropertyExpression("prop", "$.target")),
+          arguments("nested property not found", Map.of(),
+              "{\"nested\":{\"differentTarget\": \"newValue\"}}",
+              new PropertyExpression("prop", "$.nested.target")),
+          arguments("nested different property", Map.of("prop", "jsonValue"),
+              "{\"nested\":{\"target\": \"newValue\"}}",
+              new PropertyExpression("prop", "$.nested.target"))
+      );
+    }
+
+    @SneakyThrows
+    @MethodSource
+    @ParameterizedTest(name = "{0}")
+    void propertyErrorTests(String description, Map<String, String> initialProperties, String json,
+        PropertyExpression expression) {
+      // arrange
+      creator = new ItemsCreator(PrepareItemsConfig.builder()
+          .tagExpressions(List.of())
+          .propertyExpressions(List.of(expression))
+          .build());
+
+      Map<?, ?> context = objectMapper.readValue(json, Map.class);
+
+      CombineItem combineItem = CombineItem.builder()
+          .value("http://myApi.com:8080")
           .properties(initialProperties)
           .build();
 
@@ -177,7 +265,7 @@ class ItemsCreatorTest {
       creator.evaluateExpressions(combineItem, context);
 
       // assert
-      assertThat(combineItem.getProperties().entrySet()).isEqualTo(expectedProperties.entrySet());
+      assertThat(creator.getConfigErrors()).as("Test \"" + description + "\" failed!").hasSize(1);
     }
   }
 }

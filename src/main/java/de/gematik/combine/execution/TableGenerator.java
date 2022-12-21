@@ -161,9 +161,9 @@ public class TableGenerator {
     List<TableCell> missingColumnValues = possibleValues.stream()
         .filter(val -> stateInfo.getAllMissingValues().contains(val.getCombineItem()))
         .collect(toList());
-    RowFilter combinedRowFilter = stateInfo.getFilters().combineAllRowFilters();
-    Optional<TableCell> newColValue = findNewRowValue(stateInfo.getAllUsedValues(), possibleValues,
-        missingColumnValues, row, combinedRowFilter);
+    List<RowFilter> rowFilters = new ArrayList<>(stateInfo.getFilters().getTableRowFilters());
+    Optional<TableCell> newColValue = findNewRowValue(stateInfo, possibleValues,
+        missingColumnValues, row, rowFilters);
 
     return newColValue.map(value -> {
       List<TableCell> extendedRow = new ArrayList<>(row);
@@ -193,30 +193,31 @@ public class TableGenerator {
     return row;
   }
 
-  private Optional<TableCell> findNewRowValue(Set<CombineItem> allUsedValues,
+  private Optional<TableCell> findNewRowValue(StateInfo stateInfo,
       List<TableCell> preparedValues, List<TableCell> remainingValuesForThisColumn,
-      List<TableCell> row, RowFilter rowFilter) {
+      List<TableCell> row, List<RowFilter> rowFilter) {
 
-    return findNewValueNotContainedIn(remainingValuesForThisColumn, row, allUsedValues, rowFilter)
-        .or(() -> findNewValueNotContainedIn(remainingValuesForThisColumn, row, emptySet(),
+    return findNewValueNotContainedIn( stateInfo,remainingValuesForThisColumn, row,stateInfo.getAllUsedValues(), rowFilter)
+        .or(() -> findNewValueNotContainedIn(stateInfo, remainingValuesForThisColumn, row, emptySet(),
             rowFilter))
-        .or(() -> findNewValueMatchingFilter(preparedValues, row, rowFilter));
+        .or(() -> findNewValueMatchingFilter(stateInfo, preparedValues, row, rowFilter));
   }
 
-  private Optional<TableCell> findNewValueMatchingFilter(List<TableCell> possibleValues,
-      List<TableCell> row, RowFilter rowFilter) {
+  private Optional<TableCell> findNewValueMatchingFilter(StateInfo stateInfo, List<TableCell> possibleValues,
+      List<TableCell> row, List<RowFilter> rowFilters) {
     for (TableCell possibleValue : possibleValues) {
       ArrayList<TableCell> extendedRow = new ArrayList<>(row);
       extendedRow.add(possibleValue);
-      if (rowFilter.test(extendedRow)) {
+      if (checkRowFilter(extendedRow,rowFilters,stateInfo.getFilters().getColumns())) {
         return Optional.of(possibleValue);
       }
     }
     return Optional.empty();
   }
 
-  private Optional<TableCell> findNewValueNotContainedIn(List<TableCell> possibleValues,
-      List<TableCell> usedRowValues, Set<CombineItem> allUsedValues, RowFilter rowFilter) {
+  private Optional<TableCell> findNewValueNotContainedIn(StateInfo stateInfo, List<TableCell> possibleValues,
+      List<TableCell> usedRowValues, Set<CombineItem> allUsedValues, List<RowFilter> rowFilters) {
+    List<String> allColumns = stateInfo.getFilters().getColumns();
     Set<CombineItem> usedCombineItems = concat(
         allUsedValues.stream(),
         usedRowValues.stream().map(TableCell::getCombineItem))
@@ -225,15 +226,26 @@ public class TableGenerator {
     for (TableCell possibleValue : possibleValues) {
       ArrayList<TableCell> possibleRow = new ArrayList<>(usedRowValues);
       possibleRow.add(possibleValue);
-      if (!usedCombineItems.contains(possibleValue.getCombineItem()) && rowFilter.test(
-          possibleRow)) {
+      if (!usedCombineItems.contains(possibleValue.getCombineItem()) && checkRowFilter(possibleRow, rowFilters, allColumns  )) {
         return Optional.of(possibleValue);
       }
     }
     return Optional.empty();
   }
 
+  private boolean checkRowFilter (List<TableCell> row, List<RowFilter> rowFilters, List<String> allHeaders){
+    return rowFilters.stream()
+        .filter(rf -> isApplicable(row, rf, allHeaders))
+        .allMatch(rf -> rf.test(row));
+  }
 
+private boolean isApplicable(List<TableCell> row, RowFilter rowFilter, List<String> allHeaders){
+    List<String> requiredColumns = rowFilter.getRequiredColumns(allHeaders);
+    Set<String> filledColumns = row.stream()
+        .map(TableCell::getHeader)
+        .collect(toSet());
+    return filledColumns.containsAll(requiredColumns);
+}
   private List<TableCell> sortRowForColumns(List<String> columns, List<TableCell> row) {
     row.sort(comparingInt(a -> columns.indexOf(a.getHeader())));
     return row;

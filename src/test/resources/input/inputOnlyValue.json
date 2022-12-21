@@ -1,11 +1,11 @@
 [
   {
-    "value": "http://localhost:8080"
+    "value": "API-1"
   },
   {
-    "value": "http://localhost:8083"
+    "value": "API-2"
   },
   {
-    "value": "http://localhost:8084"
+    "value": "API-3"
   }
 ]

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package de.gematik.combine;
+package de.gematik.utils;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 
+import de.gematik.combine.CombineMojo;
 import java.util.function.Supplier;
 import lombok.Getter;
 import org.apache.maven.plugin.logging.Log;

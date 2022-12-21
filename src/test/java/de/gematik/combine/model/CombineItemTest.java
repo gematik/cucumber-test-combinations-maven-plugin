@@ -16,12 +16,12 @@
 
 package de.gematik.combine.model;
 
-import static de.gematik.combine.MockPluginLog.withMockedPluginLog;
+import static de.gematik.utils.MockPluginLog.withMockedPluginLog;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.Mockito.verify;
 
-import de.gematik.combine.MockPluginLog;
+import de.gematik.utils.MockPluginLog;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 

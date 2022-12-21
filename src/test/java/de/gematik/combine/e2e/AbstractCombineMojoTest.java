@@ -55,6 +55,8 @@ public abstract class AbstractCombineMojoTest {
     combineMojo.setSkipTags(emptyList());
     combineMojo.setEnding(".cute");
     combineMojo.setFilterConfiguration(new FilterConfiguration());
+    combineMojo.setMinTableSize(minimalTableSize());
+    combineMojo.setBreakIfTableToSmall(breakIfTableToSmall());
 
     when(combineMojo.getLog()).thenReturn(log);
   }
@@ -79,6 +81,14 @@ public abstract class AbstractCombineMojoTest {
 
   protected String combineItemsFile() {
     return "./src/test/resources/input/input1.json";
+  }
+
+  private int minimalTableSize() {
+    return 1;
+  }
+
+  private boolean breakIfTableToSmall() {
+    return false;
   }
 
 }

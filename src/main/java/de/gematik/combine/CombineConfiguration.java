@@ -43,5 +43,7 @@ public class CombineConfiguration {
   @Builder.Default
   private List<String> skipTags = new ArrayList<>();
   private FilterConfiguration filterConfiguration;
+  private boolean breakIfTableToSmall;
+  private int minTableSize;
 
 }

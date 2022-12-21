@@ -28,6 +28,7 @@ import de.gematik.combine.filter.table.cell.CellFilter;
 import de.gematik.combine.filter.table.cell.JexlCellFilter;
 import de.gematik.combine.filter.table.row.DistinctRowPropertyFilter;
 import de.gematik.combine.filter.table.row.EqualRowPropertyFilter;
+import de.gematik.combine.filter.table.row.JexlRowFilter;
 import de.gematik.combine.filter.table.row.TableRowFilter;
 import de.gematik.combine.model.CombineItem;
 import de.gematik.combine.model.TableCell;
@@ -124,6 +125,25 @@ class TableGeneratorTest {
         CombineItem.builder().value("Api_B2").property("prop", "B").build(),
         CombineItem.builder().value("Api_C1").property("prop", "C").build()
     );
+
+    @Test
+    void shouldEvaluateFilterAccessingNotAdjacentColumns(){
+      //arrange
+      ConfiguredFilters configuredFilters = new ConfiguredFilters(config, headers,
+          Filters.builder()
+              .tableRowFilters(List.of(
+                  new JexlRowFilter(
+                      "HEADER_1.properties[\"prop\"].equals(HEADER_3.properties[\"prop\"])")))
+              .build());
+      // act
+      List<List<TableCell>> table = tableGenerator.generateTable(items, configuredFilters);
+      // assert
+      assertThat(table)
+          .extracting(row -> row.stream()
+              .map(TableCell::getValue)
+              .collect(joining(",")))
+          .containsExactly("Api_A1,Api_A2,Api_A1", "Api_B1,Api_B2,Api_B1", "Api_C1,Api_A1,Api_C1");
+    }
 
     @Test
     void shouldCreateMinimalTable() {

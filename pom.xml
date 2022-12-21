@@ -7,25 +7,24 @@
   <!-- tag::maven-coordinates[] -->
   <groupId>de.gematik</groupId>
   <artifactId>cucumber-test-combinations-maven-plugin</artifactId>
-  <version>2.4.3</version>
+  <version>2.5.0</version>
   <!-- end::maven-coordinates[] -->
   <packaging>maven-plugin</packaging>
-  <name>BDD Parameterizer Maven Plugin</name>
-  <description>Fill in each cucumber scenarios examples table with all filtered combinations of
-    values in the input file
-  </description>
-  <url>https://github.com/gematik/${github.repo}</url>
+  <name>CuTest Combinations Maven Plugin</name>
+  <description>Fill cucumber scenarios examples tables with generated combinations of
+    specified values.</description>
+  <url>https://github.com/gematik/cucumber-test-combinations-maven-plugin</url>
 
   <scm>
-    <url>https://github.com/gematik/${github.repo}</url>
-    <connection>scm:git:git://github.com/gematik/${github.repo}.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com:gematik/${github.repo}.git
+    <url>https://github.com/gematik/cucumber-test-combinations-maven-plugin</url>
+    <connection>scm:git:git://github.com/gematik/cucumber-test-combinations-maven-plugin.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:gematik/cucumber-test-combinations-maven-plugin.git
     </developerConnection>
   </scm>
 
   <issueManagement>
     <system>GitHub</system>
-    <url>https://github.com/gematik/${github.repo}/issues</url>
+    <url>https://github.com/gematik/cucumber-test-combinations-maven-plugin/issues</url>
   </issueManagement>
 
   <organization>
@@ -52,7 +51,6 @@
 
   <properties>
     <java.version>11</java.version>
-    <github.repo>testtool-CuTestCombinator</github.repo>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <sonar.coverage.jacoco.xmlReportPaths>
@@ -105,10 +103,6 @@
       <artifactId>lombok</artifactId>
       <version>${lombok.version}</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -188,11 +182,6 @@
         <groupId>com.jayway.jsonpath</groupId>
         <artifactId>json-path</artifactId>
         <version>2.7.0</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>2.14.0-rc1</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
@@ -299,7 +288,8 @@
           </execution>
         </executions>
         <configuration>
-          <sourceDirectory>src/main/java</sourceDirectory>
+          <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
+          <outputDirectory>${project.build.directory}/delombok</outputDirectory>
           <addOutputDirectory>false</addOutputDirectory>
         </configuration>
       </plugin>
@@ -309,7 +299,7 @@
         <version>${maven-javadoc-plugin.version}</version>
         <configuration>
           <defaultVersion>${project.version}</defaultVersion>
-          <sourcepath>target/generated-sources/delombok</sourcepath>
+          <sourcepath>${project.build.directory}/delombok</sourcepath>
         </configuration>
         <executions>
           <execution>

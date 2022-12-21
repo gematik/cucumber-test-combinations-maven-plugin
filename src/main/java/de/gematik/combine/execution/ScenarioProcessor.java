@@ -16,6 +16,7 @@
 
 package de.gematik.combine.execution;
 
+import static de.gematik.combine.CombineMojo.appendError;
 import static de.gematik.combine.CombineMojo.getPluginLog;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -51,6 +52,7 @@ public class ScenarioProcessor {
     examples.forEach(table -> processExamplesTable(table, combineItems, configuration));
 
     addEmptyExamplesTags(scenario, configuration.getEmptyExamplesTags());
+    checkTableSize(scenario, configuration.getMinTableSize());
   }
 
   private void processExamplesTable(Examples examples, List<CombineItem> combineItems,
@@ -89,6 +91,19 @@ public class ScenarioProcessor {
     return examples.getTags().stream()
         .map(tag -> tag.getName().toLowerCase())
         .noneMatch(skipTags::contains);
+  }
+
+  private void checkTableSize(Scenario scenario, int minTableSize) {
+    List<Integer> tableSizes = scenario.getExamples().stream()
+        .map(e -> e.getTableBody().size())
+        .filter(e -> e < minTableSize)
+        .collect(toList());
+    if (tableSizes.isEmpty()) {
+      return;
+    }
+    appendError(format(
+        "The table of scenario \"%s\" have a table with size %s which is less than the minimal size of %s",
+        scenario.getName(), tableSizes.stream().min(Integer::compareTo).orElse(-1), minTableSize));
   }
 
 }

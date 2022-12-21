@@ -1,0 +1,14 @@
+[
+  {
+    "value": "API-1",
+    "url": "http://localhost:8080"
+  },
+  {
+    "value": "API-2",
+    "url": "http://localhost:8083"
+  },
+  {
+    "value": "API-3",
+    "url": "http://localhost:8084"
+  }
+]

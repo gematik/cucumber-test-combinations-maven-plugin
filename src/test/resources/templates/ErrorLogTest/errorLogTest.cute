@@ -1,0 +1,43 @@
+# language: de
+Funktionalität:  test
+
+  Szenariogrundriss: Should cause error
+    Angenommen Reservierung eines Test-Clients "<ClientName>" an der Schnittstelle "<HEADER_1>"
+    Wenn       Registrierung des Test-Client "<ClientName>" mit "<BenutzerName>" beim TI-Messenger-Dienst
+    Dann       Registrierung ist "<Status>"
+
+    @Filter(!HEADER_1.properties["homeserver"].equals(HEADER_2.properties["homeserver"]))
+    @Filter(HEADER_1.hasTag("client"))
+    @DistinctColumn(HEADER_1)
+    Beispiele:
+      | HEADER_1 | HEADER_2 |
+
+  Szenariogrundriss: Should be fine
+    Angenommen Reservierung eines Test-Clients "<ClientName>" an der Schnittstelle "<HEADER_1>"
+    Wenn       Registrierung des Test-Client "<ClientName>" mit "<BenutzerName>" beim TI-Messenger-Dienst
+    Dann       Registrierung ist "<Status>"
+
+    @Filter(HEADER_1.properties["homeserver"].equals(HEADER_2.properties["homeserver"]))
+    Beispiele:
+      | HEADER_1 | HEADER_2 |
+
+  Szenariogrundriss: Should cause second error
+    Angenommen Reservierung eines Test-Clients "<ClientName>" an der Schnittstelle "<HEADER_1>"
+    Wenn       Registrierung des Test-Client "<ClientName>" mit "<BenutzerName>" beim TI-Messenger-Dienst
+    Dann       Registrierung ist "<Status>"
+
+    @Filter(!HEADER_1.properties["homeserver"].equals(HEADER_2.properties["homeserver"]))
+    @Filter(HEADER_1.hasTag("participant"))
+    Beispiele:
+      | HEADER_1 | HEADER_2 |
+
+  @WIP
+  Szenariogrundriss: This should be ignored
+    Angenommen Reservierung eines Test-Clients "<ClientName>" an der Schnittstelle "<HEADER_1>"
+    Wenn       Registrierung des Test-Client "<ClientName>" mit "<BenutzerName>" beim TI-Messenger-Dienst
+    Dann       Registrierung ist "<Status>"
+
+    @Filter(!HEADER_1.properties["homeserver"].equals(HEADER_2.properties["homeserver"]))
+    @Filter(HEADER_1.hasTag("participant"))
+    Beispiele:
+      | HEADER_1 | HEADER_2 |

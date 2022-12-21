@@ -20,6 +20,7 @@ import static de.gematik.combine.tags.parser.AllowDoubleLineupTagParser.ALLOW_DO
 import static de.gematik.combine.tags.parser.AllowSelfCombineTagParser.ALLOW_SELF_COMBINE_TAG;
 import static de.gematik.combine.tags.parser.MinimalTableTagParser.MINIMAL_TABLE_TAG;
 import static de.gematik.utils.Utils.getItemsToCombine;
+import static de.gematik.utils.Utils.writeErrors;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.FileUtils.copyDirectory;
@@ -32,6 +33,7 @@ import de.gematik.combine.execution.FileProcessor;
 import de.gematik.combine.model.CombineItem;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.inject.Inject;
@@ -58,6 +60,7 @@ public class CombineMojo extends AbstractMojo {
   public static final String EMPTY_EXAMPLES_TABLE_TAG = "@EMPTY_EXAMPLES_TABLE";
   public static final String WIP_TAG = "@WIP";
   public static final String TEST_RESOURCES_DIR = "./src/test/resources/";
+  public static final String WARN_MESSAGE = "=== Caution!!! The feature file which is prepared have empty tables ===";
 
   @Getter
   @Setter
@@ -97,6 +100,18 @@ public class CombineMojo extends AbstractMojo {
   List<String> emptyExamplesTags;
 
   /**
+   * The plugin will throw exception it was not able to add at least one row
+   */
+  @Parameter(property = "breakIfTableToSmall", defaultValue = "true")
+  boolean breakIfTableToSmall;
+
+  /**
+   * The plugin will throw exception it was not able to add at least one row
+   */
+  @Parameter(property = "minTableSize", defaultValue = "1")
+  int minTableSize;
+
+  /**
    * Prefix that is added to all plugin specific tags in the feature file to categorize them under
    * in the report
    */
@@ -123,6 +138,10 @@ public class CombineMojo extends AbstractMojo {
 
   private final FileProcessor replacer;
 
+  @Getter
+  @Setter
+  private static List<String> errorLog = new ArrayList<>();
+
   @SneakyThrows
   public void execute() {
     setInstance(this);
@@ -131,7 +150,7 @@ public class CombineMojo extends AbstractMojo {
     execute(getConfiguration());
   }
 
-  public void execute(CombineConfiguration config) {
+  public void execute(CombineConfiguration config) throws MojoExecutionException {
     String outDir = config.getOutputDir();
     String fileEnding = config.getTemplateFileEnding();
 
@@ -148,6 +167,11 @@ public class CombineMojo extends AbstractMojo {
     files.stream()
         .map(file -> stripEnding(file, fileEnding))
         .forEach(file -> replacer.process(file, config, itemsToCombine));
+    writeErrors(errorLog, WARN_MESSAGE, true);
+    if (config.isBreakIfTableToSmall() && !errorLog.isEmpty()) {
+      throw new MojoExecutionException(
+          "Scenarios with insufficient examples found -> \n" + String.join("\n", errorLog));
+    }
   }
 
   @SneakyThrows
@@ -205,6 +229,8 @@ public class CombineMojo extends AbstractMojo {
         .defaultExamplesTags(defaultExamplesTags)
         .skipTags(skipTags.stream().map(String::toLowerCase).collect(toList()))
         .filterConfiguration(filterConfiguration)
+        .breakIfTableToSmall(breakIfTableToSmall)
+        .minTableSize(minTableSize)
         .build();
   }
 
@@ -241,6 +267,10 @@ public class CombineMojo extends AbstractMojo {
 
   public static Log getPluginLog() {
     return getInstance().getLog();
+  }
+
+  public static void appendError(String error) {
+    errorLog.add(error);
   }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -57,8 +57,10 @@ public abstract class AbstractCombineMojoTest {
     combineMojo.setFilterConfiguration(new FilterConfiguration());
     combineMojo.setMinTableSize(minimalTableSize());
     combineMojo.setBreakIfTableToSmall(breakIfTableToSmall());
+    combineMojo.setBreakIfMinimalTableError(breakIfMinimalTableError());
 
     when(combineMojo.getLog()).thenReturn(log);
+    CombineMojo.resetError();
   }
 
   @SneakyThrows
@@ -83,11 +85,15 @@ public abstract class AbstractCombineMojoTest {
     return "./src/test/resources/input/input1.json";
   }
 
-  private int minimalTableSize() {
+  protected int minimalTableSize() {
     return 1;
   }
 
-  private boolean breakIfTableToSmall() {
+  protected boolean breakIfTableToSmall() {
+    return false;
+  }
+
+  protected boolean breakIfMinimalTableError() {
     return false;
   }
 

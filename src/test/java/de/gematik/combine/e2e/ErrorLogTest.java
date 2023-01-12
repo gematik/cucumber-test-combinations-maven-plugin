@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ class ErrorLogTest extends AbstractCombineMojoTest {
   void init() {
     FileUtils.deleteDirectory(new File(GENERATED_COMBINE_ITEMS_DIR));
     combineMojo.setMinTableSize(2);
-    CombineMojo.setErrorLog(new ArrayList<>());
   }
 
   @AfterEach
@@ -53,7 +52,7 @@ class ErrorLogTest extends AbstractCombineMojoTest {
   @SneakyThrows
   void errorLogShouldBeFilled() {
     combineMojo.execute();
-    assertThat(CombineMojo.getErrorLog()).hasSize(2);
+    assertThat(CombineMojo.getTableSizeErrorLog()).hasSize(2);
   }
 
   @Test
@@ -72,7 +71,6 @@ class ErrorLogTest extends AbstractCombineMojoTest {
     assertThatThrownBy(() -> combineMojo.execute())
         .isInstanceOf(MojoExecutionException.class)
         .hasMessageStartingWith("Scenarios with insufficient examples found ->");
-    combineMojo.setBreakIfTableToSmall(false);
   }
 
   @Test
@@ -80,7 +78,7 @@ class ErrorLogTest extends AbstractCombineMojoTest {
   void shouldConsiderMinimalTableSizeSetToOne() {
     combineMojo.setMinTableSize(1);
     combineMojo.execute();
-    assertThat(CombineMojo.getErrorLog()).hasSize(1);
+    assertThat(CombineMojo.getTableSizeErrorLog()).hasSize(1);
   }
 
   @Test
@@ -88,7 +86,7 @@ class ErrorLogTest extends AbstractCombineMojoTest {
   void shouldConsiderMinimalTableSizeSetToZero() {
     combineMojo.setMinTableSize(0);
     combineMojo.execute();
-    assertThat(CombineMojo.getErrorLog()).isEmpty();
+    assertThat(CombineMojo.getTableSizeErrorLog()).isEmpty();
   }
 
   @Override

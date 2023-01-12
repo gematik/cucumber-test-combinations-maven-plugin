@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,20 @@
 package de.gematik.combine.execution;
 
 import static com.google.common.collect.Lists.cartesianProduct;
+import static de.gematik.combine.CombineMojo.ErrorType.MINIMAL_TABLE;
 import static de.gematik.combine.CombineMojo.getPluginLog;
+import static de.gematik.combine.util.CurrentScenario.getCurrenScenarioName;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.shuffle;
 import static java.util.Comparator.comparingInt;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 
+import de.gematik.combine.CombineMojo;
 import de.gematik.combine.filter.table.cell.CellFilter;
 import de.gematik.combine.filter.table.row.RowFilter;
 import de.gematik.combine.model.CombineItem;
@@ -43,8 +47,10 @@ import java.util.function.Consumer;
 import lombok.Data;
 
 /**
- * This TableGenerator combines given {@link CombineItem}s to tables. It knows two generation modes:
- * <p> 1. full table: applies cell filters to columns and calculates the cartesian product afterwards
+ * This TableGenerator combines given {@link CombineItem}s to tables. It knows two generation
+ * modes:
+ * <p> 1. full table: applies cell filters to columns and calculates the cartesian product
+ * afterwards
  * <p> 2. minimal table: tries to use every item just once, but reuses items to fill otherwise
  * incomplete rows. Table generation complies with cell and row filters
  */
@@ -86,7 +92,8 @@ public class TableGenerator {
   }
 
   /**
-   * applies cell filters to each column and returns a list with the possible values for each column
+   * applies cell filters to each column and returns a list with the possible values for each
+   * column
    */
   private List<List<TableCell>> preFilteredColumns(List<CombineItem> combineItems,
       ConfiguredFilters filters) {
@@ -128,19 +135,22 @@ public class TableGenerator {
     StateInfo stateInfo = new StateInfo(filters, preparedColumns);
     forEachUnusedValue(stateInfo,
         unusedValue -> findValidRow(stateInfo, unusedValue).ifPresent(stateInfo::addNewRow));
+    if (stateInfo.getAllMissingValues().size() != 0) {
+      stateInfo.getAllMissingValues()
+          .forEach(e -> CombineMojo.appendError(
+              "Building minimal table failed for scenario: \"" + getCurrenScenarioName()
+                  + "\". No row could be build for -> value: " + e.getValue() + (
+                  nonNull(e.getUrl()) ? " url: " + e.getUrl() : ""),
+              MINIMAL_TABLE));
+    }
     return stateInfo.getResult();
   }
 
-  private void forEachUnusedValue(StateInfo stateInfo,
-      Consumer<TableCell> unusedValueConsumer) {
+  private void forEachUnusedValue(StateInfo stateInfo, Consumer<TableCell> unusedValueConsumer) {
     for (List<TableCell> preparedColumn : stateInfo.getPreparedColumns()) {
-      for (int index = 0; index < preparedColumn.size(); index++) {
-        Optional<TableCell> unusedValue = preparedColumn.stream()
-            .filter(val -> stateInfo.getAllMissingValues().contains(val.getCombineItem()))
-            .findAny();
-        unusedValue.ifPresent(unusedValueConsumer);
-        if (unusedValue.isEmpty()) {
-          break;
+      for (TableCell tableCell : preparedColumn) {
+        if (stateInfo.getAllMissingValues().contains(tableCell.getCombineItem())) {
+          Optional.of(tableCell).ifPresent(unusedValueConsumer);
         }
       }
     }
@@ -176,7 +186,7 @@ public class TableGenerator {
       List<String> columns, List<List<TableCell>> preparedColumns,
       BiFunction<List<TableCell>, List<TableCell>, Optional<List<TableCell>>> rowExtender) {
     int startColumn = columns.indexOf(firstValue.getHeader());
-    List<TableCell> tmpRow = new ArrayList<>(preparedColumns.size());
+    List<TableCell> tmpRow = new ArrayList<>(columns.size());
     tmpRow.add(firstValue);
     Optional<List<TableCell>> row = Optional.of(tmpRow);
 
@@ -197,8 +207,10 @@ public class TableGenerator {
       List<TableCell> preparedValues, List<TableCell> remainingValuesForThisColumn,
       List<TableCell> row, List<RowFilter> rowFilter) {
 
-    return findNewValueNotContainedIn( stateInfo,remainingValuesForThisColumn, row,stateInfo.getAllUsedValues(), rowFilter)
-        .or(() -> findNewValueNotContainedIn(stateInfo, remainingValuesForThisColumn, row, emptySet(),
+    return findNewValueNotContainedIn(stateInfo, remainingValuesForThisColumn, row,
+        stateInfo.getAllUsedValues(), rowFilter)
+        .or(() -> findNewValueNotContainedIn(stateInfo, remainingValuesForThisColumn, row,
+            emptySet(),
             rowFilter))
         .or(() -> findNewValueMatchingFilter(stateInfo, preparedValues, row, rowFilter));
   }
@@ -208,14 +220,15 @@ public class TableGenerator {
     for (TableCell possibleValue : possibleValues) {
       ArrayList<TableCell> extendedRow = new ArrayList<>(row);
       extendedRow.add(possibleValue);
-      if (checkRowFilter(extendedRow,rowFilters,stateInfo.getFilters().getColumns())) {
+      if (checkRowFilter(extendedRow, rowFilters, stateInfo.getFilters().getColumns())) {
         return Optional.of(possibleValue);
       }
     }
     return Optional.empty();
   }
 
-  private Optional<TableCell> findNewValueNotContainedIn(StateInfo stateInfo, List<TableCell> possibleValues,
+  private Optional<TableCell> findNewValueNotContainedIn(StateInfo stateInfo,
+      List<TableCell> possibleValues,
       List<TableCell> usedRowValues, Set<CombineItem> allUsedValues, List<RowFilter> rowFilters) {
     List<String> allColumns = stateInfo.getFilters().getColumns();
     Set<CombineItem> usedCombineItems = concat(
@@ -226,26 +239,29 @@ public class TableGenerator {
     for (TableCell possibleValue : possibleValues) {
       ArrayList<TableCell> possibleRow = new ArrayList<>(usedRowValues);
       possibleRow.add(possibleValue);
-      if (!usedCombineItems.contains(possibleValue.getCombineItem()) && checkRowFilter(possibleRow, rowFilters, allColumns  )) {
+      if (!usedCombineItems.contains(possibleValue.getCombineItem()) && checkRowFilter(possibleRow,
+          rowFilters, allColumns)) {
         return Optional.of(possibleValue);
       }
     }
     return Optional.empty();
   }
 
-  private boolean checkRowFilter (List<TableCell> row, List<RowFilter> rowFilters, List<String> allHeaders){
+  private boolean checkRowFilter(List<TableCell> row, List<RowFilter> rowFilters,
+      List<String> allHeaders) {
     return rowFilters.stream()
         .filter(rf -> isApplicable(row, rf, allHeaders))
         .allMatch(rf -> rf.test(row));
   }
 
-private boolean isApplicable(List<TableCell> row, RowFilter rowFilter, List<String> allHeaders){
+  private boolean isApplicable(List<TableCell> row, RowFilter rowFilter, List<String> allHeaders) {
     List<String> requiredColumns = rowFilter.getRequiredColumns(allHeaders);
     Set<String> filledColumns = row.stream()
         .map(TableCell::getHeader)
         .collect(toSet());
     return filledColumns.containsAll(requiredColumns);
-}
+  }
+
   private List<TableCell> sortRowForColumns(List<String> columns, List<TableCell> row) {
     row.sort(comparingInt(a -> columns.indexOf(a.getHeader())));
     return row;

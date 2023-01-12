@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package de.gematik.combine;
 
+import static de.gematik.combine.CombineMojo.ErrorType.MINIMAL_TABLE;
+import static de.gematik.combine.CombineMojo.ErrorType.SIZE;
 import static de.gematik.combine.tags.parser.AllowDoubleLineupTagParser.ALLOW_DOUBLE_LINEUP_TAG;
 import static de.gematik.combine.tags.parser.AllowSelfCombineTagParser.ALLOW_SELF_COMBINE_TAG;
 import static de.gematik.combine.tags.parser.MinimalTableTagParser.MINIMAL_TABLE_TAG;
@@ -36,6 +38,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +63,8 @@ public class CombineMojo extends AbstractMojo {
   public static final String EMPTY_EXAMPLES_TABLE_TAG = "@EMPTY_EXAMPLES_TABLE";
   public static final String WIP_TAG = "@WIP";
   public static final String TEST_RESOURCES_DIR = "./src/test/resources/";
-  public static final String WARN_MESSAGE = "=== Caution!!! The feature file which is prepared have empty tables ===";
+  public static final String WARN_MESSAGE = "=== Caution!!! The feature file which is prepared have some issues and may not contain the expected value ===";
+  public static final String MINIMAL_TABLE_ERROR_HEADER = "Minimal table should be created and failed. For following apis a valid row could not be generated:\n\t";
 
   @Getter
   @Setter
@@ -112,6 +116,13 @@ public class CombineMojo extends AbstractMojo {
   int minTableSize;
 
   /**
+   * The plugin will throw exception if minimal table could not generate valid row for at least one
+   * value
+   */
+  @Parameter(property = "breakIfMinimalTableError", defaultValue = "false")
+  boolean breakIfMinimalTableError;
+
+  /**
    * Prefix that is added to all plugin specific tags in the feature file to categorize them under
    * in the report
    */
@@ -139,8 +150,9 @@ public class CombineMojo extends AbstractMojo {
   private final FileProcessor replacer;
 
   @Getter
-  @Setter
-  private static List<String> errorLog = new ArrayList<>();
+  private static List<String> tableSizeErrorLog = new ArrayList<>();
+  @Getter
+  private static List<String> minimalTableErrorLog = new ArrayList<>();
 
   @SneakyThrows
   public void execute() {
@@ -167,10 +179,17 @@ public class CombineMojo extends AbstractMojo {
     files.stream()
         .map(file -> stripEnding(file, fileEnding))
         .forEach(file -> replacer.process(file, config, itemsToCombine));
-    writeErrors(errorLog, WARN_MESSAGE, true);
-    if (config.isBreakIfTableToSmall() && !errorLog.isEmpty()) {
+    writeErrors(
+        Stream.concat(minimalTableErrorLog.stream(), tableSizeErrorLog.stream()).collect(toList()),
+        WARN_MESSAGE, true);
+    if (config.isBreakIfTableToSmall() && !tableSizeErrorLog.isEmpty()) {
       throw new MojoExecutionException(
-          "Scenarios with insufficient examples found -> \n" + String.join("\n", errorLog));
+          "Scenarios with insufficient examples found -> \n" + String.join("\n",
+              tableSizeErrorLog));
+    }
+    if (config.isBreakIfMinimalTableError() && !minimalTableErrorLog.isEmpty()) {
+      throw new MojoExecutionException(
+          MINIMAL_TABLE_ERROR_HEADER + String.join("\n\t", minimalTableErrorLog));
     }
   }
 
@@ -231,6 +250,7 @@ public class CombineMojo extends AbstractMojo {
         .filterConfiguration(filterConfiguration)
         .breakIfTableToSmall(breakIfTableToSmall)
         .minTableSize(minTableSize)
+        .breakIfMinimalTableError(breakIfMinimalTableError)
         .build();
   }
 
@@ -269,8 +289,22 @@ public class CombineMojo extends AbstractMojo {
     return getInstance().getLog();
   }
 
-  public static void appendError(String error) {
-    errorLog.add(error);
+  public static void appendError(String error, ErrorType type) {
+    if (type == SIZE) {
+      tableSizeErrorLog.add(error);
+    } else if (type == MINIMAL_TABLE) {
+      minimalTableErrorLog.add(error);
+    }
+  }
+
+  public static void resetError() {
+    tableSizeErrorLog = new ArrayList<>();
+    minimalTableErrorLog = new ArrayList<>();
+  }
+
+  public enum ErrorType {
+    SIZE,
+    MINIMAL_TABLE
   }
 
 }

@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package de.gematik.combine.model;
+package de.gematik.combine.util;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Delegate;
+import static lombok.AccessLevel.PRIVATE;
 
-@Builder
-@Data
-@RequiredArgsConstructor
-public class TableCell {
+import lombok.NoArgsConstructor;
 
-  private final String header;
+@NoArgsConstructor(access = PRIVATE)
+public class CurrentScenario {
 
-  @Delegate
-  private final CombineItem combineItem;
+  private static String currenScenarioName;
+
+  public static void setCurrentScenarioName(String name) {
+    currenScenarioName = name;
+  }
+
+  public static String getCurrenScenarioName() {
+    return currenScenarioName;
+  }
 }

@@ -1,0 +1,83 @@
+[
+  {
+    "value": "http://testdriverApi_A_IOS_Client",
+    "url": "https://localhost:8080",
+    "tags": [
+      "client",
+      "practitioner",
+      "prefIOP",
+      "new"
+    ],
+    "properties": {
+      "homeserver": "A",
+      "os": "IOS"
+    }
+  },
+  {
+    "value": "http://testdriverApi_B_IOS_Client",
+    "url": "https://localhost:8084",
+    "tags": [
+      "client",
+      "practitioner",
+      "prefIOP",
+      "new"
+    ],
+    "properties": {
+      "homeserver": "B",
+      "os": "IOS"
+    }
+  },
+  {
+    "value": "http://testdriverApi_A_Android_Client",
+    "url": "https://localhost:8080",
+    "tags": [
+      "client",
+      "practitioner",
+      "prefIOP",
+      "new"
+    ],
+    "properties": {
+      "homeserver": "A",
+      "os": "Android"
+    }
+  },
+  {
+    "value": "http://testdriverApi_A_Win_Client",
+    "url": "https://localhost:8081",
+    "tags": [
+      "client",
+      "practitioner",
+      "new"
+    ],
+    "properties": {
+      "homeserver": "A",
+      "os": "Windows"
+    }
+  },
+  {
+    "value": "http://testdriverApi_A_Linux_Client",
+    "url": "https://localhost:8082",
+    "tags": [
+      "client",
+      "practitioner",
+      "new"
+    ],
+    "properties": {
+      "homeserver": "A",
+      "os": "Linux"
+    }
+  },
+  {
+    "value": "http://testdriverApi_A_ORG",
+    "url": "https://localhost:8083",
+    "tags": [
+      "orgAdmin",
+      "new"
+    ],
+    "properties": {
+      "homeserver": "A",
+      "os": "Windows"
+    }
+  }
+
+]

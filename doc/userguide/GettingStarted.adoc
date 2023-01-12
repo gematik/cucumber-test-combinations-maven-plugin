@@ -22,6 +22,7 @@ To configure the combine goal the following options are available:
 |skipScenariosWithoutExamples| If *true* plugin will add tags '@WIP' and '@EMPTY_EXAMPLES_TABLE' to an examples table where the plugin was not able to add at least one row |true
 |minTableSize|Amount of minimal rows in one table. If table have less rows error log will be written. Can be conbined with *breakIfTableToSmall*|1
 |breakIfTableToSmall|If *true* the plugin will raise an error if it`s not able to add the minimal amount of rows that are requested in property minTableSize|true
+|breakIfMinimalTableError|If *true* the plugin will raise an error if there is at least one value that could not apply due row-filters. This does not include all values that are excluded by colum-filters|false
 |defaultExamplesTags|List of tags that are added to each table as default.
 @AllowDoubleLineup, @AllowSelfCombine and @MinimalTable are forbidden. Their default should be set in filterConfiguration.| empty
 |pluginTagCategory|Define a category to be placed before every plugin-specific tag, so they don't get mixed with all the other tags in the document with important information.|"Plugin"
@@ -137,6 +138,8 @@ DoubleLineup will never appear in such a table.
 
 IMPORTANT: Only cell and row filters are evaluated in table generation.
 Table filters will be applied after table generation. Therefore, this table can not be filtered with table filter tags without loosing multiple entries completely.
+
+WARNING: This will cause under circumstances (combined with shuffle and not every colum with same filter) to different results. To lower this risk, set the colum with the most restrictive filters at first colum.
 |
 [[config_tag_maxrows]]@MaxRows(<int>)
 

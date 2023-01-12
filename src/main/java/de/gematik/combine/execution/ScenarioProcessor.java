@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 gematik GmbH
+ * Copyright (c) 2023 gematik GmbH
  * 
  * Licensed under the Apache License, Version 2.0 (the License);
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package de.gematik.combine.execution;
 
+import static de.gematik.combine.CombineMojo.ErrorType.SIZE;
 import static de.gematik.combine.CombineMojo.appendError;
 import static de.gematik.combine.CombineMojo.getPluginLog;
 import static java.lang.String.format;
@@ -23,6 +24,7 @@ import static java.util.stream.Collectors.toList;
 
 import de.gematik.combine.CombineConfiguration;
 import de.gematik.combine.model.CombineItem;
+import de.gematik.combine.util.CurrentScenario;
 import io.cucumber.messages.types.Examples;
 import io.cucumber.messages.types.Location;
 import io.cucumber.messages.types.Scenario;
@@ -43,6 +45,7 @@ public class ScenarioProcessor {
 
   public void process(Scenario scenario, CombineConfiguration configuration,
       List<CombineItem> combineItems) {
+    CurrentScenario.setCurrentScenarioName(scenario.getName());
 
     List<Examples> examples = scenario.getExamples().stream()
         .filter(example -> examplesWithoutSkipTag(example, configuration.getSkipTags()))
@@ -102,8 +105,9 @@ public class ScenarioProcessor {
       return;
     }
     appendError(format(
-        "The table of scenario \"%s\" have a table with size %s which is less than the minimal size of %s",
-        scenario.getName(), tableSizes.stream().min(Integer::compareTo).orElse(-1), minTableSize));
+            "The table of scenario \"%s\" have a table with size %s which is less than the minimal size of %s",
+            scenario.getName(), tableSizes.stream().min(Integer::compareTo).orElse(-1), minTableSize),
+        SIZE);
   }
 
 }

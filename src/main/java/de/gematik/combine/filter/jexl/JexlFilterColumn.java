@@ -16,10 +16,10 @@
 
 package de.gematik.combine.filter.jexl;
 
+import static de.gematik.combine.util.NonNullableMap.nonNullableMap;
 import static java.util.stream.Collectors.toList;
 
 import de.gematik.combine.model.TableCell;
-import de.gematik.combine.util.NonNullableMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +51,7 @@ public class JexlFilterColumn {
       properties.get(entry.getKey()).add(entry.getValue());
     }
 
-    return new NonNullableMap<>(properties, key -> DEFAULT_PROPERTY);
+    return nonNullableMap(properties, key -> DEFAULT_PROPERTY);
   }
 
   public JexlFilterList<String> getTags() {

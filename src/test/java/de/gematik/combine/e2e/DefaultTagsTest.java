@@ -16,6 +16,7 @@
 
 package de.gematik.combine.e2e;
 
+import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -37,6 +38,23 @@ public class DefaultTagsTest extends AbstractCombineMojoTest {
 
   public static final String DEFAULT_CONFIG_FILE = "withoutFilters";
 
+  public static Stream<Arguments> invalidTags() {
+    return Stream.of(
+        arguments("Huhu"),
+        arguments("@@Huhu"),
+        arguments("@Hu hu"),
+        arguments("@Huhu@Duda")
+    );
+  }
+
+  public static Stream<Arguments> configTags() {
+    return Stream.of(
+        arguments("@AllowDoubleLineup"),
+        arguments("@AllowSelfCombine"),
+        arguments("@MinimalTable")
+    );
+  }
+
   @BeforeEach
   public void setup() {
     combineMojo.setEnding(WITHOUT_FILTERS_FILE_ENDING);
@@ -46,25 +64,20 @@ public class DefaultTagsTest extends AbstractCombineMojoTest {
   @Test
   @SneakyThrows
   void shouldSetDefaultTags() {
+    // arrange
+    String pluginTagCategory = combineMojo.getPluginTagCategory();
+
     // act
     combineMojo.execute();
-    // assert
 
+    // assert
     String strippedStr = readFile(DEFAULT_CONFIG_FILE);
     assertThat(strippedStr).endsWith(
-        "@Plugin:MaxRows(1)@Plugin:Blub\n"
-            + "Beispiele:\n"
-            + "|HEADER_1|HEADER_2|\n"
-            + "|Api1|Api2|\n");
-  }
-
-  public static Stream<Arguments> invalidTags() {
-    return Stream.of(
-        arguments("Huhu"),
-        arguments("@@Huhu"),
-        arguments("@Hu hu"),
-        arguments("@Huhu@Duda")
-    );
+        format("@%s:MaxRows(1)@%s:Blub\n"
+                + "Beispiele:\n"
+                + "|HEADER_1|HEADER_2|\n"
+                + "|Api1|Api2|\n",
+            pluginTagCategory, pluginTagCategory));
   }
 
   @ParameterizedTest
@@ -78,14 +91,6 @@ public class DefaultTagsTest extends AbstractCombineMojoTest {
         // assert
         .isInstanceOf(MojoExecutionException.class)
         .hasMessageContaining(invalidTag + " is not a valid default tag");
-  }
-
-  public static Stream<Arguments> configTags() {
-    return Stream.of(
-        arguments("@AllowDoubleLineup"),
-        arguments("@AllowSelfCombine"),
-        arguments("@MinimalTable")
-    );
   }
 
   @ParameterizedTest

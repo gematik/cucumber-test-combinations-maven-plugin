@@ -23,7 +23,6 @@ import static org.mockito.quality.Strictness.LENIENT;
 
 import de.gematik.combine.CombineMojo;
 import java.io.File;
-import java.util.ArrayList;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;

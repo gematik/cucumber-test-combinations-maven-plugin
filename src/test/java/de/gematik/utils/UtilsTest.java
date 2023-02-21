@@ -51,7 +51,6 @@ class UtilsTest {
   void shouldKeepValue() {
     File f = new File(URL_VALUE_JSON);
     List<CombineItem> combines = getItemsToCombine(f, mojo, false);
-    System.out.println(combines);
     combines.forEach(c -> assertThat(c.getValue()).startsWith("API-"));
   }
 

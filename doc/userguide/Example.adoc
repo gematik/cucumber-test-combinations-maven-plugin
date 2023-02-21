@@ -1,8 +1,6 @@
 
 == Usage
 
-// TODO rewrite
-
 The plugin can be used by placing it in the build section of your pom.xml and parametrizing with the options shown above.
 Below there is an example of how it could be used:
 

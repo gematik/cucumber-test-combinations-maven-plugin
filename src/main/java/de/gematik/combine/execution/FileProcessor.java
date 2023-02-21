@@ -43,8 +43,7 @@ public class FileProcessor {
   private final GherkinProcessor gherkinProcessor;
 
   @SneakyThrows
-  public void process(File file, CombineConfiguration configuration,
-      List<CombineItem> combineItems) {
+  public void process(File file, CombineConfiguration config, List<CombineItem> combineItems) {
     getPluginLog().info("processing: " + file.getName());
     getPluginLog().debug("file: " + file.getAbsolutePath());
 
@@ -58,7 +57,7 @@ public class FileProcessor {
       throw new MojoExecutionException(e.getMessage() + " " + file.getAbsolutePath());
     }
 
-    gherkinProcessor.process(gherkinDocument, configuration, combineItems);
+    gherkinProcessor.process(gherkinDocument, config, combineItems);
 
     getPluginLog().debug("writing result to: " + file.getAbsolutePath());
     final String newContent = prettyPrint(gherkinDocument, Syntax.gherkin);
@@ -67,8 +66,7 @@ public class FileProcessor {
     getPluginLog().info("processed: " + file.getName());
   }
 
-
-  public static GherkinDocument parseGherkinString(String gherkin) {
+  private static GherkinDocument parseGherkinString(String gherkin) {
     final GherkinParser parser = GherkinParser.builder()
         .includeSource(false)
         .includePickles(false)

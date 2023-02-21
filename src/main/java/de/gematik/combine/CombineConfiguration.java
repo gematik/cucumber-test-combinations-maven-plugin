@@ -37,12 +37,15 @@ public class CombineConfiguration {
   @Builder.Default
   private String pluginTagCategory = "Plugin";
   @Builder.Default
+  private String versionFilterTagCategory = "VersionFilter";
+  @Builder.Default
   private List<String> emptyExamplesTags = new ArrayList<>();
   @Builder.Default
   private List<String> defaultExamplesTags = new ArrayList<>();
   @Builder.Default
   private List<String> skipTags = new ArrayList<>();
   private FilterConfiguration filterConfiguration;
+  private ProjectFilters projectFilters;
   private boolean breakIfTableToSmall;
   private int minTableSize;
   private boolean breakIfMinimalTableError;

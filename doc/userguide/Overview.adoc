@@ -1,8 +1,6 @@
 
 == Overview
 
-// TODO rewrite
-
 === Who will find it useful?
 This tool is useful for all who want to parameterize their feature files with an external input.
 The plugin will get this external input and will add it to feature files as a table of Examples.

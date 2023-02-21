@@ -1,0 +1,14 @@
+[
+  {
+    "value": "Api1",
+    "tags": [],
+    "properties": {
+      "version": "1.0.1.1"
+    }
+  },
+  {
+    "value": "Api2",
+    "tags": [],
+    "properties": {}
+  }
+]

@@ -43,19 +43,19 @@ public class ScenarioProcessor {
 
   private final ExamplesProcessor examplesProcessor;
 
-  public void process(Scenario scenario, CombineConfiguration configuration,
+  public void process(Scenario scenario, CombineConfiguration config,
       List<CombineItem> combineItems) {
     CurrentScenario.setCurrentScenarioName(scenario.getName());
 
     List<Examples> examples = scenario.getExamples().stream()
-        .filter(example -> examplesWithoutSkipTag(example, configuration.getSkipTags()))
+        .filter(example -> examplesWithoutSkipTag(example, config.getSkipTags()))
         .collect(toList());
 
     getPluginLog().debug(format("processing %d examples: ", examples.size()));
-    examples.forEach(table -> processExamplesTable(table, combineItems, configuration));
+    examples.forEach(table -> processExamplesTable(table, combineItems, config));
 
-    addEmptyExamplesTags(scenario, configuration.getEmptyExamplesTags());
-    checkTableSize(scenario, configuration.getMinTableSize());
+    addEmptyExamplesTags(scenario, config.getEmptyExamplesTags());
+    checkTableSize(scenario, config.getMinTableSize());
   }
 
   private void processExamplesTable(Examples examples, List<CombineItem> combineItems,
@@ -66,8 +66,7 @@ public class ScenarioProcessor {
         .process(examples, configuration, combineItems);
   }
 
-
-  public void addEmptyExamplesTags(Scenario scenario, List<String> tags) {
+  private void addEmptyExamplesTags(Scenario scenario, List<String> tags) {
     boolean allExamplesEmpty = scenario.getExamples().stream()
         .allMatch(example -> example.getTableBody().isEmpty());
     if (allExamplesEmpty) {
@@ -105,7 +104,7 @@ public class ScenarioProcessor {
       return;
     }
     appendError(format(
-            "The table of scenario \"%s\" have a table with size %s which is less than the minimal size of %s",
+            "The table of scenario \"%s\" has a table with size %s which is less than the minimal size of %s",
             scenario.getName(), tableSizes.stream().min(Integer::compareTo).orElse(-1), minTableSize),
         SIZE);
   }

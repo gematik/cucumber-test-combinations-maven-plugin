@@ -1,0 +1,21 @@
+# language: de
+Funktionalität:  test
+
+  Szenariogrundriss: Anmeldung eines Akteurs
+    Angenommen "<Frodo>, <Sam> und <GOLLUM> sind gemeinsam im Schattengebirge unterwegs"
+    Wenn       <Frodo> Hunger hat
+    Dann       ist Beef vorprogrammiert
+
+    @Version(HEADER_1,HEADER_2>0)
+    Beispiele:
+      | HEADER_1 | HEADER_2 |
+
+  Szenariogrundriss: Anmeldung zweites Akteurs
+    Angenommen <Harry> wohnt im Ligusterweg Nr. 4
+    Wenn       <Hagrid> mit dem fetten <Motorrad> vorfährt
+    Dann       ist die Freude groß
+
+    @MaxRows(5)
+    @Version(HEADER_1<8)
+    Beispiele:
+      | HEADER_1 | HEADER_2 |

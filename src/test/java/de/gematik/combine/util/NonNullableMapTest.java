@@ -16,6 +16,7 @@
 
 package de.gematik.combine.util;
 
+import static de.gematik.combine.util.NonNullableMap.nonNullableMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
@@ -28,7 +29,7 @@ class NonNullableMapTest {
   private static final int DEFAULT_VALUE = 42;
   private static final int NON_EXISTING_KEY = 99;
   private static final Map<Integer, Integer> INNER_MAP = Map.of(EXISTING_KEY, VALUE);
-  private final NonNullableMap<Integer, Integer> testSubject = new NonNullableMap<>(INNER_MAP,
+  private final NonNullableMap<Integer, Integer> testSubject = nonNullableMap(INNER_MAP,
       key -> DEFAULT_VALUE);
 
   @Test

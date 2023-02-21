@@ -16,12 +16,15 @@
 
 package de.gematik.combine.filter.table.cell;
 
+import de.gematik.combine.filter.project.ProjectCellFilter;
 import de.gematik.combine.model.TableCell;
 import java.util.function.Predicate;
 
 /**
- * A TableCellFilter is a Filter that operates on a single table cell and can filter each value with no dependencies to other values. Therefore, it
- * can be applied to the column values before generating the cartesian product and reduce the size of the produced base table significantly.
+ * A {@link CellFilter} is a Filter that operates on a single table cell and can filter each value
+ * with no dependencies to other values. Therefore, it can be applied to the column values before
+ * generating the cartesian product and reduce the size of the produced base table significantly. A
+ * CellFilter can override a {@link ProjectCellFilter}
  */
 public interface CellFilter extends Predicate<TableCell> {
 

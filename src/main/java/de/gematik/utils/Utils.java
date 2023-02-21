@@ -39,12 +39,16 @@ import java.util.List;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
+import org.apache.maven.monitor.logging.DefaultLog;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
+import org.codehaus.plexus.logging.console.ConsoleLogger;
 
 @NoArgsConstructor(access = PRIVATE)
 public class Utils {
+
+  private static final DefaultLog nullLogger = new DefaultLog(new ConsoleLogger());
 
   /**
    * read the combine_items.json file into the combineItems list
@@ -82,7 +86,11 @@ public class Utils {
     if (nonNull(CombineMojo.getInstance())) {
       return CombineMojo.getPluginLog();
     }
-    return PrepareItemsMojo.getPluginLog();
+    if (nonNull(PrepareItemsMojo.getInstance())) {
+      return PrepareItemsMojo.getPluginLog();
+    } else {
+      return nullLogger;
+    }
   }
 
   public static void writeErrors(List<String> errors) {

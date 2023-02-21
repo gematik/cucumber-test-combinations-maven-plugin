@@ -58,30 +58,36 @@ public class PrepareItemsMojo extends AbstractMojo {
 
   public static final String WARN_MESSAGE = "=== Caution!!! The generated file have modified your input file significantly! ===";
   /**
+   * Path to the directory where the combined items get stored
+   */
+  public static final String GENERATED_COMBINE_ITEMS_DIR =
+      "target" + File.separator + "generated-combine";
+  private static final List<String> apiErrors = new ArrayList<>();
+  @Getter
+  @Setter
+  private static PrepareItemsMojo instance;
+  private final ApiRequester apiRequester;
+  /**
    * Path to file that contains the values to combine
    */
   @Parameter(property = "combineItemsFile", defaultValue = TEST_RESOURCES_DIR
       + "combine_items.json")
   String combineItemsFile;
-
   /**
    * Location to info
    */
   @Parameter(property = "infoResourceLocation")
   String infoResourceLocation;
-
   /**
    * Expression and tag to set if expression is true
    */
   @Parameter(property = "tagExpressions")
   List<TagExpression> tagExpressions;
-
   /**
    * List of Expressions that set as property
    */
   @Parameter(property = "propertyExpressions")
   List<PropertyExpression> propertyExpressions;
-
   /**
    * Path to truststore
    */
@@ -114,21 +120,12 @@ public class PrepareItemsMojo extends AbstractMojo {
    */
   @Parameter(property = "configFail", defaultValue = "true")
   boolean configFail;
-  /**
-   * Path to the directory where the combined items get stored
-   */
-  public static final String GENERATED_COMBINE_ITEMS_DIR =
-      "target" + File.separator + "generated-combine";
-
-  private static final List<String> apiErrors = new ArrayList<>();
-
-  @Getter
-  @Setter
-  private static PrepareItemsMojo instance;
-
-  private final ApiRequester apiRequester;
   private ItemsCreator itemsCreator;
   private List<CombineItem> items;
+
+  public static Log getPluginLog() {
+    return instance.getLog();
+  }
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
@@ -176,7 +173,6 @@ public class PrepareItemsMojo extends AbstractMojo {
     writeItemsToFile(processedItems);
   }
 
-
   private CombineItem processItem(CombineItem item) {
     String url = item.getUrl() == null ? item.getValue() : item.getUrl();
     try {
@@ -219,9 +215,5 @@ public class PrepareItemsMojo extends AbstractMojo {
         .tagExpressions(tagExpressions)
         .propertyExpressions(propertyExpressions)
         .build();
-  }
-
-  public static Log getPluginLog() {
-    return instance.getLog();
   }
 }

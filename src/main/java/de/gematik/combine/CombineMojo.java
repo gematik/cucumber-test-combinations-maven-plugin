@@ -17,6 +17,7 @@
 package de.gematik.combine;
 
 import static de.gematik.combine.CombineMojo.ErrorType.MINIMAL_TABLE;
+import static de.gematik.combine.CombineMojo.ErrorType.PROPERTY;
 import static de.gematik.combine.CombineMojo.ErrorType.SIZE;
 import static de.gematik.combine.tags.parser.AllowDoubleLineupTagParser.ALLOW_DOUBLE_LINEUP_TAG;
 import static de.gematik.combine.tags.parser.AllowSelfCombineTagParser.ALLOW_SELF_COMBINE_TAG;
@@ -24,6 +25,7 @@ import static de.gematik.combine.tags.parser.MinimalTableTagParser.MINIMAL_TABLE
 import static de.gematik.utils.Utils.getItemsToCombine;
 import static de.gematik.utils.Utils.writeErrors;
 import static java.lang.String.format;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.FileUtils.copyDirectory;
 import static org.apache.commons.io.FileUtils.deleteDirectory;
@@ -69,13 +71,18 @@ public class CombineMojo extends AbstractMojo {
   @Getter
   @Setter
   private static CombineMojo instance;
-
+  @Getter
+  private static List<String> tableSizeErrorLog = new ArrayList<>();
+  @Getter
+  private static List<String> minimalTableErrorLog = new ArrayList<>();
+  @Getter
+  private static List<String> propertyErrorLog = new ArrayList<>();
+  private final FileProcessor replacer;
   /**
    * Path to the directory where the rendered templates got stored
    */
   @Parameter(property = "outputDir", defaultValue = TEST_RESOURCES_DIR + "features")
   String outputDir;
-
   /**
    * Path to file that contains the values to combine
    */
@@ -83,76 +90,80 @@ public class CombineMojo extends AbstractMojo {
   @Parameter(property = "combineItemsFile", defaultValue = TEST_RESOURCES_DIR
       + "combine_items.json")
   String combineItemsFile;
-
   /**
    * Path to the directory of the templates
    */
   @Parameter(property = "templateDir", defaultValue = TEST_RESOURCES_DIR + "templates")
   String templateDir;
-
   /**
    * The specific ending of the templates
    */
   @Parameter(property = "ending", defaultValue = ".cute")
   String ending;
-
   /**
    * The plugin will add these tags to all examples tables where it was not able to add at least one
    * row
    */
   @Parameter(property = "emptyExamplesTags")
   List<String> emptyExamplesTags;
-
   /**
    * The plugin will throw exception it was not able to add at least one row
    */
   @Parameter(property = "breakIfTableToSmall", defaultValue = "true")
   boolean breakIfTableToSmall;
-
   /**
    * The plugin will throw exception it was not able to add at least one row
    */
   @Parameter(property = "minTableSize", defaultValue = "1")
   int minTableSize;
-
   /**
    * The plugin will throw exception if minimal table could not generate valid row for at least one
    * value
    */
   @Parameter(property = "breakIfMinimalTableError", defaultValue = "false")
   boolean breakIfMinimalTableError;
-
   /**
-   * Prefix that is added to all plugin specific tags in the feature file to categorize them under
-   * in the report
+   * Prefix that is added to all plugin specific tags (except version filters!) in the feature file
+   * to categorize them under in the report
    */
+  @Getter
   @Parameter(property = "pluginTagCategory", defaultValue = "Plugin")
   String pluginTagCategory;
+  /**
+   * Prefix that is added to all version filter tags in the feature file to categorize them under in
+   * the report
+   */
 
+  @Getter
+  @Parameter(property = "versionFilterTagCategory", defaultValue = "VersionFilter")
+  String versionFilterTagCategory;
+  /**
+   * The plugin will look for this property to determine the version of an item, may be set to an
+   * arbitrary string, default is "version"
+   */
+  @Getter
+  @Parameter(property = "versionProperty", defaultValue = "version")
+  String versionProperty;
   /**
    * List of tags that are added to each processed examples table
    */
   @Parameter(property = "defaultExamplesTags")
   List<String> defaultExamplesTags;
-
   /**
    * List of tags that are skipped by this plugin
    */
   @Parameter(property = "skipTags")
   List<String> skipTags;
-
   /**
-   * filterConfiguration
+   * Filter Configuration
    */
   @Parameter(property = "filterConfiguration")
   FilterConfiguration filterConfiguration;
-
-  private final FileProcessor replacer;
-
-  @Getter
-  private static List<String> tableSizeErrorLog = new ArrayList<>();
-  @Getter
-  private static List<String> minimalTableErrorLog = new ArrayList<>();
+  /**
+   * Project Filters
+   */
+  @Parameter(property = "projectFilters")
+  ProjectFilters projectFilters;
 
   @SneakyThrows
   public void execute() {
@@ -180,7 +191,9 @@ public class CombineMojo extends AbstractMojo {
         .map(file -> stripEnding(file, fileEnding))
         .forEach(file -> replacer.process(file, config, itemsToCombine));
     writeErrors(
-        Stream.concat(minimalTableErrorLog.stream(), tableSizeErrorLog.stream()).collect(toList()),
+        Stream.of(minimalTableErrorLog, tableSizeErrorLog, propertyErrorLog)
+            .flatMap(Collection::stream)
+            .collect(toList()),
         WARN_MESSAGE, true);
     if (config.isBreakIfTableToSmall() && !tableSizeErrorLog.isEmpty()) {
       throw new MojoExecutionException(
@@ -238,16 +251,34 @@ public class CombineMojo extends AbstractMojo {
       pluginTagCategory = "Plugin";
     }
 
+    if (versionFilterTagCategory == null) {
+      versionFilterTagCategory = "VersionFilter";
+    }
+
+    if (versionProperty == null) {
+      versionProperty = "version";
+    }
+
+    if (nonNull(projectFilters)) {
+      projectFilters.parseProjectFilters();
+    }
+
+    if (!ending.startsWith(".")) {
+      ending = format(".%s", ending);
+    }
+
     return CombineConfiguration.builder()
         .templateDir(templateDir)
         .templateFileEnding(ending)
         .outputDir(outputDir)
         .combineItemFile(combineItemsFile)
         .pluginTagCategory(pluginTagCategory)
+        .versionFilterTagCategory(versionFilterTagCategory)
         .emptyExamplesTags(emptyExamplesTags)
         .defaultExamplesTags(defaultExamplesTags)
         .skipTags(skipTags.stream().map(String::toLowerCase).collect(toList()))
         .filterConfiguration(filterConfiguration)
+        .projectFilters(projectFilters)
         .breakIfTableToSmall(breakIfTableToSmall)
         .minTableSize(minTableSize)
         .breakIfMinimalTableError(breakIfMinimalTableError)
@@ -284,7 +315,6 @@ public class CombineMojo extends AbstractMojo {
     return listFiles(inputDir, new String[]{ending.replace(".", "")}, true);
   }
 
-
   public static Log getPluginLog() {
     return getInstance().getLog();
   }
@@ -294,17 +324,21 @@ public class CombineMojo extends AbstractMojo {
       tableSizeErrorLog.add(error);
     } else if (type == MINIMAL_TABLE) {
       minimalTableErrorLog.add(error);
+    } else if (type == PROPERTY) {
+      propertyErrorLog.add(error);
     }
   }
 
   public static void resetError() {
     tableSizeErrorLog = new ArrayList<>();
     minimalTableErrorLog = new ArrayList<>();
+    propertyErrorLog = new ArrayList<>();
   }
 
   public enum ErrorType {
     SIZE,
-    MINIMAL_TABLE
+    MINIMAL_TABLE,
+    PROPERTY
   }
 
 }

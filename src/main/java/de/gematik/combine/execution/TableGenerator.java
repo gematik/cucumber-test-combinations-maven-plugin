@@ -72,11 +72,12 @@ public class TableGenerator {
 
     List<List<TableCell>> preparedColumns = preFilteredColumns(combineItems, filters);
 
-    getPluginLog().debug(format("creating cartesianProduct table with %d columns", columns.size()));
+    getPluginLog().debug(
+        format("creating cartesianProduct table with %d columns", columns.size()));
     if (columns.size() > 5) {
-      getPluginLog().warn(format(
-          "creating cartesianProduct table with %d columns produces a huge amount of entries and can cause out of memory errors",
-          columns.size()));
+      getPluginLog().warn(
+          format("creating cartesianProduct table with %d columns produces a huge amount "
+              + "of entries and can cause out of memory errors", columns.size()));
     }
     List<List<TableCell>> table = new ArrayList<>(cartesianProduct(preparedColumns));
 
@@ -84,9 +85,10 @@ public class TableGenerator {
         format("created table with %d columns and %d rows", columns.size(), table.size()));
     if (table.size() > ONE_MILLION) {
       getPluginLog().warn(
-          "Such a big table will need chunking and a considerable amount of time for filtering.\n"
-              + "Please use '@Filter' tags with just one header reference to filter columns before applying "
-              + "the cartesian product and therefore reduce generated table size.");
+          "Such a big table will need chunking and a considerable amount of time "
+              + "for filtering.\nPlease use '@Filter' tags with just one header reference to "
+              + "filter columns before applying the cartesian product and therefore reduce "
+              + "generated table size.");
     }
     return table;
   }
@@ -113,7 +115,9 @@ public class TableGenerator {
       }
       preparedColumns.add(e);
     }
-    getPluginLog().debug("prepared columns after applied cell filters: " + preparedColumns);
+    getPluginLog().debug(
+        format("prepared columns after applied cell filters: %s", preparedColumns));
+
     return preparedColumns;
   }
 
@@ -138,9 +142,10 @@ public class TableGenerator {
     if (stateInfo.getAllMissingValues().size() != 0) {
       stateInfo.getAllMissingValues()
           .forEach(e -> CombineMojo.appendError(
-              "Building minimal table failed for scenario: \"" + getCurrenScenarioName()
-                  + "\". No row could be build for -> value: " + e.getValue() + (
-                  nonNull(e.getUrl()) ? " url: " + e.getUrl() : ""),
+              format("Building minimal table failed for scenario: \"%s\". "
+                      + "No row could be build for -> value: %s%s",
+                  getCurrenScenarioName(),
+                  e.getValue(), nonNull(e.getUrl()) ? " url: " + e.getUrl() : ""),
               MINIMAL_TABLE));
     }
     return stateInfo.getResult();
@@ -215,7 +220,8 @@ public class TableGenerator {
         .or(() -> findNewValueMatchingFilter(stateInfo, preparedValues, row, rowFilter));
   }
 
-  private Optional<TableCell> findNewValueMatchingFilter(StateInfo stateInfo, List<TableCell> possibleValues,
+  private Optional<TableCell> findNewValueMatchingFilter(StateInfo stateInfo,
+      List<TableCell> possibleValues,
       List<TableCell> row, List<RowFilter> rowFilters) {
     for (TableCell possibleValue : possibleValues) {
       ArrayList<TableCell> extendedRow = new ArrayList<>(row);

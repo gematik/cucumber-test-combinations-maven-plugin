@@ -87,7 +87,6 @@ public class Filters {
     return getTableRowFilters().stream()
         .reduce(x -> true, RowFilter::and, RowFilter::and);
   }
-  //TODO above combined all row filters to one evil filter, try List of filter to filter filters who have no headers jet
 
   public Map<String, CellFilter> combineCellFilters() {
     return unmodifiableMap(cellFilters.entrySet().stream()

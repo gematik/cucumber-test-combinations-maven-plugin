@@ -55,6 +55,8 @@ public abstract class AbstractCombineMojoTest {
     combineMojo.setSkipTags(emptyList());
     combineMojo.setEnding(".cute");
     combineMojo.setFilterConfiguration(new FilterConfiguration());
+    combineMojo.setVersionFilterTagCategory("VersionFilter");
+    combineMojo.setPluginTagCategory("Plugin");
     combineMojo.setMinTableSize(minimalTableSize());
     combineMojo.setBreakIfTableToSmall(breakIfTableToSmall());
     combineMojo.setBreakIfMinimalTableError(breakIfMinimalTableError());

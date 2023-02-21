@@ -20,17 +20,18 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
-
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class NonNullableMap<K, V> implements Map<K, V> {
 
+  private final Map<K, V> innerMap;
   private final Function<K, V> defaultValue;
 
-  private final Map<K, V> innerMap;
-
-  public NonNullableMap(Map<K, V> innerMap, Function<K, V> defaultValue) {
-    this.defaultValue = defaultValue;
-    this.innerMap = innerMap;
+  public static <K, V> NonNullableMap<K, V> nonNullableMap(Map<K, V> innerMap,
+      Function<K, V> defaultValue) {
+    return new NonNullableMap<>(innerMap, defaultValue);
   }
 
   @Override

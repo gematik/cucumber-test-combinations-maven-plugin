@@ -16,21 +16,6 @@
 
 package de.gematik.combine;
 
-import static de.gematik.combine.tags.parser.AllowDoubleLineupTagParser.ALLOW_DOUBLE_LINEUP_TAG;
-import static de.gematik.combine.tags.parser.AllowSelfCombineTagParser.ALLOW_SELF_COMBINE_TAG;
-import static de.gematik.combine.tags.parser.DistinctColumnPropertyTagParser.DISTINCT_COLUMN_PROPERTY_TAG;
-import static de.gematik.combine.tags.parser.DistinctColumnTagParser.DISTINCT_COLUMN_TAG;
-import static de.gematik.combine.tags.parser.DistinctRowPropertyTagParser.DISTINCT_ROW_PROPERTY_TAG;
-import static de.gematik.combine.tags.parser.EqualRowPropertyTagParser.EQUAL_ROW_PROPERTY_TAG;
-import static de.gematik.combine.tags.parser.FilterTagParser.JEXL_ROW_FILTER_TAG;
-import static de.gematik.combine.tags.parser.MaxRowsTagParser.MAX_ROWS_TAG;
-import static de.gematik.combine.tags.parser.MaxSameColumnPropertyTagParser.MAX_SAME_COLUMN_PROPERTY_TAG;
-import static de.gematik.combine.tags.parser.MinimalTableTagParser.MINIMAL_TABLE_TAG;
-import static de.gematik.combine.tags.parser.RequirePropertyTagParser.REQUIRE_PROPERTY_TAG;
-import static de.gematik.combine.tags.parser.RequireTagTagParser.REQUIRE_TAG_TAG;
-import static de.gematik.combine.tags.parser.ShuffleTagParser.SHUFFLE_TAG;
-import static java.util.Map.entry;
-
 import de.gematik.combine.execution.ExamplesProcessor;
 import de.gematik.combine.execution.FileProcessor;
 import de.gematik.combine.execution.GherkinProcessor;
@@ -51,7 +36,25 @@ import de.gematik.combine.tags.parser.MinimalTableTagParser;
 import de.gematik.combine.tags.parser.RequirePropertyTagParser;
 import de.gematik.combine.tags.parser.RequireTagTagParser;
 import de.gematik.combine.tags.parser.ShuffleTagParser;
+import de.gematik.combine.tags.parser.VersionFilterParser;
+
 import java.util.Map;
+
+import static de.gematik.combine.tags.parser.AllowDoubleLineupTagParser.ALLOW_DOUBLE_LINEUP_TAG;
+import static de.gematik.combine.tags.parser.AllowSelfCombineTagParser.ALLOW_SELF_COMBINE_TAG;
+import static de.gematik.combine.tags.parser.DistinctColumnPropertyTagParser.DISTINCT_COLUMN_PROPERTY_TAG;
+import static de.gematik.combine.tags.parser.DistinctColumnTagParser.DISTINCT_COLUMN_TAG;
+import static de.gematik.combine.tags.parser.DistinctRowPropertyTagParser.DISTINCT_ROW_PROPERTY_TAG;
+import static de.gematik.combine.tags.parser.EqualRowPropertyTagParser.EQUAL_ROW_PROPERTY_TAG;
+import static de.gematik.combine.tags.parser.FilterTagParser.JEXL_ROW_FILTER_TAG;
+import static de.gematik.combine.tags.parser.MaxRowsTagParser.MAX_ROWS_TAG;
+import static de.gematik.combine.tags.parser.MaxSameColumnPropertyTagParser.MAX_SAME_COLUMN_PROPERTY_TAG;
+import static de.gematik.combine.tags.parser.MinimalTableTagParser.MINIMAL_TABLE_TAG;
+import static de.gematik.combine.tags.parser.RequirePropertyTagParser.REQUIRE_PROPERTY_TAG;
+import static de.gematik.combine.tags.parser.RequireTagTagParser.REQUIRE_TAG_TAG;
+import static de.gematik.combine.tags.parser.ShuffleTagParser.SHUFFLE_TAG;
+import static de.gematik.combine.tags.parser.VersionFilterParser.VERSION_TAG;
+import static java.util.Map.entry;
 
 public class DependencyInstances {
 
@@ -68,11 +71,12 @@ public class DependencyInstances {
       entry(DISTINCT_COLUMN_PROPERTY_TAG, new DistinctColumnPropertyTagParser()),
       entry(MAX_SAME_COLUMN_PROPERTY_TAG, new MaxSameColumnPropertyTagParser()),
       entry(REQUIRE_TAG_TAG, new RequireTagTagParser()),
-      entry(REQUIRE_PROPERTY_TAG, new RequirePropertyTagParser())
+      entry(REQUIRE_PROPERTY_TAG, new RequirePropertyTagParser()),
+      entry(VERSION_TAG, new VersionFilterParser())
   );
 
-  public static final TagParser TAG_PARSER = new TagParser(ALL_PARSERS);
   public static final TableGenerator TABLEGENERATOR = new TableGenerator();
+  public static final TagParser TAG_PARSER = new TagParser(ALL_PARSERS);
   public static final ExamplesProcessor EXAMPLES_PROCESSOR = new ExamplesProcessor(TAG_PARSER,
       TABLEGENERATOR);
   public static final ScenarioProcessor SCENARIO_PROCESSOR = new ScenarioProcessor(

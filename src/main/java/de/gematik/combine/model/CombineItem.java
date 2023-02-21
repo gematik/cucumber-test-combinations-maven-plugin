@@ -16,8 +16,9 @@
 
 package de.gematik.combine.model;
 
+import static de.gematik.combine.util.NonNullableMap.nonNullableMap;
+
 import de.gematik.combine.CombineMojo;
-import de.gematik.combine.util.NonNullableMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -49,7 +50,6 @@ public class CombineItem implements Comparable<CombineItem> {
   @EqualsAndHashCode.Exclude
   private Map<String, String> properties = new HashMap<>();
 
-
   public String toString() {
     return value;
   }
@@ -65,16 +65,18 @@ public class CombineItem implements Comparable<CombineItem> {
   }
 
   public Map<String, String> getProperties() {
-    return new NonNullableMap<>(properties, this::getDefaultPropertyAndLog);
-  }
-
-  private String getDefaultPropertyAndLog(String key) {
-    CombineMojo.getPluginLog().info(String.format("item %s does not have property %s", value, key));
-    return DEFAULT_PROPERTY;
+    return nonNullableMap(properties, this::getDefaultPropertyAndLog);
   }
 
   @Override
   public int compareTo(CombineItem other) {
     return value.compareTo(other.value);
   }
+
+  private String getDefaultPropertyAndLog(String key) {
+    CombineMojo.getPluginLog().info(
+        String.format("item %s does not have property %s", value, key));
+    return DEFAULT_PROPERTY;
+  }
+
 }

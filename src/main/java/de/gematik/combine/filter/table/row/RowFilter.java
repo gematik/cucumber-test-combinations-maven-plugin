@@ -16,14 +16,16 @@
 
 package de.gematik.combine.filter.table.row;
 
+import de.gematik.combine.filter.project.ProjectRowFilter;
 import de.gematik.combine.model.TableCell;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * A RowFilter is a Filter that operates on a whole row of values and therefore cannot be applied before the creation of the table.
- * Only after the rows have been combined using the cartesian product may rows be filtered with a RowFilter.
+ * A {@link RowFilter} is a Filter that operates on a whole row of values and therefore cannot be applied before the creation of the table.
+ * Only after the rows have been combined using the cartesian product may rows be filtered with a RowFilter. A
+ *  * CellFilter can override a {@link ProjectRowFilter}
  */
 public interface RowFilter extends Predicate<List<TableCell>> {
 

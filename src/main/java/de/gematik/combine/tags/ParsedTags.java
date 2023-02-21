@@ -18,9 +18,14 @@ package de.gematik.combine.tags;
 
 
 import static de.gematik.combine.filter.ConfigFilterMapper.toFilters;
+import static de.gematik.combine.util.NonNullableMap.nonNullableMap;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
+import static java.util.Objects.nonNull;
 
+import de.gematik.combine.CombineConfiguration;
 import de.gematik.combine.FilterConfiguration;
+import de.gematik.combine.ProjectFilters;
 import de.gematik.combine.filter.Filters;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +52,8 @@ public class ParsedTags {
         .apply(defaultConfig);
   }
 
-  public ConfiguredFilters configureFilters(FilterConfiguration defaultConfig) {
-    FilterConfiguration actualConfig = getActualConfig(defaultConfig);
+  public ConfiguredFilters configureFilters(CombineConfiguration config) {
+    FilterConfiguration actualConfig = getActualConfig(config.getFilterConfiguration());
 
     Filters allFilters = toFilters(actualConfig);
 
@@ -56,6 +61,7 @@ public class ParsedTags {
     getTableRowFilters().forEach(allFilters::addTableRowFilter);
     getCellFilters().forEach(allFilters::addCellFilter);
 
+    checkAndAddProjectFilters(config, allFilters);
     return new ConfiguredFilters(actualConfig, columns, allFilters);
   }
 
@@ -65,5 +71,38 @@ public class ParsedTags {
 
   public List<ConfigModifier> getConfigModifiers() {
     return unmodifiableList(configModifiers);
+  }
+
+  private void checkAndAddProjectFilters(CombineConfiguration config, Filters allFilters) {
+    ProjectFilters projectFilters = config.getProjectFilters();
+    if (nonNull(projectFilters)) {
+      addRowFilters(allFilters, projectFilters);
+      columns.forEach(header -> addCellFilters(header, allFilters, projectFilters));
+    }
+  }
+
+  private static void addRowFilters(Filters allFilters, ProjectFilters projectFilters) {
+    projectFilters.getRowFilters().stream()
+        .filter(rowFilter -> isFilterOverriddenInScenario(rowFilter, allFilters, null))
+        .forEach(allFilters::addTableRowFilter);
+  }
+
+  private static void addCellFilters(String header, Filters allFilters,
+      ProjectFilters projectFilters) {
+    projectFilters.getCellFilters().stream()
+        .filter(cellFilter -> isFilterOverriddenInScenario(cellFilter, allFilters, header))
+        .forEach(cellFilter -> allFilters.addCellFilter(header, cellFilter));
+  }
+
+  private static boolean isFilterOverriddenInScenario(Object filter, Filters allFilters,
+      String header) {
+    if (nonNull(header)) {
+      return nonNullableMap(allFilters.getCellFilters(), x -> emptyList())
+          .get(header).stream()
+          .noneMatch(filter.getClass().getSuperclass()::isInstance);
+    } else {
+      return allFilters.getTableRowFilters().stream()
+          .noneMatch(filter.getClass().getSuperclass()::isInstance);
+    }
   }
 }

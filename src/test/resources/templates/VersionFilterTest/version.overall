@@ -1,0 +1,7 @@
+# language: de
+Funktionalität:  Testfile
+  Szenariogrundriss: Only one test
+    Angenommen something happens
+
+    Beispiele:
+      | ApiName1A |

@@ -1,6 +1,16 @@
 :toc-title: Table of Contents
 :toc:
-:toclevels: 5
+:toclevels: 4
+
+:classdia-caption: Class diagram
+:seqdia-caption: Sequence diagram
+
+:source-highlighter: prettify
+
+:imagesdir: ../images
+:testdir: ../../src/test
+:sourcedir: ../../src
+:plantumldir: ../plantuml
 = Getting Started
 
 == [[COMBINE]]Combine goal
@@ -406,8 +416,78 @@ combine_items.json"
 |clientCertStorePw|Client-cert-password|
 |hardFail|If one API is not reachable the plugin will raise an exception|true
 |configFail|If one tag or one property should be set or differs from the given the plugin will raise an exception. If set to false all information from the infopoint will override the given information|true
+|groups|Name of all groups of items in combine_items.json to use|
+|excludedGroups|Name of all groups of items in combine_items.json explicitly *not* to use|
+|poolSize|Size of to use different groups|0
 |===
 
+==== Pooling
+
+If the `combine_items.json` contains a lot of items, it could be useful to group items and build pools. This allows to pre-filter the items and only prepare and combine for selected items.
+
+For controlling the behavior of pooling, following parameters can be used:
+
+* groups
+* excludedGroups
+* poolSize
+
+All items which contain at least one group that are named in groups will be in the pool. On the opposite you can exclude groups via excluded groups. The total size of used groups can be configured by setting a poolSize which determines how many groups should be used.
+
+Following cases should explain the behavior:
+
+. If the poolSize is less than one _(default 0)_, all items that have no excluded group will be taken in consideration.
+. If the number of named groups is less than the poolSize, random groups will be added till the poolSize is reached.
+. If the poolSize is higher than the size of available groups, an exception will raise.
+. If one item has X groups and the poolSize is set to X, the plugin tries to have at least X different items.
+. Exclude overrides all. No Item with an excluded group will be selected, even if that means that one group have
+
+Examples for the cases taking linked to _example input file with groups_:
+
+[%header,cols="1,1,2,2,4,2,1"]
+|====
+|#|poolSize|groups|excluded|result|selected groups|exact match
+|1|0|||Item1 - Item6|ALL|YES
+|2|3|G||Item2, Item3, Item4, Item7|G,C,D|NO
+|3|9|||Exception||YES
+|4|2|E,F||Item5,Item6|E,F,G|NO
+|5|2|AG|C|Item1,Item6|A,G|YES
+|====
+
+.example input file with groups
+[source,json]
+----
+[
+  {
+    "value": "Item1",
+    "groups": ["A", "B"]
+  },
+  {
+    "value": "Item2",
+    "groups": ["A", "C"]
+  },
+  {
+    "value": "Item3",
+    "groups": ["D"]
+  },
+  {
+    "value": "Item4",
+    "groups": ["D"]
+  },
+  {
+    "value": "Item5"
+  },
+  {
+    "value": "Item6",
+    "groups": ["E", "F"]
+  },
+  {
+    "value": "Item7",
+    "groups": ["G"]
+  }
+]
+----
+
+An additionally summary file will be created to retrace which groups are used and which are excluded. This can be found at `./target/generated-combine/usedGroups.json`
 
 ==== [[Expressions]] Expressions
 

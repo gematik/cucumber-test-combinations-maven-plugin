@@ -1,0 +1,9 @@
+:globalConfig: true
+:toc-title: Table of Contents
+:toc:
+:toclevels: 4
+== BDD-Parameterizer-Maven-Plugin
+
+include::Overview.adoc[]
+include::GettingStarted.adoc[]
+include::Example.adoc[]

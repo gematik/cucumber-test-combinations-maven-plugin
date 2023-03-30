@@ -1,0 +1,9 @@
+[
+  {
+    "value": "Api1",
+    "groups": ["A", "B"]
+  },
+  {
+    "value": "Api3"
+  }
+]

@@ -1,4 +1,16 @@
+:toc-title: Table of Contents
+:toc:
+:toclevels: 4
 
+:classdia-caption: Class diagram
+:seqdia-caption: Sequence diagram
+
+:source-highlighter: prettify
+
+:imagesdir: ../images
+:testdir: ../../src/test
+:sourcedir: ../../src
+:plantumldir: ../plantuml
 == Usage
 
 The plugin can be used by placing it in the build section of your pom.xml and parametrizing with the options shown above.
@@ -13,7 +25,7 @@ Below there is an example of how it could be used:
       <plugin>
         <groupId>de.gematik</groupId>
         <artifactId>cucumber-test-combinations-maven-plugin</artifactId>
-        <version>1.0.0</version>
+        <version>2.7.0</version>
         <configuration>
           <outputDir>${project.build.directory}/features/</outputDir>
           <templateDir>./src/test/resources/templates/</templateDir>

@@ -1,0 +1,29 @@
+[
+  {
+    "value": "Api1",
+    "tags": [
+      "client"
+    ],
+    "properties": {
+      "homeserver": "A"
+    }
+  },
+  {
+    "value": "Api2",
+    "properties": {
+      "homeserver": "A"
+    }
+  },
+  {
+    "value": "Api3",
+    "properties": {
+      "homeserver": "B"
+    }
+  },
+  {
+    "value": "Api4",
+    "properties": {
+      "homeserver": "B"
+    }
+  }
+]

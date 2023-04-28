@@ -54,6 +54,12 @@ public class CombineItem implements Comparable<CombineItem> {
   @EqualsAndHashCode.Exclude
   private Set<String> groups = new HashSet<>();
 
+  @EqualsAndHashCode.Exclude
+  private String checkExpression;
+
+  @EqualsAndHashCode.Exclude
+  private String checkExpressionId;
+
   public String toString() {
     return value;
   }

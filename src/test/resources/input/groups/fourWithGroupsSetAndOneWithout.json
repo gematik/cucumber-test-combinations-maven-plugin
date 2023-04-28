@@ -1,0 +1,45 @@
+[
+  {
+    "value": "Api1",
+    "groups": ["A"]
+  },
+  {
+    "value": "Api2",
+    "groups": ["A"]
+  },
+  {
+    "value": "Api3",
+    "groups": ["A"]
+  },
+  {
+    "value": "Api4",
+    "groups": ["A"]
+  },
+  {
+    "value": "Api5",
+    "groups": ["B"]
+  },
+  {
+    "value": "Api6",
+    "groups": ["B"]
+  },
+  {
+    "value": "Api7",
+    "groups": ["B"]
+  },
+  {
+    "value": "Api8",
+    "groups": ["C"]
+  },
+  {
+    "value": "Api9",
+    "groups": ["C"]
+  },
+  {
+    "value": "Api10",
+    "groups": ["D"]
+  },
+  {
+    "value": "Api11"
+  }
+]

@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 
-import de.gematik.prepare.request.ApiRequester;
+import de.gematik.utils.request.ApiRequester;
 import lombok.SneakyThrows;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.jupiter.api.BeforeEach;

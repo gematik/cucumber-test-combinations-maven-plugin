@@ -1,0 +1,10 @@
+[
+  {
+    "value": "Api1",
+    "groups": ["A_approved", "VeriFied"]
+  },
+  {
+    "value": "Api2",
+    "groups": ["A_approved"]
+  }
+]

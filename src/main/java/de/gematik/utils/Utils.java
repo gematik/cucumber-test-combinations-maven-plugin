@@ -22,6 +22,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.nonNull;
 import static lombok.AccessLevel.PRIVATE;
 
+import de.gematik.check.CheckMojo;
 import de.gematik.combine.CombineMojo;
 import de.gematik.combine.model.CombineItem;
 import de.gematik.prepare.PrepareItemsMojo;
@@ -82,32 +83,40 @@ public class Utils {
     return new ArrayList<>(combineItems);
   }
 
-  private static Log getLog() {
+  public static Log getLog() {
     if (nonNull(CombineMojo.getInstance())) {
       return CombineMojo.getPluginLog();
     }
     if (nonNull(PrepareItemsMojo.getInstance())) {
       return PrepareItemsMojo.getPluginLog();
+    }
+    if (nonNull(CheckMojo.getInstance())) {
+      return CheckMojo.getPluginLog();
     } else {
       return nullLogger;
     }
   }
 
-  public static void writeErrors(List<String> errors) {
-    writeErrors(errors, null, true);
+  public static void writeErrors(String msgPreamble, List<String> errors) {
+    writeErrors(msgPreamble, errors, null, true);
   }
 
   @SneakyThrows
-  public static void writeErrors(List<String> errors, String message, boolean shouldAppend) {
+  public static void writeErrors(String msgPreamble, List<String> errors, String message,
+      boolean shouldAppend) {
     if (errors.isEmpty()) {
       return;
     }
     if (nonNull(message)) {
       getLog().warn(message);
     }
-    errors.forEach(getLog()::warn);
+    errors.forEach(e -> getLog().warn(msgPreamble + e));
     File file = new File(GENERATED_COMBINE_ITEMS_DIR + File.separator + "errorLog.txt");
     String errorString = StringUtills.join(errors, "\n") + "\n";
     FileUtils.write(file, errorString, UTF_8, shouldAppend);
+  }
+
+  public static String getItemAsString(CombineItem item) {
+    return item.getValue() + (nonNull(item.getUrl()) ? " -> " + item.getUrl() : "");
   }
 }

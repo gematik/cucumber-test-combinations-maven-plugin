@@ -1,0 +1,58 @@
+[
+  {
+    "value": "Api1",
+    "groups": ["A_approved", "verified"]
+  },
+  {
+    "value": "Api2",
+    "groups": ["A_approved"]
+  },
+  {
+    "value": "Api3",
+    "groups": ["B_approved", "verified"]
+  },
+  {
+    "value": "Api4",
+    "groups": ["B_approved"]
+  },
+  {
+    "value": "Api5",
+    "groups": ["C_new"]
+  },
+  {
+    "value": "Api6",
+    "groups": ["C_new"]
+  },
+  {
+    "value": "Api7",
+    "groups": ["C_new"]
+  },
+  {
+    "value": "Api8",
+    "groups": ["D_ignore","D_new"]
+  },
+  {
+    "value": "Api9",
+    "groups": ["D_ignore","D_new"]
+  },
+  {
+    "value": "Api10",
+    "groups": ["D_ignore","D_new"]
+  },
+  {
+    "value": "Api11",
+    "groups": ["E_ignore"]
+  },
+  {
+    "value": "Api12",
+    "groups": ["E_ignore","E_special"]
+  },
+  {
+    "value": "Api13",
+    "groups": ["E_ignore","E_special"]
+  },
+  {
+    "value": "Api14",
+    "groups": ["F_special"]
+  }
+]

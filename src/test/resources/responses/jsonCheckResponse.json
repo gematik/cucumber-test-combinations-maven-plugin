@@ -1,0 +1,19 @@
+{
+  "justATrueValue": true,
+  "justAFalseValue": false,
+  "justAList": [
+    "someValue",
+    "someOtherValue",
+    "anotherValue"
+  ],
+  "justAComplexPath": {
+    "stillComplex": {
+      "andFurther": true,
+      "farList": [
+        "fatListEntry1",
+        "fatListEntry2",
+        "fatListEntry3"
+      ]
+    }
+  }
+}

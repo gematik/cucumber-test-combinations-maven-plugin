@@ -21,8 +21,6 @@ import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import de.gematik.combine.model.CombineItem;
 import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,17 +29,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
-import org.apache.maven.plugin.logging.Log;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-class ItemsCreatorTest extends AbstractPrepareTest{
+class ItemsCreatorTest extends AbstractPrepareTest {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
 

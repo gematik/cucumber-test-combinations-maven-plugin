@@ -14,31 +14,18 @@
  * limitations under the License.
  */
 
-package de.gematik.prepare;
+package de.gematik.utils;
 
-import de.gematik.prepare.pooling.GroupMatchStrategyType;
-import de.gematik.prepare.pooling.PoolGroup;
+import de.gematik.combine.model.CombineItem;
+
 import java.util.List;
-import lombok.Builder;
-import lombok.Data;
 
-@Data
-@Builder
-public class PrepareItemsConfig {
+public class ItemsCreator {
 
-  private String combineItemsFile;
-
-  private String infoResourceLocation;
-
-  private List<TagExpression> tagExpressions;
-
-  private List<PropertyExpression> propertyExpressions;
-
-  private List<PoolGroup> poolGroups;
-
-  private List<String> excludedGroups;
-
-  private int poolSize;
-
-  private GroupMatchStrategyType defaultMatchStrategy;
+  public static CombineItem ciWithGroup(List<String> groupsList) {
+    return CombineItem.builder()
+        .value("Api-Test")
+        .groups(groupsList)
+        .build();
+  }
 }

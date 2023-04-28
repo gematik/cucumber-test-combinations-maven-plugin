@@ -23,34 +23,25 @@ import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import de.gematik.combine.model.CombineItem;
-import de.gematik.prepare.request.ApiRequester;
 import java.io.File;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.logging.Log;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-class PrepareItemsMojoTest extends AbstractPrepareTest{
+class PrepareItemsMojoTest extends AbstractPrepareTest {
 
   public static final String ONLY_VALUE_JSON = "src/test/resources/input/inputOnlyValue.json";
   public static final String URL_VALUE_JSON = "src/test/resources/input/inputValueAndUrl.json";
@@ -146,7 +137,7 @@ class PrepareItemsMojoTest extends AbstractPrepareTest{
     assertThatThrownBy(() -> mojo.checkExpressionSetCorrectly())
         .isInstanceOf(MojoExecutionException.class)
         .message().startsWith(
-            "Erroneous configuration: missing " + missingType + " in ");
+        "Erroneous configuration: missing " + missingType + " in ");
   }
 
 
@@ -168,7 +159,7 @@ class PrepareItemsMojoTest extends AbstractPrepareTest{
     when(itemsCreator.getConfigErrors()).thenReturn(List.of("Some Error"));
     mojo.setItems(List.of());
     mojo.configFail = false;
-    mojo.combineItemsFile = ONLY_VALUE_JSON;
+    mojo.setCombineItemsFile(ONLY_VALUE_JSON);
     mojo.run();
   }
 }

@@ -18,7 +18,7 @@ package de.gematik.prepare;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import de.gematik.prepare.request.ApiRequester;
+import de.gematik.utils.request.ApiRequester;
 import java.util.stream.Stream;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.jupiter.params.ParameterizedTest;

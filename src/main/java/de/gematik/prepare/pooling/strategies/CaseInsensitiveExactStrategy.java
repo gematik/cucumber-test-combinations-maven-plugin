@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
-package de.gematik.prepare;
+package de.gematik.prepare.pooling.strategies;
 
-import de.gematik.prepare.pooling.GroupMatchStrategyType;
-import de.gematik.prepare.pooling.PoolGroup;
 import java.util.List;
-import lombok.Builder;
-import lombok.Data;
+import java.util.stream.Collectors;
 
-@Data
-@Builder
-public class PrepareItemsConfig {
+public class CaseInsensitiveExactStrategy extends MatchStrategy {
 
-  private String combineItemsFile;
+  public CaseInsensitiveExactStrategy(List<String> groups) {
 
-  private String infoResourceLocation;
+    super(groups.stream().map(String::toLowerCase).collect(Collectors.toList()));
 
-  private List<TagExpression> tagExpressions;
+  }
 
-  private List<PropertyExpression> propertyExpressions;
+  @Override
+  protected boolean doesMatch(String group) {
+    return this.pattern.stream().anyMatch(e -> e.equals(group.toLowerCase()));
+  }
 
-  private List<PoolGroup> poolGroups;
-
-  private List<String> excludedGroups;
-
-  private int poolSize;
-
-  private GroupMatchStrategyType defaultMatchStrategy;
 }

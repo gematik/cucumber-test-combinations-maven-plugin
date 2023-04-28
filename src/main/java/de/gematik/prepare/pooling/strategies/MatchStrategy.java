@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-package de.gematik.prepare;
+package de.gematik.prepare.pooling.strategies;
 
-import de.gematik.prepare.pooling.GroupMatchStrategyType;
-import de.gematik.prepare.pooling.PoolGroup;
 import java.util.List;
-import lombok.Builder;
-import lombok.Data;
+import java.util.Set;
 
-@Data
-@Builder
-public class PrepareItemsConfig {
+public abstract class MatchStrategy {
 
-  private String combineItemsFile;
+  public static final String MATCHING = "contains";
+  public static final String NOT_MATCHING = "notContaining";
 
-  private String infoResourceLocation;
+  protected List<String> pattern;
 
-  private List<TagExpression> tagExpressions;
+  protected MatchStrategy(List<String> pattern) {
+    this.pattern = pattern;
+  }
 
-  private List<PropertyExpression> propertyExpressions;
+  protected abstract boolean doesMatch(String group);
 
-  private List<PoolGroup> poolGroups;
-
-  private List<String> excludedGroups;
-
-  private int poolSize;
-
-  private GroupMatchStrategyType defaultMatchStrategy;
+  public String match(Set<String> item) {
+    for (String itemGroup : item) {
+      if (doesMatch(itemGroup)) {
+        return MATCHING;
+      }
+    }
+    return NOT_MATCHING;
+  }
 }

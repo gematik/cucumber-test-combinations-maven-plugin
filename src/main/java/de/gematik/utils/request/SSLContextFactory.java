@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.gematik.prepare.request;
+package de.gematik.utils.request;
 
 import static javax.net.ssl.KeyManagerFactory.getDefaultAlgorithm;
 

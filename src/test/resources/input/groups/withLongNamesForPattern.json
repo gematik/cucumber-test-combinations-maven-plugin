@@ -1,0 +1,38 @@
+[
+  {
+    "value": "Api1",
+    "groups": ["A_approved"]
+  },
+  {
+    "value": "Api2",
+    "groups": ["A_not"]
+  },
+  {
+    "value": "Api3",
+    "groups": ["B_approved"]
+  },
+  {
+    "value": "Api4",
+    "groups": ["B_not"]
+  },
+  {
+    "value": "Api5"
+  },
+  {
+    "value": "Api6",
+    "groups": ["B_invalid"]
+  },
+  {
+    "value": "Api7",
+    "groups": ["C_apProved"]
+  },
+  {
+    "value": "Api8",
+    "groups": ["D_appRoved_temp"]
+  },
+  {
+    "value": "Api9",
+    "groups": ["D_appRoved_temp"]
+  }
+
+]

@@ -13,6 +13,342 @@
 :plantumldir: ../plantuml
 = Getting Started
 
+== Error log
+
+Every error / mismatch will be logged to console and also to the folder ./target/generated-combine.
+This is generally for all different goals. more particularly you can decide if the plugin should break the build, or should only log errors.
+This enables you for a proper investigation.
+
+== [[PREPARE]]Prepare goal
+
+It parses the info-endpoint and adds additional information and validates all given information automatically.
+It takes the base combine_items.json and creates a new one regarding the info-data endpoint and the given expressions.
+The info-point could be parsed by JSON-Path which are configured in expressions.
+
+Only if there is a configuration for a specific tag or property it will validate.
+All tags or properties that have no configuration will be copied 1 to 1 in the resulting combine_items.json.
+
+Depending on configuration the plugin exits with an error or overrides all information with the findings at the info-endpoint.
+
+IMPORTANT: *If you want to use this goal, it has to be executed before the combine goal!*
+
+=== Configuration and parameters
+
+[[prepare-options]]
+.prepare options
+[%header,cols="1,2,1"]
+|===
+|Option name|Description|Default
+|combineItemsFile|Path to json file that contains the values to prepare.
+For further information click <<combine_items,here>>|"./src/test/resources/ combine_items.json"
+|infoResourceLocation[[infoResourceLocation]]|Location to the info-endpoint, if this is not he root location.
+For example if the URL is localhost:8080 and the info-endpoint is at /app/info you have to provide app/info here.|
+|tagExpressions|This is a list of complex data and define which tags have to be set under what conditions.
+Read more <<Expressions,here>>|
+|propertyExpressions|This is a list of complex data and define which property have to be set under what conditions.
+Read more <<Expressions, here>>|
+|truststore|Path of truststore|
+|truststorePw|Truststore password|
+|clientCertStore|Path of client-cert-store|
+|clientCertStorePw|Client-cert-password|
+|hardFail|If one API is not reachable the plugin will raise an exception|true
+|configFail|If one tag or one property should be set or differs from the given the plugin will raise an exception.
+If set to false all information from the info point will override the given information|true
+|poolGroups |This is a list of complex data and define which groups should be used and should appeare how often.
+Read more <<_pool_groups,here>>|
+|excludedGroups|Name of all groups of items in combine_items.json explicitly *not* to use (comma separated)|
+|poolSize|Size of to use different groups|0
+|defaultMatchStrategy|Describes the strategy how the groups should be matched.
+Further explanation <<Matching Strategy,here>>|WILDCARD
+|===
+
+[#_pooling]
+=== Pooling
+
+If the `combine_items.json` contains a lot of items, it could be useful to group items and build pools.
+This allows to pre-filter the items and only prepare and combine for selected items.
+
+IMPORTANT: One pool could contain multiple groups!
+
+For controlling the behavior of pooling, following parameters can be used:
+
+* poolGroups (komplex type)
+** groupPattern (list of pattern that are allowed (comma separated))
+** amount (how many groups of this pattern should be used (default=0))
+** strategy (define how you want to match. (optional) More info <<_matching_strategy,here>>)
+* excludedGroups (groups that should be excluded.
+Follows pattern in all poolGroups.
+Is globally valid)
+* poolSize (How many groups should be used.
+If not used, only `poolGroups` will be used.
+If no `poolGroup` named, randomly groups from left items will be selected.)
+* defaultMatchStrategy (If no strategy is named in poolGroup this default will be applied)
+* poolGroupString (overriding `poolGroups`.
+Further explanation <<_poolgroupstring_explained, here>>)
+
+An example configuration in `pom` could be found <<_configuration_pooling_in_pom_xml,here>>.
+
+==== Pool groups
+
+Each `poolGroup` can have its own patterns, amount and <<_matching_strategy,matchting strategy>>.
+The pattern configures all valid groups for this `poolGroup`.
+
+==== Behaviour of pooling
+
+This rules should explain the behaviour of pooling:
+
+. It will be insured that requirements of all named `poolGroups` are fulfilled or else an error will raise
+.. If an item matches one group but another matches the `excludedGroups` it will not be selected.
+Other items of the correct group are not effected
+. If poolSize \<= all different groups of the already selected one, the plugin uses only the already selected one
+. If poolSize > already selected, the plugin will start to randomly choose a group and will add its items
+.. All groups that are not mentioned in `excludedGroups` will be in consideration
+. If the poolSize is less than one _(default 0)_ and no poolin group is named, all items that have no excluded group will be taken in consideration.
+. If the poolSize is higher than the size of available groups, an exception will raise.
+. Exclude overrides all!
+
+An additionally summary file will be created to retrace which groups are used and which are excluded.
+This can be found at `./target/generated-combine/usedGroups.json`
+In addition this information will be set in java runtime environment and can be accessed later via:
+
+* cutest.plugin.groups.used
+* cutest.plugin.groups.excluded
+* cutest.plugin.groups.usedWithoutGroup
+
+==== Matching Strategy
+
+The strategy tells how the named `groups` and `excludedGroups` will be compared to the groups of the different items.
+To use them they have to be named like below (UPPER_SNAKE_CASE).
+
+Following possibilities are available:
+
+include::{sourcedir}/main/java/de/gematik/prepare/pooling/GroupMatchStrategyType.java[tag=matchingStrategies]
+
+==== PoolGroupString explained
+
+This option is for automatisation purpose.
+With the following pattern poolGroups can be named.
+This will override all pool groups that are configured in pom.
+
+Each `poolGroup` is divided by `;`, followed by patterns -> amount -> <<_matching_strategy,matching strategy>> comma separated.
+If several patterns should be named thy can be devided by `|`.
+A `poolGroup` must have at least one groupPattern.
+The other parameter are optional and have a default:
+
+* amount = 0
+* strategy = ${defaultMatchStrategy}
+
+If amount == 0 -> all matching groups will be seleted
+
+.Example
+*approved|*valid,2,WILDCARD;.*open,1,REGEX;*filler,,WILDCARD;*special,4
+
+This example written in pom.xml:
+
+[source,xml]
+----
+<poolGroups>
+  <poolGroup>
+    <groupPattern>*approved</groupPattern>
+    <groupPattern>*valid</groupPattern>
+    <amount>2</amount>
+    <strategy>WILDCARD</strategy>
+  </poolGroup>
+  <poolGroup>
+    <groupPattern>.*open</groupPattern>
+    <amount>1</amount>
+    <strategy>REGEX</strategy>
+  </poolGroup>
+  <poolGroup>
+    <groupPattern>.*filler</groupPattern>
+    <strategy>WILDCARD</strategy>
+  </poolGroup>
+  <poolGroup>
+    <groupPattern>.*special</groupPattern>
+    <amount>4</amount>
+  </poolGroup>
+</poolGroups>
+----
+
+==== Configuration pooling in pom.xml
+
+.Example configuration for poolingGroups
+[source,xml]
+----
+<configuration>
+  <defaultMatchStrategy>WILDCARD</groupMatchStrategy>
+  <poolSize>5</poolSize>
+  <excludedGroups>invalid</excludedGroups>
+  <poolGroups>
+    <poolGroup>
+      <groupPattern>*approved</groupPattern>
+      <amount>2</amount>
+      <strategy>REGEX</strategy>
+    </poolGroup>
+    <poolGroup>
+      ...
+    </poolGroup>
+    ...
+  </poolGroups>
+  <poolGroupString>WOULD OVERRIDE THE WHOLE POOL-GROUP SECTION</poolGroupString>
+</configuration>
+----
+
+=== [[Expressions]] Expressions
+
+Every single expression you configure is a check that should be done against the info-endpoint.
+This expression got executed and compared to the info-endpoint.
+
+A tag expression (JSON-Path) should have a true or false as result.
+If the result of the path is true the tag will be added or kept.
+If the result is false the tag will be ignored (no error) or unset if the tag is named in the base combine_item.json.
+
+This results in following table of outcomes:
+
+.Result table tags
+[%header,cols="2,2,2,1"]
+|===
+|Value in base|Value in api|result|error
+|is set|true|tag is set|no
+|is not set|true|tag is set|no
+|is set|false|tag is removed|yes
+|is not set|false|tag is ignored| no
+|===
+
+If the path for a property is existing, the value will be added.
+If the path does not exist but the property is set in the base combine_items.json the property stays.
+If no property is set in the base combine_items.json and the path does not exist, the property will be removed.
+In addition to the tag, the set value in the base combine_items.json will be compared to the value found at the info-endpoint and will raise an exception if configured, but at least noticed in error log.
+
+This results in following table of outcomes:
+
+.Result table properties
+[%header,cols="2,2,2,1"]
+|===
+|Value in base|Value in api|result|error
+|is set|found and is same|property is set|no
+|is set|found and differs from base|property got overwritten by api value|yes
+|is not set|found|property is set|no
+|is set|not found|property is removed|yes
+|is not set|not found|tag is ignored| no
+|===
+
+Everytime an expression is not successful (returns false or was not found) the build will break if `configFail` is set to true (default).
+If it's set to false the regarding tag or property will be removed if set.
+In this case an errorLog.txt file with all registered errors will be generated right next to the generated combine_items.json at `./target/generated-combine`.
+
+==== Configuration expressions in pom.xml
+
+.Example tag and property Expression
+[source,xml]
+----
+<configuration>
+  <tagExpressions>
+    <tagExpression>
+      <tag>MyTag</tag>
+      <expression>$.my.Json.Path</expression>
+    </tagExpression>
+    <tagExpression>
+      ...
+    </tagExpression>
+  </tagExpressions>
+  <propertyExpressions>
+    <propertyExpression>
+      <property>myProperty</property>
+      <expression>$.my.Json.Path</expression>
+    </propertyExpression>
+    <propertyExpression>
+      ...
+    </propertyExpression>
+  </propertyExpressions>
+</configuration>
+----
+
+[#_using_mtls]
+=== Using mTls
+
+For using mTls all 4 properties have to be set:
+
+. truststore
+. truststorePw
+. clientCertStore
+. clientCertStorePw
+
+If one of these properties is set and the others not, or it's mal configuration, the plugin will raise an error.
+For using only https none of this properties have to be set.
+The plugin uses the internal truststore as default.
+
+== Check goal
+
+With this goal an endpoint json response could be validated.
+This check will be executed against every item.
+If this goal is executed after the <<Prepare goal,prepare goal>> it will only check the items that are left after <<_pooling, pooling>>.
+If the endpoint is an mTls secured, please have a look at <<_using_mtls,using mTls>>.
+
+=== Configuration and parameters
+
+.check parameters
+[cols="1,2,1"]
+|===
+|checkPath|Additional path that will be added to url from item.
+Should point to a json response|
+|checkExpressions|This is a list of complex data and is a collection of expression that can be reffered in `combine_items.json`.
+If no defaultCheckExpression is named, the first named here will be used as default.
+Read more <<_check_expressions,here>>|
+|defaultCheckExpressions|Expression that will be applied if no explicit is named|
+|truststore|Path of truststore|
+|truststorePw|Truststore password|
+|clientCertStore|Path of client-cert-store|
+|clientCertStorePw|Client-cert-password|
+|===
+
+[#_check_expressions]
+=== Check expressions
+
+One check expression could be ordered to an item in three ways.
+Listed in descending order.
+
+. Expression directly in `combine_items.json`
+. ExpressionId in `combine_items.json`
+. Default expression (either named via `defaultCheckExpression` as property or first named expression in `expressions`)
+
+==== Syntax check expression
+
+The expression itself will be proceeded in a jexl expression. In addition the combineItem could be accessed via the keyword `ITEM` and the json response of the api can be used with `$`.
+
+The whole expression must return a boolean.
+
+.Examples
+. ITEM.getTags().contains("myTag") ? $.haveMyTag :$.shoulHaveOtherTag
+.. This expression checks if the item have the tag _myTag_. If true the check proofs if the response at _haveMyTag_ is true, else _shouldHaveOtherTag_ should be true.
+. $.healthcheck
+.. This expression checks only the json path and if the value healthcheck returns true.
+. $.my.path.to.list.size() >= 10
+.. Checks if a list at _my.path.to.list_ have at least 10 items.
+
+
+==== Configure in pom
+
+The id could be any string but have to be unique.
+The way expression can be configured in `pom`:
+
+[source,xml]
+----
+<configuration>
+  <checkExpressions>
+    <checkExpression>
+      <id>1</id>
+      <expression>ITEM.getTags().contains("myTag") ? $.size() >= 1 : $.size() >= 5</expression>
+    </checkExpression>
+    <checkExpression>
+      <id>myExpression</id>
+      <expression>$.health</expression>
+    </checkExpression>
+    ...
+  </checkExpressions>
+</configuration>
+----
+
 == [[COMBINE]]Combine goal
 
 === Configuration and parameters
@@ -26,19 +362,32 @@ To configure the combine goal the following options are available:
 |Option name|Description|Default
 |templateDir|Path to the directory of the templates|./src/test/resources/templates
 |outputDir|Path to the directory where the rendered templates got stored|./src/test/resources/features
-|[[combineItemsFile]]combineItemsFile|Path to json file that contains the values to combine. More info on this file <<combine_items,here>>.|./src/test/resources/combine_items.json
+|
+[[combineItemsFile]]
+combineItemsFile|Path to json file that contains the values to combine.
+More info on this file <<combine_items,here>>.|./src/test/resources/combine_items.json
 |ending|The specific ending of the templates|.cute
 |skipScenariosWithoutExamples| If *true* plugin will add tags '@WIP' and '@EMPTY_EXAMPLES_TABLE' to an examples table where the plugin was not able to add at least one row |true
-|minTableSize|Amount of minimal rows in one table. If table have less rows error log will be written. Can be conbined with *breakIfTableToSmall*|1
+|minTableSize|Amount of minimal rows in one table.
+If table have less rows error log will be written.
+Can be conbined with *breakIfTableToSmall*|1
 |breakIfTableToSmall|If *true* the plugin will raise an error if it`s not able to add the minimal amount of rows that are requested in property minTableSize|true
-|breakIfMinimalTableError|If *true* the plugin will raise an error if there is at least one value that could not apply due row-filters. This does not include all values that are excluded by colum-filters|false
+|breakIfMinimalTableError|If *true* the plugin will raise an error if there is at least one value that could not apply due row-filters.
+This does not include all values that are excluded by colum-filters|false
 |defaultExamplesTags|List of tags that are added to each table as default.
-@AllowDoubleLineup, @AllowSelfCombine and @MinimalTable are forbidden. Their default should be set in filterConfiguration.| empty
+@AllowDoubleLineup, @AllowSelfCombine and @MinimalTable are forbidden.
+Their default should be set in filterConfiguration.| empty
 |pluginTagCategory|Define a category to be placed before every plugin-specific tag (except for version filter tags, see below), so they don't get mixed with all the other tags in the document with important information.|"Plugin"
 |projectFilterTagCategory|Like pluginTagCategory, but especially for *version filter* tags.|"VersionFilter"
-|[[versionProperty]]versionProperty|Specify the name of the item property (from <<combine_items, combine_items.json>>) the plugin will use to filter for versions.|"version"
-|[[filterConfiguration]]filterConfiguration| Configuration for default filter behavior, see options below: <<filter-configuration, filterConfig options table>> | see <<filter-configuration, table>>
-|[[projectFilters]]projectFilters|Set filters that are used across the entire project, see options below: <<project-filters, projectFilters table>>|None
+|
+[[versionProperty]]
+versionProperty|Specify the name of the item property (from <<combine_items, combine_items.json>>) the plugin will use to filter for versions.|"version"
+|
+[[filterConfiguration]]
+filterConfiguration| Configuration for default filter behavior, see options below: <<filter-configuration, filterConfig options table>> | see <<filter-configuration, table>>
+|
+[[projectFilters]]
+projectFilters|Set filters that are used across the entire project, see options below: <<project-filters, projectFilters table>>|None
 |===
 
 [[filter-configuration]]
@@ -49,27 +398,33 @@ To configure the combine goal the following options are available:
 |allowSelfCombine[[allowSelfCombine]]|If *true* plugin will allow that an item can be combined with itself|false
 |allowDoubleLineup[[allowDoubleLineup]]|If *true* plugin will allow that one combination of items can appear multiple times if differently sorted|false
 |minimalTable[[minimalTable]]|If *true* plugin will always generate a table with minimal number of entries|false
-|[[maxTableRows]]maxTableRows|Set a maximum of rows per table
+|
+[[maxTableRows]]
+maxTableRows|Set a maximum of rows per table
 
 _override with <<config_tag_maxrows, @MaxRows>>_|Integer.MAX_VALUE
-|[[shuffleCombinations]]shuffleCombinations|If *true* plugin will shuffle the table rows
+|
+[[shuffleCombinations]]
+shuffleCombinations|If *true* plugin will shuffle the table rows
 
 _override with <<config-tag-shuffle, @Shuffle>>_|false
 |===
 
-
 [[project-filters]]
 .projectFilters (within <<options>>)
-[%header, cols="1,3,1"]
+[%header,cols="1,3,1"]
 |===
 |Option name|Description|Default
-|[[versionProjectFilter]]version a|Set a global version filter that will be used in every examples table unless it is explicitly overridden there with a <<version-filter, @Version(...) filter>>.
+|
+[[versionProjectFilter]]
+version a|Set a global version filter that will be used in every examples table unless it is explicitly overridden there with a <<version-filter, @Version(...) filter>>.
 
 IMPORTANT: *In pom.xml only the bash-style operators can be used!* (see <<operators, Operators>>)
 
 _Note that the global version filter will still be applied to columns that do not have a version filter set to them._
 
-_A global version filter can not be set to (a) specific column header(s). Any column headers set in it will be *ignored*._
+_A global version filter can not be set to (a) specific column header(s).
+Any column headers set in it will be *ignored*._
 
 .example:
 ****
@@ -79,6 +434,7 @@ _A global version filter can not be set to (a) specific column header(s). Any co
 ** *@Version(col1,col2>4.20)*
 ** *@Version(col3\<=4.20)*
 ****
+
 .result:
 ****
 => *greater than 4.20* will be used for col1 and col2
@@ -93,7 +449,6 @@ Read more about version filters <<version-filter, here>>
 |None
 
 |===
-
 
 === What else do I need?
 
@@ -133,7 +488,8 @@ Each item needs a `value` field and can have a list of `tags` and a map of `prop
 ====
 If you want to use the <<PREPARE, Prepare Goal>>, the items must have a value that can be set and must be set as the <<infoResourceLocation, infoResourceLocation>>.
 
-You can *EITHER* use a base _combine_items.json_ file which is then completed by the <<PREPARE, Prepare Goal>>. <<PREPARE, It>> asks all the specified endpoints for the information and outputs to a file located at `.target/generated-combine/combine_items.json`. You can then use that output as the <<combineItemsFile, input>> for the <<COMBINE, Combine Goal>>.
+You can *EITHER* use a base _combine_items.json_ file which is then completed by the <<PREPARE, Prepare Goal>>. <<PREPARE, It>> asks all the specified endpoints for the information and outputs to a file located at `.target/generated-combine/combine_items.json`.
+You can then use that output as the <<combineItemsFile, input>> for the <<COMBINE, Combine Goal>>.
 
 *OR* you can just use a complete _combine_items.json_ file with running the <<COMBINE, Combine Goal>> only, specifying your prepared input file via <<combineItemsFile, combineItemsFile>>.
 ====
@@ -179,7 +535,9 @@ Configuration tags with a boolean value have default values for which the value 
 [cols="2,1,4"]
 |===
 |Tag name|Default|Example
-|[[config_tag_AllowDoubleLineup]]@AllowDoubleLineup(<boolean>)
+|
+[[config_tag_AllowDoubleLineup]]
+@AllowDoubleLineup(<boolean>)
 
 Example:
 @AllowDoubleLineup(true)|true|Specifies if one combination of items can appear multiple times in the examples table, if sorted differently.
@@ -188,7 +546,9 @@ e.g. Row "\|entry2\|entry1\|" will not appear if row "\|entry1\|entry2\|" is pre
 
 Can override the <<allowDoubleLineup, allowDoubleLineup>> option.
 
-|[[config_tag_AllowSelfCombine]]@AllowSelfCombine(<boolean>)
+|
+[[config_tag_AllowSelfCombine]]
+@AllowSelfCombine(<boolean>)
 
 Example:
 @AllowSelfCombine(false)|true|Specifies if an item can be combined with itself.
@@ -197,34 +557,45 @@ e.g. Row "\|entry1\|entry1\|" will not appear if SelfCombine is disabled.
 
 Can override the <<allowSelfCombine, allowSelfCombine>> option.
 
-|[[config_tag_mintable]]@MinimalTable(<boolean>)
+|
+[[config_tag_mintable]]
+@MinimalTable(<boolean>)
 
 Example:
-@MinimalTable(true)|true a|Generate a table with minimal number of entries. Each possible entry will occur in the resulting table as long as there are sufficient items to fill each row. If additional entries are needed to fill the last row, items will be reused.
+@MinimalTable(true)|true a|Generate a table with minimal number of entries.
+Each possible entry will occur in the resulting table as long as there are sufficient items to fill each row.
+If additional entries are needed to fill the last row, items will be reused.
 Using cell and row filters may lead to the plugin having to reuse items multiple times even in MinimalTable mode.
 
 DoubleLineup is always deactivated in such a table.
 
 IMPORTANT: Only cell and row filters are evaluated in table generation.
-Table filters will be applied after table generation. Therefore, this table can not be filtered with table filter tags without loosing multiple entries completely.
+Table filters will be applied after table generation.
+Therefore, this table can not be filtered with table filter tags without loosing multiple entries completely.
 
-WARNING: This may cause different results under certain circumstances (e.g. in combination with shuffle or different filters for every column). To avoid this, apply the most restrictive filters to the first column.
+WARNING: This may cause different results under certain circumstances (e.g. in combination with shuffle or different filters for every column).
+To avoid this, apply the most restrictive filters to the first column.
 
 Can override the <<minimalTable, minimalTable>> option.
-|[[config_tag_maxrows]]@MaxRows(<int>)
+|
+[[config_tag_maxrows]]
+@MaxRows(<int>)
 
 Example: @MaxRows(1)|- a|Set a maximum of rows in this table.
 
 [IMPORTANT]
 ====
-*"MaxRows" is also used for a <<table_filter_maxrows,TableFilter-Tag>>. The type of created filter is determined by the value for this tag:*
+*"MaxRows" is also used for a <<table_filter_maxrows,TableFilter-Tag>>.
+The type of created filter is determined by the value for this tag:*
 
 * for simple integer values it is interpreted as configuration tag, that overrides maxRows-config
 * for everything else the table filter is used, which does not override the configuration value
 ====
 
 Can override the <<maxTableRows, maxTableRows>> option.
-|[[config-tag-shuffle]]@Shuffle(<boolean>)
+|
+[[config-tag-shuffle]]
+@Shuffle(<boolean>)
 
 Example: @Shuffle(true)|true|Shuffle the table, this can be interesting if you want to limit the table size but still want to get different lines in the mix than the ones which are first generated by pure arithmetic logic.
 
@@ -243,16 +614,18 @@ Filter tags can filter out possible table rows by given parameters.
 
 Example:
 @Filter(HEADER_1.hasTag("orgAdmin")) a|
-In this filter you can assign an expression to a table column that must return *true* for a link:src/main/java/de/gematik/combine/model/CombineItem.java[CombineItem] to be placed in that column. Columns are identified by referencing its header.
+In this filter you can assign an expression to a table column that must return *true* for a link:src/main/java/de/gematik/combine/model/CombineItem.java[CombineItem] to be placed in that column.
+Columns are identified by referencing its header.
 
-By placing an _exclamation mark_ before an expression the boolean returned by it can be negated. Example: `@Filter(##!##COL.hasTag("XY"))`
+By placing an _exclamation mark_ before an expression the boolean returned by it can be negated.
+Example: `@Filter(##!##COL.hasTag("XY"))`
 The ##!## can be read as *_not_*.
 
 [[filter-expressions]]
 .filter expressions
-
 * `COL.hasTag("XY")`
 ** will only let items be placed in *COL* if they have the tag *XY*
+
 * `!COL.hasTag("XY")`
 ** will only let items be placed in *COL* if they *do not* have the tag *XY*
 * `COL1.properties["XY"].equals("value")`
@@ -269,6 +642,7 @@ NOTE: If you want the items of all columns in a row to have equal or distinct va
 
 .examples
 * `@Filter(H1.hasTag("client"))`
+
 * `@Filter(!H1.hasTag("orgAdmin"))`
 * `@Filter(H1.properties["home"].equals(H2.properties["home"]))`
 * `@Filter(!H2.properties["home"].equals("gematik")`
@@ -280,23 +654,29 @@ NOTE: If you want the items of all columns in a row to have equal or distinct va
 
 The expression itself, if you are looking for a deep-dive read, is a https://commons.apache.org/proper/commons-jexl/reference/syntax.html[JEXL-Expression].
 
-IMPORTANT: *`@Filter` tags that only reference one column will be applied to columns before generating the table and can reduce the amount of filtering significantly.*
-|[[EqualProperty]]@EqualProperty(<propertyName>)
+IMPORTANT: *`@Filter` tags that only reference one column will be applied to columns before generating the table and can reduce the amount of filtering significantly.* |
+
+[[EqualProperty]]
+@EqualProperty(<propertyName>)
 
 Example:
 @EqualProperty(homeserver)|In a row, all items must have the given property set to the same value.
-|[[DistinctProperty]]@DistinctProperty(<propertyName>)
+|
+
+[[DistinctProperty]]
+@DistinctProperty(<propertyName>)
 
 Example:
-@DistinctProperty(homeserver)|No item in a row can have the same value of the given property, meaning in a row every item must have a different value set for the given property
-|[[version-filter]]@Version(<column(s)><operator><version>)
+@DistinctProperty(homeserver)|No item in a row can have the same value of the given property, meaning in a row every item must have a different value set for the given property |
+
+[[version-filter]]
+@Version(<column(s)><operator><version>)
 
 Examples:
 
 @Version(HEADER_1\--GE\--2.2.1)
 
-@Version(HEADER_1,HEADER_3==5.1)
-a|In the given column(s), a cell must
+@Version(HEADER_1,HEADER_3==5.1) a|In the given column(s), a cell must
 
 * have a version property: the name of that property can be set via the <<versionProperty, versionProperty>> variable in <<options, options>>; the plugin will use that name to look for a version property in each items´ properties
 
@@ -308,36 +688,25 @@ The version parameter must be of the form X , X.X , X.X.X or X.X.X.X etc., with 
 
 A version filter can be applied to multiple columns by giving a comma-seperated list of column headers.
 
-Available operators are the standard https://en.cppreference.com/w/cpp/language/operator_comparison#Two-way_comparison[two-way comparison operators]. In a `@Version()` filter both bash-style and math-style operators can be used interchangeably.
+Available operators are the standard https://en.cppreference.com/w/cpp/language/operator_comparison#Two-way_comparison[two-way comparison operators].
+In a `@Version()` filter both bash-style and math-style operators can be used interchangeably.
 
 [[operators]]
 .comparison operators
 [cols="1,1,3"]
 !===
-!bash-style !math-style !description
-!--EQ--
-!==
-!*equals* (note that version 1 == 1.0 == 01.0.0)
+!bash-style !math-style !description !--EQ-- !== !*equals* (note that version 1 == 1.0 == 01.0.0)
 
-!--NE--
-!\!=
-!*does not equal*
+!--NE-- !\!= !*does not equal*
 
-!--LT--
-!<
-!*less than*
+!--LT-- !< !*less than*
 
-!--LE--
-!\<=
+!--LE-- !\<=
 !*less than or equal*
 
-!--GT--
-!>
-!*greater than*
+!--GT-- !> !*greater than*
 
-!--GE--
-!>=
-!*greater than or equal*
+!--GE-- !>= !*greater than or equal*
 !===
 
 Can override a <<versionProjectFilter, version projectFilter>> _for the columns it is referencing only!_.
@@ -357,7 +726,8 @@ Table filter tags can filter the whole table and are not bound to a row.
 Example:
 @DistinctColumn(HEADER_1)|In the given column every item will only appear once.
 |
-[[table_filter_maxrows]]@MaxRows(<expression>)
+[[table_filter_maxrows]]
+@MaxRows(<expression>)
 
 Examples:
 
@@ -366,7 +736,8 @@ Examples:
 @MaxRows(HEADER_1.properties["homeserver"].distinct().count()*2)
 a|Sets a maximum of rows in this table.
 
-This is an extended version of the config tag <<config_tag_maxrows,MaxRows>> that can evaluate https://commons.apache.org/proper/commons-jexl/reference/syntax.html[JEXL-Expressions]. As well as arithmetic operations you can access items properties and use them to create an integer that then will be used as in <<config_tag_maxrows, @MaxRows()>>
+This is an extended version of the config tag <<config_tag_maxrows,MaxRows>> that can evaluate https://commons.apache.org/proper/commons-jexl/reference/syntax.html[JEXL-Expressions].
+As well as arithmetic operations you can access items properties and use them to create an integer that then will be used as in <<config_tag_maxrows, @MaxRows()>>
 
 In the expression you can access the columns with its header name and use it like a link:src/main/java/de/gematik/combine/filter/jexl/JexlFilterColumn.java[JexlFilterColumn].
 
@@ -388,179 +759,3 @@ a| Leaves only one row for each distinct property value in the given column.
 Works as MaxSameColumnProperty-Tag with count 1.
 |===
 
-== [[PREPARE]]Prepare goal
-
-It parses the info-endpoint and adds additional information and validates all given information automatically. It takes the base combine_items.json and creates a new one regarding the info-data endpoint and the given expressions. The info-point could be parsed by JSON-Path which are configured in expressions.
-
-Only if there is a configuration for a specific tag or property it will validate. All tags or properties that have no configuration will be copied 1 to 1 in the resulting combine_items.json.
-
-Depending on configuration the plugin exits with an error or overrides all information with the findings at the info-endpoint.
-
-IMPORTANT: *If you want to use this goal, it has to be executed before the combine goal!*
-
-=== Configuration and parameters
-
-[[prepare-options]]
-.prepare options
-[%header, cols="1,2,1"]
-|===
-|Option name|Description|Default
-|combineItemsFile|Path to json file that contains the values to prepare. <<combine_items,click here for further information>>|"./src/test/resources/
-combine_items.json"
-|infoResourceLocation[[infoResourceLocation]]|Location to the info-endpoint, if this is not he root location. For example if the URL is localhost:8080 and the info-endpoint is at /app/info you have to provide app/info here.|
-|tagExpressions|This is a list of complex data and define which tags have to be set under what conditions. Read more here <<Expressions>>|
-|propertyExpressions|This is a list of complex data and define which property have to be set under what conditions. Read more here <<Expressions>>|
-|truststore|Path of truststore|
-|truststorePw|Truststore password|
-|clientCertStore|Path of client-cert-store|
-|clientCertStorePw|Client-cert-password|
-|hardFail|If one API is not reachable the plugin will raise an exception|true
-|configFail|If one tag or one property should be set or differs from the given the plugin will raise an exception. If set to false all information from the infopoint will override the given information|true
-|groups|Name of all groups of items in combine_items.json to use|
-|excludedGroups|Name of all groups of items in combine_items.json explicitly *not* to use|
-|poolSize|Size of to use different groups|0
-|===
-
-==== Pooling
-
-If the `combine_items.json` contains a lot of items, it could be useful to group items and build pools. This allows to pre-filter the items and only prepare and combine for selected items.
-
-For controlling the behavior of pooling, following parameters can be used:
-
-* groups
-* excludedGroups
-* poolSize
-
-All items which contain at least one group that are named in groups will be in the pool. On the opposite you can exclude groups via excluded groups. The total size of used groups can be configured by setting a poolSize which determines how many groups should be used.
-
-Following cases should explain the behavior:
-
-. If the poolSize is less than one _(default 0)_, all items that have no excluded group will be taken in consideration.
-. If the number of named groups is less than the poolSize, random groups will be added till the poolSize is reached.
-. If the poolSize is higher than the size of available groups, an exception will raise.
-. If one item has X groups and the poolSize is set to X, the plugin tries to have at least X different items.
-. Exclude overrides all. No Item with an excluded group will be selected, even if that means that one group have
-
-Examples for the cases taking linked to _example input file with groups_:
-
-[%header,cols="1,1,2,2,4,2,1"]
-|====
-|#|poolSize|groups|excluded|result|selected groups|exact match
-|1|0|||Item1 - Item6|ALL|YES
-|2|3|G||Item2, Item3, Item4, Item7|G,C,D|NO
-|3|9|||Exception||YES
-|4|2|E,F||Item5,Item6|E,F,G|NO
-|5|2|AG|C|Item1,Item6|A,G|YES
-|====
-
-.example input file with groups
-[source,json]
-----
-[
-  {
-    "value": "Item1",
-    "groups": ["A", "B"]
-  },
-  {
-    "value": "Item2",
-    "groups": ["A", "C"]
-  },
-  {
-    "value": "Item3",
-    "groups": ["D"]
-  },
-  {
-    "value": "Item4",
-    "groups": ["D"]
-  },
-  {
-    "value": "Item5"
-  },
-  {
-    "value": "Item6",
-    "groups": ["E", "F"]
-  },
-  {
-    "value": "Item7",
-    "groups": ["G"]
-  }
-]
-----
-
-An additionally summary file will be created to retrace which groups are used and which are excluded. This can be found at `./target/generated-combine/usedGroups.json`
-
-==== [[Expressions]] Expressions
-
-Every single expression you configure is a check that should be done against the info-endpoint. This expression got executed and compared to the info-endpoint.
-
-A tag expression (JSON-Path) should have a true or false as result. If the result of the path is true the tag will be added or kept. If the result is false the tag will be ignored (no error) or unset if the tag is named in the base combine_item.json.
-
-This results in following table of outcomes:
-
-.Result table tags
-[%header,cols="2,2,2,1"]
-|===
-|Value in base|Value in api|result|error
-|is set|true|tag is set|no
-|is not set|true|tag is set|no
-|is set|false|tag is removed|yes
-|is not set|false|tag is ignored| no
-|===
-
-If the path for a property is existing, the value will be added. If the path does not exist but the property is set in the base combine_items.json the property stays. If no property is set in the base combine_items.json and the path does not exist, the property will be removed. In addition to the tag, the set value in the base combine_items.json will be compared to the value found at the info-endpoint and will raise an exception if configured, but at least noticed in error log.
-
-This results in following table of outcomes:
-
-.Result table properties
-[%header, cols="2,2,2,1"]
-|===
-|Value in base|Value in api|result|error
-|is set|found and is same|property is set|no
-|is set|found and differs from base|property got overwritten by api value|yes
-|is not set|found|property is set|no
-|is set|not found|property is removed|yes
-|is not set|not found|tag is ignored| no
-|===
-
-Everytime an expression is not successful (returns false or was not found) the build will break if `configFail` is set to true (default). If it's set to false the regarding tag or property will be removed if set. In this case an errorLog.txt file with all registered errors will be generated right next to the generated combine_items.json at `./target/generated-combine`.
-
-==== Configuration in pom.xml
-.Example tag and property Expression
-[source, xml]
-----
-<configuration>
-  <tagExpressions>
-    <tagExpression>
-      <tag>MyTag</tag>
-      <expression>$.my.Json.Path</expression>
-    </tagExpression>
-    <tagExpression>
-      ...
-    </tagExpression>
-  </tagExpressions>
-  <propertyExpressions>
-    <propertyExpression>
-      <property>myProperty</property>
-      <expression>$.my.Json.Path</expression>
-    </propertyExpression>
-    <propertyExpression>
-      ...
-    </propertyExpression>
-  </propertyExpressions>
-</configuration>
-----
-
-=== Using mTls
-
-For using mTls all 4 properties have to be set:
-
-. truststore
-. truststorePw
-. clientCertStore
-. clientCertStorePw
-
-If one of these properties is set and the others not, or it's mal configuration, the plugin will raise an error. For using only https none of this properties have to be set. The plugin uses the internal truststore as default.
-
-=== Error log
-
-Every error / mismatch that exist between the base combine_items.json will be logged to console and also to the folder ./target/generated-combine. This enables you for a proper investigation.

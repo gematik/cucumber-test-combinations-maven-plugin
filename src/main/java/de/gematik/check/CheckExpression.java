@@ -14,31 +14,20 @@
  * limitations under the License.
  */
 
-package de.gematik.prepare;
+package de.gematik.check;
 
-import de.gematik.prepare.pooling.GroupMatchStrategyType;
-import de.gematik.prepare.pooling.PoolGroup;
-import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-public class PrepareItemsConfig {
+@NoArgsConstructor
+@AllArgsConstructor
+public class CheckExpression {
 
-  private String combineItemsFile;
+  private String id;
+  private String expression;
 
-  private String infoResourceLocation;
-
-  private List<TagExpression> tagExpressions;
-
-  private List<PropertyExpression> propertyExpressions;
-
-  private List<PoolGroup> poolGroups;
-
-  private List<String> excludedGroups;
-
-  private int poolSize;
-
-  private GroupMatchStrategyType defaultMatchStrategy;
 }

@@ -33,6 +33,7 @@ import static org.apache.commons.io.FileUtils.listFiles;
 import static org.apache.commons.io.filefilter.DirectoryFileFilter.DIRECTORY;
 import static org.apache.commons.io.filefilter.FileFilterUtils.suffixFileFilter;
 
+import de.gematik.BaseMojo;
 import de.gematik.combine.execution.FileProcessor;
 import de.gematik.combine.model.CombineItem;
 import java.io.File;
@@ -47,7 +48,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -60,7 +60,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 @Mojo(name = "prepare-combine", defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES)
 @Setter
 @RequiredArgsConstructor(onConstructor_ = @Inject)
-public class CombineMojo extends AbstractMojo {
+public class CombineMojo extends BaseMojo {
 
   public static final String EMPTY_EXAMPLES_TABLE_TAG = "@EMPTY_EXAMPLES_TABLE";
   public static final String WIP_TAG = "@WIP";
@@ -83,13 +83,6 @@ public class CombineMojo extends AbstractMojo {
    */
   @Parameter(property = "outputDir", defaultValue = TEST_RESOURCES_DIR + "features")
   String outputDir;
-  /**
-   * Path to file that contains the values to combine
-   */
-  @Setter
-  @Parameter(property = "combineItemsFile", defaultValue = TEST_RESOURCES_DIR
-      + "combine_items.json")
-  String combineItemsFile;
   /**
    * Path to the directory of the templates
    */
@@ -190,7 +183,7 @@ public class CombineMojo extends AbstractMojo {
     files.stream()
         .map(file -> stripEnding(file, fileEnding))
         .forEach(file -> replacer.process(file, config, itemsToCombine));
-    writeErrors(
+    writeErrors(getClass().getSimpleName(),
         Stream.of(minimalTableErrorLog, tableSizeErrorLog, propertyErrorLog)
             .flatMap(Collection::stream)
             .collect(toList()),
@@ -213,7 +206,7 @@ public class CombineMojo extends AbstractMojo {
       throw new MojoExecutionException(
           "Template directory does not exist: " + templateDirFile.getAbsolutePath());
     }
-    File file = new File(combineItemsFile);
+    File file = new File(getCombineItemsFile());
     if (!file.exists() || !file.isFile()) {
       throw new MojoExecutionException("Combine items file not found: " + file.getAbsolutePath());
     }
@@ -271,7 +264,7 @@ public class CombineMojo extends AbstractMojo {
         .templateDir(templateDir)
         .templateFileEnding(ending)
         .outputDir(outputDir)
-        .combineItemFile(combineItemsFile)
+        .combineItemFile(getCombineItemsFile())
         .pluginTagCategory(pluginTagCategory)
         .versionFilterTagCategory(versionFilterTagCategory)
         .emptyExamplesTags(emptyExamplesTags)

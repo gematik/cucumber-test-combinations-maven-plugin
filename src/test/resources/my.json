@@ -1,0 +1,24 @@
+[
+  {
+    "value": "https://localhost:8080",
+    "tags": [
+      "orgAdmin"
+    ]
+  },
+  {
+    "value": "WHAT?",
+    "url": "https://localhost:8080"
+  },
+  {
+    "value": "https://localhost:8080"
+  },
+  {
+    "value": "https://localhost:8080",
+    "checkExpressionId": "Second",
+    "checkExpression": "ITEM.getValue().startsWith(\"https:\")"
+  },
+  {
+    "value": "https://localhost:8080",
+    "checkExpression": "$.devices[0].deviceId == 11"
+  }
+]

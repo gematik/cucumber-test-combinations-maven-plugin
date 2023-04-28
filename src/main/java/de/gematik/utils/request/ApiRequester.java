@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package de.gematik.prepare.request;
+package de.gematik.utils.request;
 
-import de.gematik.prepare.PrepareItemsMojo;
+import static de.gematik.utils.Utils.getLog;
+
 import java.io.IOException;
 import javax.net.ssl.SSLContext;
 import lombok.SneakyThrows;
@@ -56,11 +57,11 @@ public class ApiRequester {
       client = new OkHttpClient.Builder()
           .sslSocketFactory(sslContext.getSocketFactory())
           .build();
-      PrepareItemsMojo.getInstance().getLog().info("Using mTLS");
+      getLog().info("Using mTLS");
     } else if (trustStorePath == null && trustStorePassword == null && clientCertPath == null
         && clientCertPassword == null) {
       client = new OkHttpClient.Builder().build();
-      PrepareItemsMojo.getInstance().getLog().warn("Using no TLS");
+      getLog().warn("Using no TLS");
     } else {
       throw new MojoExecutionException(
           "You tried to set an mTLS context but one information is missing");

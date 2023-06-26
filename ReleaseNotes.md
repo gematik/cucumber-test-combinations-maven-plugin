@@ -2,12 +2,18 @@
 
 # Release notes
 
-## 2.9.1
+## 2.9.X
 
 ### Features
 
 - New goal check api implemented. It is possible to request an endpoint and check for some
   conditions
+- Improved error message if connection to api failed
+- New parameters to disable explicit executions or all executions at once implemented
+
+### Bugs
+
+- Check-execution removes double `/` from url
 
 ## 2.8.0
 

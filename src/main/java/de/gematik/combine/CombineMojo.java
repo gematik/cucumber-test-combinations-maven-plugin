@@ -157,9 +157,18 @@ public class CombineMojo extends BaseMojo {
    */
   @Parameter(property = "projectFilters")
   ProjectFilters projectFilters;
+  /**
+   * Parameter to decide if combine-execution should be run
+   */
+  @Parameter(name = "skipComb", defaultValue = "false")
+  boolean skipComb;
 
   @SneakyThrows
   public void execute() {
+    if (this.isSkip() || skipComb) {
+      getLog().warn("Combine items and generate feature files got skipped due configuration");
+      return;
+    }
     setInstance(this);
     doChecks();
     deleteDirectory(new File(outputDir));

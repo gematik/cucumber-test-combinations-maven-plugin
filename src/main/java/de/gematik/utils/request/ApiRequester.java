@@ -43,7 +43,7 @@ public class ApiRequester {
     try (ResponseBody body = client.newCall(request).execute().body()) {
       return body.string();
     } catch (IOException e) {
-      throw new MojoExecutionException("API did not respond -> " + value, e);
+      throw new MojoExecutionException("API did not respond -> " + value + " cause: " + e.getMessage());
     }
   }
 

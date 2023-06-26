@@ -13,11 +13,17 @@
 :plantumldir: ../plantuml
 = Getting Started
 
-== Error log
+== Over all executions
+
+=== Error log
 
 Every error / mismatch will be logged to console and also to the folder ./target/generated-combine.
 This is generally for all different goals. more particularly you can decide if the plugin should break the build, or should only log errors.
 This enables you for a proper investigation.
+
+=== Skip
+
+The paramer `skip` can be set to true. This will disable alle executions at once.
 
 == [[PREPARE]]Prepare goal
 
@@ -60,6 +66,7 @@ Read more <<_pool_groups,here>>|
 |poolSize|Size of to use different groups|0
 |defaultMatchStrategy|Describes the strategy how the groups should be matched.
 Further explanation <<Matching Strategy,here>>|WILDCARD
+|skipComb|Parameter to decide if combine-execution should be run|false
 |===
 
 [#_pooling]
@@ -288,8 +295,9 @@ If the endpoint is an mTls secured, please have a look at <<_using_mtls,using mT
 === Configuration and parameters
 
 .check parameters
-[cols="1,2,1"]
+[%header,cols="1,2,1"]
 |===
+|Option name|Description|Default
 |checkPath|Additional path that will be added to url from item.
 Should point to a json response|
 |checkExpressions|This is a list of complex data and is a collection of expression that can be reffered in `combine_items.json`.
@@ -300,6 +308,7 @@ Read more <<_check_expressions,here>>|
 |truststorePw|Truststore password|
 |clientCertStore|Path of client-cert-store|
 |clientCertStorePw|Client-cert-password|
+|skipCheck|Parameter to decide if check-execution should be run|false
 |===
 
 [#_check_expressions]
@@ -357,7 +366,7 @@ To configure the combine goal the following options are available:
 
 [[options]]
 .options
-[cols="1,2,1"]
+[%header,cols="1,2,1"]
 |===
 |Option name|Description|Default
 |templateDir|Path to the directory of the templates|./src/test/resources/templates
@@ -448,6 +457,7 @@ Read more about version filters <<version-filter, here>>
 
 |None
 
+|skipPrep|Parameter to decide if prepare-execution should be run|false
 |===
 
 === What else do I need?

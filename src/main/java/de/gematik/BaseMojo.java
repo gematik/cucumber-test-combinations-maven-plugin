@@ -16,15 +16,16 @@
 
 package de.gematik;
 
-import static de.gematik.combine.CombineMojo.TEST_RESOURCES_DIR;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import static de.gematik.combine.CombineMojo.TEST_RESOURCES_DIR;
 
 @Getter
 @Setter
@@ -63,5 +64,10 @@ public abstract class BaseMojo extends AbstractMojo {
    */
   @Parameter(property = "clientCertStorePw")
   String clientCertStorePw;
+  /**
+   * Parameter to decide if plugin should be executed. All executions are skipped
+   */
+  @Parameter(property = "skip", defaultValue = "false")
+  boolean skip;
 
 }

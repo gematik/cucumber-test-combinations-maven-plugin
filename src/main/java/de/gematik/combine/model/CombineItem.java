@@ -17,18 +17,20 @@
 package de.gematik.combine.model;
 
 import static de.gematik.combine.util.NonNullableMap.nonNullableMap;
+import static java.util.Objects.nonNull;
 
 import de.gematik.combine.CombineMojo;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Singular;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @Data
 @Builder
@@ -89,4 +91,7 @@ public class CombineItem implements Comparable<CombineItem> {
     return DEFAULT_PROPERTY;
   }
 
+  public String produceValueUrl() {
+    return nonNull(this.url) ? value + " ---> " + url : value;
+  }
 }

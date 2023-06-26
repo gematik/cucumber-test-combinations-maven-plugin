@@ -16,23 +16,11 @@
 
 package de.gematik.check;
 
-import static de.gematik.utils.Utils.getItemAsString;
-import static de.gematik.utils.Utils.getItemsToCombine;
-import static de.gematik.utils.Utils.writeErrors;
-import static java.lang.Boolean.FALSE;
-import static java.lang.String.format;
-import static java.util.Objects.nonNull;
-
 import de.gematik.BaseMojo;
 import de.gematik.combine.model.CombineItem;
 import de.gematik.utils.request.ApiRequester;
 import io.cucumber.core.internal.com.fasterxml.jackson.core.JsonProcessingException;
 import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -48,6 +36,19 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+
+import javax.inject.Inject;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static de.gematik.utils.Utils.getItemAsString;
+import static de.gematik.utils.Utils.getItemsToCombine;
+import static de.gematik.utils.Utils.writeErrors;
+import static java.lang.Boolean.FALSE;
+import static java.lang.String.format;
+import static java.util.Objects.nonNull;
 
 /**
  * Plugin checks api with jexl expression
@@ -80,6 +81,23 @@ public class CheckMojo extends BaseMojo {
    */
   @Parameter(property = "defaultCheckExpressions")
   String defaultCheckExpressions;
+  /**
+   * Parameter to decide if check-execution should be run
+   */
+  @Parameter(name = "skipCheck", defaultValue = "false")
+  boolean skipCheck;
+
+  @SneakyThrows
+  public void execute() {
+    if (this.isSkip() || skipCheck) {
+      getLog().warn("Check items got skipped due configuration");
+      return;
+    }
+    setInstance(this);
+    this.apiRequester
+        .setupTls(getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw());
+    run();
+  }
 
   public static Log getPluginLog() {
     return instance.getLog();
@@ -90,14 +108,6 @@ public class CheckMojo extends BaseMojo {
       .silent(false)
       .safe(false)
       .create();
-
-  @Override
-  public void execute() {
-    setInstance(this);
-    this.apiRequester
-        .setupTls(getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw());
-    run();
-  }
 
   @SneakyThrows
   private void run() {
@@ -116,7 +126,7 @@ public class CheckMojo extends BaseMojo {
     try {
       String expressionString = getExpression(item);
       getLog().info(format("Checking %s with expression \"%s\"", getItemAsString(item),
-          expressionString.replace("\n","")));
+          expressionString.replace("\n", "")));
       expression = JEXL_ENGINE.createExpression(expressionString);
     } catch (MojoExecutionException | JexlException e) {
       getLog().error(e.getMessage());
@@ -126,13 +136,17 @@ public class CheckMojo extends BaseMojo {
 
     try {
       String url = item.getUrl() == null ? item.getValue() : item.getUrl();
-      Map<?, ?> jsonContext = getJsonContextFromApi(url + "/" + checkPath);
+      url += "/" + checkPath;
+      url = url.replaceAll("(?<!:)//", "/");
+      Map<?, ?> jsonContext = getJsonContextFromApi(url);
       final JexlContext context = new MapContext();
       context.set("$", jsonContext);
       context.set("ITEM", item);
       if (FALSE.equals(expression.evaluate(context))) {
-        errors.add(format("Check fails for %s and expression \"%s\"", getItemAsString(item),
-            expression));
+        String errorMsg = format("Check fails for %s and expression \"%s\"", getItemAsString(item),
+            expression);
+        getLog().error(errorMsg);
+        errors.add(errorMsg);
       }
     } catch (MojoExecutionException e) {
       getLog().error(e.getMessage());
@@ -167,7 +181,7 @@ public class CheckMojo extends BaseMojo {
     return checkExpressions.get(0).getExpression();
   }
 
-  private Map<?,?> getJsonContextFromApi(String url)
+  private Map<?, ?> getJsonContextFromApi(String url)
       throws MojoExecutionException, JsonProcessingException {
     return new ObjectMapper().readValue(apiRequester.getApiResponse(url), Map.class);
   }

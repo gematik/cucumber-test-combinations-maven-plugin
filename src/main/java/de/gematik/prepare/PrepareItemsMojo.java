@@ -33,16 +33,6 @@ import de.gematik.prepare.pooling.Pooler;
 import de.gematik.utils.request.ApiRequester;
 import io.cucumber.core.internal.com.fasterxml.jackson.core.JsonProcessingException;
 import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -56,6 +46,16 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+
+import javax.inject.Inject;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Plugin for filling empty gherkin tables with generated combinations
@@ -128,6 +128,11 @@ public class PrepareItemsMojo extends BaseMojo {
    */
   @Parameter(name = "defaultMatchStrategy", defaultValue = "WILDCARD")
   GroupMatchStrategyType defaultMatchStrategy;
+  /**
+   * Parameter to decide if prepare-execution should be run
+   */
+  @Parameter(name = "skipPrep", defaultValue = "false")
+  boolean skipPrep;
 
   private ItemsCreator itemsCreator;
   private List<CombineItem> items;
@@ -139,6 +144,10 @@ public class PrepareItemsMojo extends BaseMojo {
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    if (this.isSkip() || skipPrep) {
+      getLog().warn("Preparation of items file got skipped due configuration");
+      return;
+    }
     setInstance(this);
     checkExpressionSetCorrectly();
     getLog().info("Going to preprocess " + getCombineItemsFile());
@@ -201,7 +210,7 @@ public class PrepareItemsMojo extends BaseMojo {
       return item;
     } catch (MojoExecutionException ex) {
       apiErrors.add(getItemAsString(item) + " -> not reachable");
-      getLog().error("Could not connect to api: " + getItemAsString(item));
+      getLog().error("Could not connect to api: " + getItemAsString(item) + "\n" + ex.getMessage());
     } catch (JsonProcessingException ex) {
       apiErrors.add(url + " -> could not parse JSON");
       getLog().error("Could not parse JSON from " + url, ex);
@@ -226,11 +235,15 @@ public class PrepareItemsMojo extends BaseMojo {
 
   @SneakyThrows
   private void writeUsedGroupsToFile(List<CombineItem> finalListOfItems) {
-    Set<String> usedGroups = finalListOfItems.stream().map(CombineItem::getGroups)
-        .flatMap(Collection::stream).collect(Collectors.toSet());
+    Map<String, List<String>> usedGroups = finalListOfItems.stream().map(CombineItem::getGroups)
+        .flatMap(Collection::stream)
+        .collect(Collectors.toSet())
+        .stream()
+        .collect(Collectors.toMap(String::toString, e -> finalListOfItems.stream().filter(i -> i.getGroups().contains(e)).map(CombineItem::produceValueUrl).collect(toList())));
+
     List<String> usedWithoutGroups = finalListOfItems.stream()
         .filter(e -> e.getGroups().isEmpty())
-        .map(CombineItem::getValue)
+        .map(CombineItem::produceValueUrl)
         .collect(Collectors.toList());
     JSONObject result = new JSONObject();
     result.put("usedGroups", usedGroups);
@@ -239,10 +252,16 @@ public class PrepareItemsMojo extends BaseMojo {
     File file = new File(GENERATED_COMBINE_ITEMS_DIR + File.separator + "usedGroups.json");
     FileUtils.writeStringToFile(file,
         new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result), UTF_8);
-    System.setProperty("cutest.plugin.groups.used", join(",", usedGroups));
+    System.setProperty("cutest.plugin.groups.used", mapGroupsToString(usedGroups));
     System.setProperty("cutest.plugin.groups.excluded", join(",", excludedGroups));
     System.setProperty("cutest.plugin.groups.usedWithoutGroup", join(",", usedWithoutGroups));
     getLog().info("Created new used group file -> " + file.getAbsolutePath());
+  }
+
+  private String mapGroupsToString(Map<String, List<String>> map) {
+    StringBuilder sb = new StringBuilder();
+    map.forEach((k, v) -> sb.append(" [" + k + "]: " + join(" | ", v)));
+    return sb.toString();
   }
 
   private PrepareItemsConfig getCreateItemsConfig() {

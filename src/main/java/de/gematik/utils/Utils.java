@@ -102,6 +102,11 @@ public class Utils {
   }
 
   @SneakyThrows
+  public static void writeErrors(String msgPreamble, List<String> errors, String message) {
+    writeErrors(msgPreamble, errors, message, true);
+  }
+
+  @SneakyThrows
   public static void writeErrors(String msgPreamble, List<String> errors, String message,
       boolean shouldAppend) {
     if (errors.isEmpty()) {

@@ -2,7 +2,14 @@
 
 # Release notes
 
-## 2.9.X
+## 2.9.8
+
+### Features
+
+- Improved error handling for api calls and item context errors
+- New parameters to continue all plugin goal executions on context and request errors
+
+## 2.9.0
 
 ### Features
 

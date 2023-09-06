@@ -33,6 +33,14 @@ import de.gematik.prepare.pooling.Pooler;
 import de.gematik.utils.request.ApiRequester;
 import io.cucumber.core.internal.com.fasterxml.jackson.core.JsonProcessingException;
 import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -47,16 +55,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import javax.inject.Inject;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 /**
  * Plugin for filling empty gherkin tables with generated combinations
  */
@@ -65,11 +63,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class PrepareItemsMojo extends BaseMojo {
 
-  public static final String WARN_MESSAGE = "=== Caution!!! The generated file have modified your input file significantly! ===";
-  /**
-   * Path to the directory where the combined items get stored
-   */
-  private static final List<String> apiErrors = new ArrayList<>();
+  public static final String FAILED_REQ_WARN_MESSAGE =
+      "=== Caution!!! The generated file contains less items than your input! ==="
+          + "\n             === This is because of the following errors: ===";
+  public static final String CONFIG_FAIL_WARN_MESSAGE =
+      "=== Caution!!! The generated file is significantly different from your input! ==="
+          + "\n          === This is because of the following config errors: ===";
   @Getter
   @Setter
   private static PrepareItemsMojo instance;
@@ -89,18 +88,6 @@ public class PrepareItemsMojo extends BaseMojo {
    */
   @Parameter(property = "propertyExpressions")
   List<PropertyExpression> propertyExpressions;
-  /**
-   * Say if the build should break if at least one API is not reachable. If set to false it will
-   * generate a combine_items.json file without the not reachable API`s
-   */
-  @Parameter(property = "hardFail", defaultValue = "true")
-  boolean hardFail;
-  /**
-   * Say if the build should break if at least one manual set Tag/Property does not match the found
-   * value on info endpoint.
-   */
-  @Parameter(property = "configFail", defaultValue = "true")
-  boolean configFail;
   /**
    * Name a list of lists that should be used and how often.
    */
@@ -182,22 +169,31 @@ public class PrepareItemsMojo extends BaseMojo {
   }
 
   protected void run() throws MojoExecutionException {
+    MojoExecutionException e = null;
     List<CombineItem> processedItems = items.stream()
         .map(this::processItem)
         .filter(Objects::nonNull)
         .collect(toList());
-    writeErrors(getClass().getSimpleName(), apiErrors, WARN_MESSAGE, false);
-    writeErrors(getClass().getSimpleName(), itemsCreator.getConfigErrors());
-    if (hardFail && !apiErrors.isEmpty()) {
-      throw new MojoExecutionException(
+    boolean requestsOk = apiErrors.isEmpty() || !isBreakOnFailedRequest();
+    boolean contextOk = itemsCreator.getContextErrors().isEmpty() || !isBreakOnContextError();
+    writeErrors(getClass().getSimpleName(), apiErrors, FAILED_REQ_WARN_MESSAGE, false);
+    writeErrors(getClass().getSimpleName(), itemsCreator.getContextErrors(),
+        CONFIG_FAIL_WARN_MESSAGE, apiErrors.isEmpty());
+    if (requestsOk && contextOk) {
+      getLog().info(
+          format("Successfully processed %s items, writing to file %s",
+              processedItems.size(), getCombineItemsFile()));
+      writeItemsToFile(processedItems);
+    }
+    if (!requestsOk) {
+      throw  new MojoExecutionException(
           "Error occurred for following API`s ->\n" + join("\n", apiErrors));
     }
-    if (configFail && !itemsCreator.getConfigErrors().isEmpty()) {
+    if (!contextOk) {
       throw new MojoExecutionException(
           "Different tags or properties where found ->\n" + join("\n",
-              itemsCreator.getConfigErrors()));
+              itemsCreator.getContextErrors()));
     }
-    writeItemsToFile(processedItems);
   }
 
   private CombineItem processItem(CombineItem item) {
@@ -239,7 +235,9 @@ public class PrepareItemsMojo extends BaseMojo {
         .flatMap(Collection::stream)
         .collect(Collectors.toSet())
         .stream()
-        .collect(Collectors.toMap(String::toString, e -> finalListOfItems.stream().filter(i -> i.getGroups().contains(e)).map(CombineItem::produceValueUrl).collect(toList())));
+        .collect(Collectors.toMap(String::toString,
+            e -> finalListOfItems.stream().filter(i -> i.getGroups().contains(e))
+                .map(CombineItem::produceValueUrl).collect(toList())));
 
     List<String> usedWithoutGroups = finalListOfItems.stream()
         .filter(e -> e.getGroups().isEmpty())

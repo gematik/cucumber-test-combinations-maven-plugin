@@ -22,6 +22,7 @@ import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.doThrow;
@@ -95,17 +96,17 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
 
   @Test
   @SneakyThrows
-  void shouldDeleteNotReachableApi() {
+  void shouldNotThrowButDeleteNotReachableApi() {
     // arrange
     List<CombineItem> items = getItemsToCombine(new File(ONLY_VALUE_JSON), mojo, false);
     int amountBefore = items.size();
     mojo.setItems(items);
     mojo.setCombineItemsFile(ONLY_VALUE_JSON);
+    mojo.setBreakOnFailedRequest(false);
     doThrow(new MojoExecutionException("Could not reach")).when(apiRequester)
         .getApiResponse(items.get(1).getValue());
-    // act
-    mojo.run();
     // assert
+    assertThatNoException().isThrownBy(mojo::run);
     String fileName = new File(ONLY_VALUE_JSON).getName();
     File generatedFile = stream(requireNonNull(new File(GENERATED_COMBINE_ITEMS_DIR).listFiles()))
         .filter(e -> e.getName().endsWith(fileName))
@@ -137,16 +138,16 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
     assertThatThrownBy(() -> mojo.checkExpressionSetCorrectly())
         .isInstanceOf(MojoExecutionException.class)
         .message().startsWith(
-        "Erroneous configuration: missing " + missingType + " in ");
+            "Erroneous configuration: missing " + missingType + " in ");
   }
 
 
   @Test
   @SneakyThrows
   void shouldThrowExceptionIfTagOrPropertyMismatch() {
-    when(itemsCreator.getConfigErrors()).thenReturn(List.of("Some Error"));
+    when(itemsCreator.getContextErrors()).thenReturn(List.of("Some Error"));
     mojo.setItems(List.of());
-    mojo.configFail = true;
+    mojo.setBreakOnContextError(true);
     assertThatThrownBy(() -> mojo.run())
         .isInstanceOf(MojoExecutionException.class)
         .message().startsWith("Different tags or properties where found");
@@ -156,9 +157,9 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
   @SneakyThrows
   @SuppressWarnings("java:S2699")
   void shouldNotThrowExceptionIfTagOrPropertyMismatch() {
-    when(itemsCreator.getConfigErrors()).thenReturn(List.of("Some Error"));
+    when(itemsCreator.getContextErrors()).thenReturn(List.of("Some Error"));
     mojo.setItems(List.of());
-    mojo.configFail = false;
+    mojo.setBreakOnContextError(false);
     mojo.setCombineItemsFile(ONLY_VALUE_JSON);
     mojo.run();
   }

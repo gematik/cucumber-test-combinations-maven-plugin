@@ -13,7 +13,7 @@
 :plantumldir: ../plantuml
 = Getting Started
 
-== Over all executions
+== About all executions
 
 === Error log
 
@@ -21,9 +21,24 @@ Every error / mismatch will be logged to console and also to the folder ./target
 This is generally for all different goals. more particularly you can decide if the plugin should break the build, or should only log errors.
 This enables you for a proper investigation.
 
-=== Skip
+[#_overall_configuration_and_parameters]
+=== Overall Configuration and parameters
 
-The paramer `skip` can be set to true. This will disable alle executions at once.
+.overall options
+[%header,cols="1,2,1"]
+|===
+|Option name|Description|Default
+|skip|The parameter `skip` can be set to true. This will disable alle executions at once.|false
+|breakOnFailedRequest|By default, the plugin will raise an exception and break the build if one or more API(s) are not reachable.
+
+If set to false, the errors will be noted in the log, but the plugin will continue working with the APIs it has reached.|true
+|breakOnContextError|If a tag or property should have been set but isn't,
+or the given input expects context values that an API does not conform to, the plugin will break the build.
+
+If set to false, all information from the info API will override the given input context.|true
+|===
+
+
 
 == [[PREPARE]]Prepare goal
 
@@ -57,9 +72,6 @@ Read more <<Expressions, here>>|
 |truststorePw|Truststore password|
 |clientCertStore|Path of client-cert-store|
 |clientCertStorePw|Client-cert-password|
-|hardFail|If one API is not reachable the plugin will raise an exception|true
-|configFail|If one tag or one property should be set or differs from the given the plugin will raise an exception.
-If set to false all information from the info point will override the given information|true
 |poolGroups |This is a list of complex data and define which groups should be used and should appeare how often.
 Read more <<_pool_groups,here>>|
 |excludedGroups|Name of all groups of items in combine_items.json explicitly *not* to use (comma separated)|
@@ -67,7 +79,10 @@ Read more <<_pool_groups,here>>|
 |defaultMatchStrategy|Describes the strategy how the groups should be matched.
 Further explanation <<Matching Strategy,here>>|WILDCARD
 |skipComb|Parameter to decide if combine-execution should be run|false
+|breakOnFailedRequest|_global option, has to be set here: <<_overall_configuration_and_parameters,overall options>>!_|true
+|breakOnContextError|_global option, has to be set here: <<_overall_configuration_and_parameters,overall options>>!_|true
 |===
+
 
 [#_pooling]
 === Pooling
@@ -309,6 +324,8 @@ Read more <<_check_expressions,here>>|
 |clientCertStore|Path of client-cert-store|
 |clientCertStorePw|Client-cert-password|
 |skipCheck|Parameter to decide if check-execution should be run|false
+|breakOnFailedRequest|_global option, has to be set here: <<_overall_configuration_and_parameters,overall options>>!_|true
+|breakOnContextError|_global option, has to be set here: <<_overall_configuration_and_parameters,overall options>>!_|true
 |===
 
 [#_check_expressions]

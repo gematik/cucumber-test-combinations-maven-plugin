@@ -41,7 +41,7 @@ public class ItemsCreator {
   private JexlContext context;
 
   @Getter
-  private final List<String> configErrors = new ArrayList<>();
+  private final List<String> contextErrors = new ArrayList<>();
 
   public static final JexlEngine JEXL_ENGINE = new JexlBuilder()
       .strict(true)
@@ -73,7 +73,7 @@ public class ItemsCreator {
         newTags.add(tagExpression.getTag());
       } else {
         if (item.getTags().contains(tagExpression.getTag())) {
-          configErrors.add(
+          contextErrors.add(
               ERROR_START + item.getValue() + " -> for tag " + tagExpression.getTag()
                   + " extension "
                   + tagExpression.getExpression()
@@ -112,7 +112,7 @@ public class ItemsCreator {
       return null;
     }
     if (value == null) {
-      configErrors.add(
+      contextErrors.add(
           ERROR_START + item.getValue() + (nonNull(item.getUrl()) ? " url: " + item.getUrl()
               : "") + " -> at property "
               + propertyExpression.getProperty() + ": Could not find any value at -> "
@@ -122,7 +122,7 @@ public class ItemsCreator {
     if (existingProperties.containsKey(propertyExpression.getProperty())) {
       String existingProperty = existingProperties.get(propertyExpression.getProperty());
       if (!value.equals(existingProperty)) {
-        configErrors.add(
+        contextErrors.add(
             ERROR_START + item.getValue() + (nonNull(item.getUrl()) ? " url: " + item.getUrl()
                 : "") + " -> at property "
                 + propertyExpression.getProperty() + ": Found value -> \"" + value

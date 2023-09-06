@@ -36,7 +36,7 @@ public abstract class BaseMojo extends AbstractMojo {
    */
   public static final String GENERATED_COMBINE_ITEMS_DIR =
       "." + File.separator + "target" + File.separator + "generated-combine";
-  private static final List<String> apiErrors = new ArrayList<>();
+  protected final List<String> apiErrors = new ArrayList<>();
 
   /**
    * Path to file that contains the values to combine
@@ -69,5 +69,18 @@ public abstract class BaseMojo extends AbstractMojo {
    */
   @Parameter(property = "skip", defaultValue = "false")
   boolean skip;
+  /**
+   * Decide if run should break on one or more failed requests. If set to false, will generate a
+   * combine_items.json file with responding APIs only (if any).
+   */
+  @Parameter(name = "breakOnFailedRequest", defaultValue = "true")
+  boolean breakOnFailedRequest;
+  /**
+   * Decide if the build should break
+   * if at least one manual set Tag/Property does not match the found
+   * value on info endpoint.
+   */
+  @Parameter(property = "breakOnContextError", defaultValue = "true")
+  boolean breakOnContextError;
 
 }

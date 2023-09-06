@@ -155,7 +155,7 @@ class ItemsCreatorTest extends AbstractPrepareTest {
       creator.evaluateExpressions(combineItem, context);
 
       // assert
-      assertThat(creator.getConfigErrors()).as("Test \"" + description + "\" failed!").hasSize(1);
+      assertThat(creator.getContextErrors()).as("Test \"" + description + "\" failed!").hasSize(1);
     }
 
   }
@@ -249,7 +249,7 @@ class ItemsCreatorTest extends AbstractPrepareTest {
       creator.evaluateExpressions(combineItem, context);
 
       // assert
-      assertThat(creator.getConfigErrors()).as("Test \"" + description + "\" failed!").hasSize(1);
+      assertThat(creator.getContextErrors()).as("Test \"" + description + "\" failed!").hasSize(1);
     }
   }
 }

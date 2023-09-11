@@ -17,8 +17,11 @@
 package de.gematik.utils.request;
 
 import static de.gematik.utils.Utils.getLog;
+import static de.gematik.utils.request.SSLContextFactory.getX509TrustManager;
+import static okhttp3.ConnectionSpec.MODERN_TLS;
 
 import java.io.IOException;
+import java.util.List;
 import javax.net.ssl.SSLContext;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
@@ -48,6 +51,7 @@ public class ApiRequester {
   }
 
   @SneakyThrows
+  @SuppressWarnings("java:S5527")
   private void setupAndCreateClient() {
     if (trustStorePath != null && trustStorePassword != null && clientCertPath != null
         && clientCertPassword != null) {
@@ -55,7 +59,9 @@ public class ApiRequester {
           trustStorePath, clientCertPassword,
           trustStorePassword);
       client = new OkHttpClient.Builder()
-          .sslSocketFactory(sslContext.getSocketFactory())
+          .hostnameVerifier((hostname, session) -> true)
+          .connectionSpecs(List.of(MODERN_TLS))
+          .sslSocketFactory(sslContext.getSocketFactory(), getX509TrustManager(trustStorePath, trustStorePassword))
           .build();
       getLog().info("Using mTLS");
     } else if (trustStorePath == null && trustStorePassword == null && clientCertPath == null

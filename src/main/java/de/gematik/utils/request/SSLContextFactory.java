@@ -20,11 +20,15 @@ import static javax.net.ssl.KeyManagerFactory.getDefaultAlgorithm;
 
 import java.io.FileInputStream;
 import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import lombok.SneakyThrows;
 
 public class SSLContextFactory {
@@ -38,7 +42,7 @@ public class SSLContextFactory {
 
     final KeyManager[] keyManagers = getKeyManagers(keyStore, keyStorePassword);
     final TrustManager[] trustManagers = getTrustManagers(trustStore, trustStorePassword);
-    final SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+    final SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
 
     sslContext.init(keyManagers, trustManagers, null);
 
@@ -66,5 +70,35 @@ public class SSLContextFactory {
     }
     trustManagerFactory.init(ks);
     return trustManagerFactory.getTrustManagers();
+  }
+
+  @SneakyThrows
+  public static X509TrustManager getX509TrustManager(String trustStore, String trustStorePassword) {
+    return new X509TrustManager() {
+
+      @Override
+      @SuppressWarnings("java:S4830")
+      public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        // just trust all
+      }
+
+      @Override
+      @SuppressWarnings("java:S4830")
+      public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        // just trust all
+      }
+
+      @Override
+      @SneakyThrows
+      public X509Certificate[] getAcceptedIssuers() {
+        return Arrays.stream(getTrustManagers(trustStore, trustStorePassword))
+            .filter(X509TrustManager.class::isInstance)
+            .map(X509TrustManager.class::cast)
+            .map(X509TrustManager::getAcceptedIssuers)
+            .flatMap(Arrays::stream)
+            .toArray(X509Certificate[]::new);
+      }
+
+    };
   }
 }

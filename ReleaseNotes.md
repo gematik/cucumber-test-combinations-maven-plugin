@@ -2,6 +2,12 @@
 
 # Release notes
 
+## 2.9.9
+
+### Features
+
+- Allows TLS version 1.2 & 1.3
+
 ## 2.9.8
 
 ### Features

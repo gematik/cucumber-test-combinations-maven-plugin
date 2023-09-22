@@ -65,6 +65,16 @@ public abstract class BaseMojo extends AbstractMojo {
   @Parameter(property = "clientCertStorePw")
   String clientCertStorePw;
   /**
+   * Host to use for proxy
+   */
+  @Parameter(property = "proxyHost")
+  String proxyHost;
+  /**
+   * Port to use for proxy
+   */
+  @Parameter(property = "proxyPort")
+  Integer proxyPort;
+  /**
    * Parameter to decide if plugin should be executed. All executions are skipped
    */
   @Parameter(property = "skip", defaultValue = "false")

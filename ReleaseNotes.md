@@ -2,6 +2,12 @@
 
 # Release notes
 
+## 2.9.10
+
+### Features
+
+- Allows setting a proxy for all api calls
+
 ## 2.9.9
 
 ### Features

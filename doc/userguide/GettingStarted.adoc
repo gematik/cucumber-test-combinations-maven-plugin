@@ -300,12 +300,24 @@ If one of these properties is set and the others not, or it's mal configuration,
 For using only https none of this properties have to be set.
 The plugin uses the internal truststore as default.
 
+
+[#_using_proxy]
+=== Using A Proxy
+
+For using a proxy all 2 properties have to be set:
+
+. proxyHost
+. proxyPort
+
+The plugin uses no proxy as default.
+
 == Check goal
 
 With this goal an endpoint json response could be validated.
 This check will be executed against every item.
 If this goal is executed after the <<Prepare goal,prepare goal>> it will only check the items that are left after <<_pooling, pooling>>.
 If the endpoint is an mTls secured, please have a look at <<_using_mtls,using mTls>>.
+If the endpoint is behind a proxy, please have a look at <<_using_proxy,using a proxy>>.
 
 === Configuration and parameters
 

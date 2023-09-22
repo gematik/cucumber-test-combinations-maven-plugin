@@ -97,8 +97,9 @@ public class CheckMojo extends BaseMojo {
       return;
     }
     setInstance(this);
-    this.apiRequester
-        .setupTls(getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw());
+    apiRequester.setupProxy(getProxyHost(), getProxyPort());
+    apiRequester.setupTls(
+        getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw());
     run();
   }
 

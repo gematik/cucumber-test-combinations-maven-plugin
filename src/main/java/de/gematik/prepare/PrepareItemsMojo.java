@@ -147,6 +147,7 @@ public class PrepareItemsMojo extends BaseMojo {
     pooler = new Pooler(config);
     items = pooler.pool();
     writeUsedGroupsToFile(items);
+    apiRequester.setupProxy(getProxyHost(), getProxyPort());
     apiRequester
         .setupTls(getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw());
     run();
@@ -169,7 +170,6 @@ public class PrepareItemsMojo extends BaseMojo {
   }
 
   protected void run() throws MojoExecutionException {
-    MojoExecutionException e = null;
     List<CombineItem> processedItems = items.stream()
         .map(this::processItem)
         .filter(Objects::nonNull)

@@ -40,16 +40,15 @@ import java.util.List;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
-import org.apache.maven.monitor.logging.DefaultLog;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
-import org.codehaus.plexus.logging.console.ConsoleLogger;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 
 @NoArgsConstructor(access = PRIVATE)
 public class Utils {
 
-  private static final DefaultLog nullLogger = new DefaultLog(new ConsoleLogger());
+  private static final SystemStreamLog nullLogger = new SystemStreamLog();
 
   /**
    * read the combine_items.json file into the combineItems list
@@ -107,8 +106,7 @@ public class Utils {
   }
 
   @SneakyThrows
-  public static void writeErrors(String msgPreamble, List<String> errors, String message,
-      boolean shouldAppend) {
+  public static void writeErrors(String msgPreamble, List<String> errors, String message, boolean shouldAppend) {
     if (errors.isEmpty()) {
       return;
     }

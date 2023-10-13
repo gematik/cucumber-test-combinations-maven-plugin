@@ -38,8 +38,6 @@ or the given input expects context values that an API does not conform to, the p
 If set to false, all information from the info API will override the given input context.|true
 |===
 
-
-
 == [[PREPARE]]Prepare goal
 
 It parses the info-endpoint and adds additional information and validates all given information automatically.
@@ -82,7 +80,6 @@ Further explanation <<Matching Strategy,here>>|WILDCARD
 |breakOnFailedRequest|_global option, has to be set here: <<_overall_configuration_and_parameters,overall options>>!_|true
 |breakOnContextError|_global option, has to be set here: <<_overall_configuration_and_parameters,overall options>>!_|true
 |===
-
 
 [#_pooling]
 === Pooling
@@ -300,7 +297,6 @@ If one of these properties is set and the others not, or it's mal configuration,
 For using only https none of this properties have to be set.
 The plugin uses the internal truststore as default.
 
-
 [#_using_proxy]
 === Using A Proxy
 
@@ -352,18 +348,19 @@ Listed in descending order.
 
 ==== Syntax check expression
 
-The expression itself will be proceeded in a jexl expression. In addition the combineItem could be accessed via the keyword `ITEM` and the json response of the api can be used with `$`.
+The expression itself will be proceeded in a jexl expression.
+In addition the combineItem could be accessed via the keyword `ITEM` and the json response of the api can be used with `$`.
 
 The whole expression must return a boolean.
 
 .Examples
 . ITEM.getTags().contains("myTag") ? $.haveMyTag :$.shoulHaveOtherTag
-.. This expression checks if the item have the tag _myTag_. If true the check proofs if the response at _haveMyTag_ is true, else _shouldHaveOtherTag_ should be true.
+.. This expression checks if the item have the tag _myTag_.
+If true the check proofs if the response at _haveMyTag_ is true, else _shouldHaveOtherTag_ should be true.
 . $.healthcheck
 .. This expression checks only the json path and if the value healthcheck returns true.
 . $.my.path.to.list.size() >= 10
 .. Checks if a list at _my.path.to.list_ have at least 10 items.
-
 
 ==== Configure in pom
 
@@ -446,6 +443,8 @@ _override with <<config_tag_maxrows, @MaxRows>>_|Integer.MAX_VALUE
 shuffleCombinations|If *true* plugin will shuffle the table rows
 
 _override with <<config-tag-shuffle, @Shuffle>>_|false
+
+|softFilterToHardFilter|If true all SoftFilter will be handled as HardFilters. <<_softfilter, Learn more!>>|false
 |===
 
 [[project-filters]]
@@ -694,20 +693,17 @@ NOTE: If you want the items of all columns in a row to have equal or distinct va
 The expression itself, if you are looking for a deep-dive read, is a https://commons.apache.org/proper/commons-jexl/reference/syntax.html[JEXL-Expression].
 
 IMPORTANT: *`@Filter` tags that only reference one column will be applied to columns before generating the table and can reduce the amount of filtering significantly.* |
-
 [[EqualProperty]]
 @EqualProperty(<propertyName>)
 
 Example:
 @EqualProperty(homeserver)|In a row, all items must have the given property set to the same value.
 |
-
 [[DistinctProperty]]
 @DistinctProperty(<propertyName>)
 
 Example:
 @DistinctProperty(homeserver)|No item in a row can have the same value of the given property, meaning in a row every item must have a different value set for the given property |
-
 [[version-filter]]
 @Version(<column(s)><operator><version>)
 
@@ -798,3 +794,39 @@ a| Leaves only one row for each distinct property value in the given column.
 Works as MaxSameColumnProperty-Tag with count 1.
 |===
 
+=== SoftFilter
+
+The `SoftFilter`-Feature allows to create `Filter` that will not apply if the requested size of the table could not be generated. First the plugin tries to fill the table with the filter apply and only if the table doesn't have sufficient entries it will handle the generation without all `SoftFilter`
+
+This could be used, when filter are optional or just set to limit the table size.
+
+A filter could be declared as SoftFilter by naming it with `Soft` as prefix.
+
+.Example
+```
+...
+
+Scenario Outline: Get orgAdmin devices
+    Given claim client gematik on api <ApiName1>
+    When get all devices
+    Then returns devices information
+
+    @SoftFilter(ApiName1.hasTag("orgAdmin"))
+    Examples:
+    |ApiName1|
+
+...
+```
+
+The prefix could be added to following Tags:
+
+* @Filter(...) -> @SoftFilter(...)
+* @DistinctColumnProperty(...) -> @SoftDistinctColumnProperty(...)
+* @DistinctColumn(...) -> @SoftDistinctColumn(...)
+* @DistinctProperty(...) -> @SoftDistinctProperty(...)
+* @EqualProperty(...) -> @SoftEqualProperty(...)
+* @MaxRows(...) -> @SoftMaxRows(...)
+* @MaxSameColumnProperty(...) -> @SoftMaxSameColumnProperty(...)
+* @RequireProperty(...) -> @SoftRequireProperty(...)
+* @RequireTag(...) -> @SoftRequireTag(...)
+* @Version(...) -> @SoftVersion(...)

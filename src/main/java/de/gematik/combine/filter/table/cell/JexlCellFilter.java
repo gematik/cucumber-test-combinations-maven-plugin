@@ -27,7 +27,7 @@ import lombok.SneakyThrows;
  * for a single cell value and filters accordingly.
  */
 @EqualsAndHashCode
-public class JexlCellFilter implements CellFilter {
+public class JexlCellFilter extends AbstractCellFilter {
 
   private final String columnName;
   private final JexlFilter jexlFilter;

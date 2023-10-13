@@ -35,7 +35,7 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor
-public class DoubleLineupFilter implements TableFilter {
+public class DoubleLineupFilter extends AbstractTableFilter {
 
   private final boolean allow;
 

@@ -21,6 +21,7 @@ import static de.gematik.combine.tags.parser.DistinctRowPropertyTagParser.DISTIN
 import de.gematik.combine.filter.table.row.DistinctRowPropertyFilter;
 import de.gematik.combine.tags.ParsedTags;
 import de.gematik.combine.tags.SingleTagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -32,8 +33,10 @@ public class DistinctRowPropertyTagParser implements SingleTagParser {
   public static final String DISTINCT_ROW_PROPERTY_TAG = "DistinctProperty";
 
   @Override
-  public void parseTagAndRegister(String property, ParsedTags parsedTags) {
-    parsedTags.addTableRowFilter(new DistinctRowPropertyFilter(property));
+  public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
+    DistinctRowPropertyFilter parser = new DistinctRowPropertyFilter(preParsedTag.getValue());
+    parser.setSoft(preParsedTag.isSoft());
+    parsedTags.addTableRowFilter(parser);
   }
 
 }

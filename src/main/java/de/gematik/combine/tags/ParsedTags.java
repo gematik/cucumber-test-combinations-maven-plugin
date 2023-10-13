@@ -27,6 +27,8 @@ import de.gematik.combine.CombineConfiguration;
 import de.gematik.combine.FilterConfiguration;
 import de.gematik.combine.ProjectFilters;
 import de.gematik.combine.filter.Filters;
+import de.gematik.combine.filter.table.TableFilter;
+import de.gematik.combine.filter.table.cell.CellFilter;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -52,15 +54,15 @@ public class ParsedTags {
         .apply(defaultConfig);
   }
 
-  public ConfiguredFilters configureFilters(CombineConfiguration config) {
+  public ConfiguredFilters configureFilters(CombineConfiguration config, boolean softFilterShouldApply) {
     FilterConfiguration actualConfig = getActualConfig(config.getFilterConfiguration());
 
     Filters allFilters = toFilters(actualConfig);
 
-    getTableFilters().forEach(allFilters::addTableFilter);
-    getTableRowFilters().forEach(allFilters::addTableRowFilter);
-    getCellFilters().forEach(allFilters::addCellFilter);
-
+    getTableFilters().stream().filter(f -> !(f.isSoft() && !softFilterShouldApply)).forEach(allFilters::addTableFilter);
+    getTableRowFilters().stream().filter(f -> !(f.isSoft() && !softFilterShouldApply))
+        .forEach(allFilters::addTableRowFilter);
+    getCellFilters().forEach((key, value) -> allFilters.addCellFilter(key, value, softFilterShouldApply));
     checkAndAddProjectFilters(config, allFilters);
     return new ConfiguredFilters(actualConfig, columns, allFilters);
   }
@@ -104,5 +106,21 @@ public class ParsedTags {
       return allFilters.getTableRowFilters().stream()
           .noneMatch(filter.getClass().getSuperclass()::isInstance);
     }
+  }
+
+  public boolean containSoftFilter() {
+    return tableFiltersHaveSoft() || cellFiltersHaveSoft() || tableRowFiltersHaveSoft();
+  }
+
+  private boolean tableRowFiltersHaveSoft() {
+    return getTableRowFilters().stream().anyMatch(TableFilter::isSoft);
+  }
+
+  private boolean tableFiltersHaveSoft() {
+    return getTableFilters().stream().anyMatch(TableFilter::isSoft);
+  }
+
+  private boolean cellFiltersHaveSoft() {
+    return getCellFilters().entrySet().stream().anyMatch(s -> s.getValue().stream().anyMatch(CellFilter::isSoft));
   }
 }

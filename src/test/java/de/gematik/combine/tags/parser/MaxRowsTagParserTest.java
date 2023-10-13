@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import de.gematik.combine.FilterConfiguration;
 import de.gematik.combine.tags.ConfigModifier;
 import de.gematik.combine.tags.ParsedTags;
+import de.gematik.combine.tags.TagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import java.util.List;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +44,7 @@ class MaxRowsTagParserTest {
     // arrange
     FilterConfiguration config = FilterConfiguration.builder().build();
     // act
-    parser.parseTagAndRegister("1", tagCollector);
+    parser.parseTagAndRegister(new PreParsedTag("TestName","1"), tagCollector);
     // assert
     List<ConfigModifier> configModifiers = tagCollector.getConfigModifiers();
     assertThat(configModifiers).hasSize(1)

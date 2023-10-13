@@ -24,6 +24,7 @@ import de.gematik.combine.filter.table.cell.CellFilter;
 import de.gematik.combine.filter.table.cell.VersionFilter;
 import de.gematik.combine.model.properties.Version;
 import de.gematik.combine.tags.ParsedTags;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import de.gematik.combine.util.CompareOperator;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,7 +46,7 @@ class VersionFilterParserTest {
     String valueToParse = format(TAG_VALUE_TO_PARSE, format(OPERATOR_FORMAT, operator.name()));
 
     // act
-    PARSER.parseTagAndRegister(valueToParse, parsedTags);
+    PARSER.parseTagAndRegister(new PreParsedTag("TestName", valueToParse), parsedTags);
 
     // assert
     assertThat(parsedTags.getCellFilters()).hasSize(1);

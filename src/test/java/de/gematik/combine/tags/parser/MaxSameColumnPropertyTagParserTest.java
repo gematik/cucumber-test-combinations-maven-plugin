@@ -22,6 +22,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import de.gematik.combine.filter.table.MaxSameColumnPropertyFilter;
 import de.gematik.combine.tags.ParsedTags;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
@@ -56,8 +57,9 @@ class MaxSameColumnPropertyTagParserTest {
   @SneakyThrows
   void shouldRejectInvalidValues(String value) {
     // arrange
+    PreParsedTag preParsedTag = new PreParsedTag("TestName", value);
     // act
-    assertThatThrownBy(() -> parser.parseTagAndRegister(value, tagCollector))
+    assertThatThrownBy(() -> parser.parseTagAndRegister(preParsedTag, tagCollector))
         // assert
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("'" + value + "' does not have exact 3 arguments");
@@ -66,8 +68,10 @@ class MaxSameColumnPropertyTagParserTest {
   @Test
   @SneakyThrows
   void shouldRejectInvalidCountParam() {
+    // arrange
+    PreParsedTag preParsedTag = new PreParsedTag("TestName", "A,b,c");
     // act
-    assertThatThrownBy(() -> parser.parseTagAndRegister("A,b,c", tagCollector))
+    assertThatThrownBy(() -> parser.parseTagAndRegister(preParsedTag, tagCollector))
         // assert
         .isInstanceOf(NumberFormatException.class);
   }
@@ -76,7 +80,7 @@ class MaxSameColumnPropertyTagParserTest {
   @SneakyThrows
   void shouldParseParams() {
     // act
-    parser.parseTagAndRegister("A,b,2", tagCollector);
+    parser.parseTagAndRegister(new PreParsedTag("TestName", "A,b,2"), tagCollector);
     // assert
     assertThat(tagCollector.getTableFilters())
         .isEqualTo(List.of(new MaxSameColumnPropertyFilter("A", "b", 2)));

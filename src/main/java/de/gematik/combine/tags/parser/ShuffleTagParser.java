@@ -21,6 +21,7 @@ import static java.lang.Boolean.parseBoolean;
 
 import de.gematik.combine.tags.ParsedTags;
 import de.gematik.combine.tags.SingleTagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -32,10 +33,10 @@ public class ShuffleTagParser implements SingleTagParser {
   public static final String SHUFFLE_TAG = "Shuffle";
 
   @Override
-  public void parseTagAndRegister(String value, ParsedTags parsedTags) {
+  public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
     boolean shuffle = true;
-    if (value != null && !value.isEmpty()) {
-      shuffle = parseBoolean(value);
+    if (preParsedTag.getValue() != null && !preParsedTag.getValue().isEmpty()) {
+      shuffle = parseBoolean(preParsedTag.getValue());
     }
     boolean finalShuffle = shuffle;
     parsedTags.addConfigModifier(config -> config.toBuilder()

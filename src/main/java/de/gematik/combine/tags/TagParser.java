@@ -57,7 +57,7 @@ public class TagParser {
       getPluginLog().warn("ignoring unknown tag: " + preParsedTag);
       return;
     }
-    tagParser.parseTagAndRegister(preParsedTag.getValue(), tagCollector);
+    tagParser.parseTagAndRegister(preParsedTag, tagCollector);
   }
 
   private Optional<PreParsedTag> preParseTag(String tag) {
@@ -79,11 +79,23 @@ public class TagParser {
   }
 
   @Getter
-  @RequiredArgsConstructor
   public static class PreParsedTag {
 
     final String tagName;
     final String value;
+    final boolean isSoft;
+
+    public PreParsedTag(String tagName, String value) {
+      if (tagName.startsWith("Soft")) {
+        this.tagName = tagName.substring(4);
+        this.isSoft = true;
+      } else {
+        this.tagName = tagName;
+        this.isSoft = false;
+      }
+      this.value = value;
+    }
+
 
     @Override
     public String toString() {

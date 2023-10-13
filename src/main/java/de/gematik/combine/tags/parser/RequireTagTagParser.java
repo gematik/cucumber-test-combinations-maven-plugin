@@ -21,6 +21,7 @@ import static de.gematik.combine.tags.parser.RequireTagTagParser.REQUIRE_TAG_TAG
 import de.gematik.combine.filter.table.row.RequireTagRowFilter;
 import de.gematik.combine.tags.ParsedTags;
 import de.gematik.combine.tags.SingleTagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -32,7 +33,9 @@ public class RequireTagTagParser implements SingleTagParser {
   public static final String REQUIRE_TAG_TAG = "RequireTag";
 
   @Override
-  public void parseTagAndRegister(String tagName, ParsedTags parsedTags) {
-    parsedTags.addTableRowFilter(new RequireTagRowFilter(tagName));
+  public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
+    RequireTagRowFilter filter = new RequireTagRowFilter(preParsedTag.getValue());
+    filter.setSoft(preParsedTag.isSoft());
+    parsedTags.addTableRowFilter(filter);
   }
 }

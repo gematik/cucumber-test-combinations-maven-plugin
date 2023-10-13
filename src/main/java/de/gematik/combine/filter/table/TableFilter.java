@@ -22,15 +22,13 @@ import static java.lang.Integer.compare;
 import de.gematik.combine.filter.FilterOrder;
 import de.gematik.combine.model.TableCell;
 import java.util.List;
-import java.util.function.UnaryOperator;
 
 /**
- * A TableFilter operates on the whole table and can therefore implement filters that need more than
- * a single row. If your filter operates only on rows, you should look at
+ * A TableFilter operates on the whole table and can therefore implement filters that need more than a single row. If
+ * your filter operates only on rows, you should look at
  * {@link  de.gematik.combine.filter.table.row.TableRowFilter TableRowFilter}.
  */
-public interface TableFilter extends UnaryOperator<List<List<TableCell>>>,
-    Comparable<TableFilter> {
+public interface TableFilter extends Comparable<TableFilter>, SoftFilter{
 
   default FilterOrder getFilterOrder() {
     return getFilterOrderFor(this);
@@ -41,7 +39,9 @@ public interface TableFilter extends UnaryOperator<List<List<TableCell>>>,
     return compare(getFilterOrder().orderKey, filter.getFilterOrder().orderKey);
   }
 
-  default TableFilter combine(TableFilter after) {
-    return v -> UnaryOperator.super.andThen(after).apply(v);
+  List<List<TableCell>> apply(List<List<TableCell>> t);
+
+  default TableFilter merge(TableFilter after) {
+    return t -> after.apply(this.apply(t));
   }
 }

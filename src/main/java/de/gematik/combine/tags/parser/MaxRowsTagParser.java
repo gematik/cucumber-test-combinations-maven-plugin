@@ -24,6 +24,7 @@ import static org.apache.commons.lang3.math.NumberUtils.isParsable;
 import de.gematik.combine.filter.table.MaxRowsFilter;
 import de.gematik.combine.tags.ParsedTags;
 import de.gematik.combine.tags.SingleTagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -35,14 +36,14 @@ public class MaxRowsTagParser implements SingleTagParser {
   public static final String MAX_ROWS_TAG = "MaxRows";
 
   @Override
-  public void parseTagAndRegister(String value, ParsedTags parsedTags) {
-    if (isDigits(value) && isParsable(value)) {
-      int maxRows = parseInt(value);
+  public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
+    if (isDigits(preParsedTag.getValue()) && isParsable(preParsedTag.getValue())) {
+      int maxRows = parseInt(preParsedTag.getValue());
       parsedTags.addConfigModifier(config -> config.toBuilder()
           .maxTableRows(maxRows)
           .build());
     } else {
-      parsedTags.addTableFilter(new MaxRowsFilter(value));
+      parsedTags.addTableFilter(new MaxRowsFilter(preParsedTag.getValue()).setSoft(preParsedTag.isSoft()));
     }
   }
 }

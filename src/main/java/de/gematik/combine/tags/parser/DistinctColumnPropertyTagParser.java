@@ -21,6 +21,7 @@ import static de.gematik.combine.tags.parser.DistinctColumnPropertyTagParser.DIS
 import de.gematik.combine.filter.table.MaxSameColumnPropertyFilter;
 import de.gematik.combine.tags.ParsedTags;
 import de.gematik.combine.tags.SingleTagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -32,12 +33,12 @@ public class DistinctColumnPropertyTagParser implements SingleTagParser {
   public static final String DISTINCT_COLUMN_PROPERTY_TAG = "DistinctColumnProperty";
 
   @Override
-  public void parseTagAndRegister(String tagValueToParse, ParsedTags parsedTags) {
-    String[] args = tagValueToParse.split(",");
+  public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
+    String[] args = preParsedTag.getValue().split(",");
     if (args.length != 2) {
       throw new IllegalArgumentException(
-          "'" + tagValueToParse + "' does not have exact 2 arguments");
+          "'" + preParsedTag.getValue() + "' does not have exact 2 arguments");
     }
-    parsedTags.addTableFilter(new MaxSameColumnPropertyFilter(args[0], args[1], 1));
+    parsedTags.addTableFilter(new MaxSameColumnPropertyFilter(args[0], args[1], 1).setSoft(preParsedTag.isSoft()));
   }
 }

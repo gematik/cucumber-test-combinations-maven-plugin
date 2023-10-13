@@ -35,7 +35,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public abstract class AbstractCombineMojoTest {
+abstract class AbstractCombineMojoTest {
 
   public static final String WITHOUT_FILTERS_FILE_ENDING = ".withoutFilters";
 
@@ -60,6 +60,7 @@ public abstract class AbstractCombineMojoTest {
     combineMojo.setMinTableSize(minimalTableSize());
     combineMojo.setBreakIfTableToSmall(breakIfTableToSmall());
     combineMojo.setBreakIfMinimalTableError(breakIfMinimalTableError());
+    combineMojo.setSoftFilterToHardFilter(true);
 
     when(combineMojo.getLog()).thenReturn(log);
     CombineMojo.resetError();

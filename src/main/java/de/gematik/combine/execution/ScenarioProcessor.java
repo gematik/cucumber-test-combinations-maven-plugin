@@ -52,18 +52,18 @@ public class ScenarioProcessor {
         .collect(toList());
 
     getPluginLog().debug(format("processing %d examples: ", examples.size()));
-    examples.forEach(table -> processExamplesTable(table, combineItems, config));
+    examples.forEach(table -> processExamplesTable(table, combineItems, config, scenario.getName()));
 
     addEmptyExamplesTags(scenario, config.getEmptyExamplesTags());
     checkTableSize(scenario, config.getMinTableSize());
   }
 
   private void processExamplesTable(Examples examples, List<CombineItem> combineItems,
-      CombineConfiguration configuration) {
+      CombineConfiguration configuration, String scenarioName) {
     getPluginLog().debug("processing single examples table" + examples.getName());
 
     examplesProcessor
-        .process(examples, configuration, combineItems);
+        .process(examples, configuration, combineItems, scenarioName);
   }
 
   private void addEmptyExamplesTags(Scenario scenario, List<String> tags) {

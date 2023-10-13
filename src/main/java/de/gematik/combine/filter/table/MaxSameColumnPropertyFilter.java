@@ -37,7 +37,7 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor
-public class MaxSameColumnPropertyFilter implements TableFilter {
+public class MaxSameColumnPropertyFilter extends AbstractTableFilter {
 
   private final String columnName;
   private final String property;

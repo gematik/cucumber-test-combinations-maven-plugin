@@ -16,6 +16,8 @@
 
 package de.gematik.combine.execution;
 
+import static de.gematik.combine.CombineMojo.ErrorType.WARNING;
+import static de.gematik.combine.CombineMojo.appendError;
 import static de.gematik.combine.CombineMojo.getPluginLog;
 import static de.gematik.combine.FilterTagMapper.filterToTag;
 import static de.gematik.combine.FilterTagMapper.getTagName;
@@ -53,18 +55,32 @@ public class ExamplesProcessor {
   private final TagParser tagParser;
   private final TableGenerator tableGenerator;
 
-  public void process(Examples gherkinExamples, CombineConfiguration config,
-      List<CombineItem> combineItems) {
+  public void process(Examples gherkinExample, CombineConfiguration config,
+      List<CombineItem> combineItems, String scenarioName) {
 
     if (!config.getDefaultExamplesTags().isEmpty()) {
-      addDefaultTags(gherkinExamples, config.getDefaultExamplesTags());
+      addDefaultTags(gherkinExample, config.getDefaultExamplesTags());
     }
 
-    List<String> headers = extractHeaders(gherkinExamples);
-    List<String> tagStrings = extractTagStrings(gherkinExamples);
+    List<String> headers = extractHeaders(gherkinExample);
+    List<String> tagStrings = extractTagStrings(gherkinExample);
 
     ParsedTags parsedTags = tagParser.parseTags(tagStrings, headers);
-    ConfiguredFilters filters = parsedTags.configureFilters(config);
+    generateTable(gherkinExample, config, combineItems, parsedTags, true);
+    boolean tableToSmall = gherkinExample.getTableBody().size() < config.getMinTableSize();
+    if (tableToSmall && !config.isSoftFilterToHardFilter() && parsedTags.containSoftFilter()) {
+      appendError(
+          format("For scenario \"%s\" no table could be generated. Going to retry without SoftFilter", scenarioName),
+          WARNING);
+      generateTable(gherkinExample, config, combineItems, parsedTags, false);
+    }
+    addPluginTagPrefixes(gherkinExample, config);
+  }
+
+  private void generateTable(Examples gherkinExample, CombineConfiguration config, List<CombineItem> combineItems,
+      ParsedTags parsedTags, boolean softFilterShouldApply) {
+
+    ConfiguredFilters filters = parsedTags.configureFilters(config, softFilterShouldApply);
 
     List<List<TableCell>> filteredTable = generateTable(combineItems, filters);
 
@@ -73,9 +89,8 @@ public class ExamplesProcessor {
         .map(ExamplesProcessor::toTableRow)
         .collect(toList());
 
-    setTableBody(gherkinExamples, gherkinTable);
-    addAppliedProjectFilters(gherkinExamples, filters);
-    addPluginTagPrefixes(gherkinExamples, config);
+    setTableBody(gherkinExample, gherkinTable);
+    addAppliedProjectFilters(gherkinExample, filters);
   }
 
   private List<List<TableCell>> generateTable(List<CombineItem> combineItems,
@@ -86,8 +101,7 @@ public class ExamplesProcessor {
     return filterTable(baseTable, filters);
   }
 
-  private List<List<TableCell>> filterTable(List<List<TableCell>> baseTable,
-      ConfiguredFilters filters) {
+  private List<List<TableCell>> filterTable(List<List<TableCell>> baseTable, ConfiguredFilters filters) {
     List<TableFilter> tableFilters = new ArrayList<>(filters.getTableFilters());
     tableFilters.addAll(filters.getTableRowFilters());
 
@@ -129,7 +143,7 @@ public class ExamplesProcessor {
   private static void addPluginTagPrefixes(Examples examples, CombineConfiguration config) {
     List<Tag> changedTags = examples.getTags().stream()
         .map(tag -> addPrefixToTag(tag,
-            tag.getName().substring(1).startsWith(getTagName(VersionFilter.class),0) ?
+            tag.getName().substring(1).startsWith(getTagName(VersionFilter.class), 0) ?
                 config.getVersionFilterTagCategory() : config.getPluginTagCategory()))
         .collect(toList());
     setTags(examples, changedTags);

@@ -18,6 +18,7 @@ package de.gematik.combine.execution;
 
 import static com.google.common.collect.Lists.cartesianProduct;
 import static de.gematik.combine.CombineMojo.ErrorType.MINIMAL_TABLE;
+import static de.gematik.combine.CombineMojo.appendError;
 import static de.gematik.combine.CombineMojo.getPluginLog;
 import static de.gematik.combine.util.CurrentScenario.getCurrenScenarioName;
 import static java.lang.String.format;
@@ -30,7 +31,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 
-import de.gematik.combine.CombineMojo;
 import de.gematik.combine.filter.table.cell.CellFilter;
 import de.gematik.combine.filter.table.row.RowFilter;
 import de.gematik.combine.model.CombineItem;
@@ -47,8 +47,7 @@ import java.util.function.Consumer;
 import lombok.Data;
 
 /**
- * This TableGenerator combines given {@link CombineItem}s to tables. It knows two generation
- * modes:
+ * This TableGenerator combines given {@link CombineItem}s to tables. It knows two generation modes:
  * <p> 1. full table: applies cell filters to columns and calculates the cartesian product
  * afterwards
  * <p> 2. minimal table: tries to use every item just once, but reuses items to fill otherwise
@@ -94,8 +93,7 @@ public class TableGenerator {
   }
 
   /**
-   * applies cell filters to each column and returns a list with the possible values for each
-   * column
+   * applies cell filters to each column and returns a list with the possible values for each column
    */
   private List<List<TableCell>> preFilteredColumns(List<CombineItem> combineItems,
       ConfiguredFilters filters) {
@@ -141,7 +139,7 @@ public class TableGenerator {
         unusedValue -> findValidRow(stateInfo, unusedValue).ifPresent(stateInfo::addNewRow));
     if (stateInfo.getAllMissingValues().size() != 0) {
       stateInfo.getAllMissingValues()
-          .forEach(e -> CombineMojo.appendError(
+          .forEach(e -> appendError(
               format("Building minimal table failed for scenario: \"%s\". "
                       + "No row could be build for -> value: %s%s",
                   getCurrenScenarioName(),

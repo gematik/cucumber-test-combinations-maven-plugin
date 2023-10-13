@@ -35,7 +35,7 @@ import lombok.ToString;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor
-public class DistinctColumnFilter implements TableFilter {
+public class DistinctColumnFilter extends AbstractTableFilter {
 
   private final String columnName;
 

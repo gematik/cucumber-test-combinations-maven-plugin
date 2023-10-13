@@ -23,17 +23,16 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 import de.gematik.combine.filter.FilterOrder;
-import de.gematik.combine.filter.table.TableFilter;
+import de.gematik.combine.filter.table.AbstractTableFilter;
 import de.gematik.combine.model.TableCell;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This is an adapter class for TableFilters that operate only on single rows. It implements the
- * iteration over table rows with chunking for tables greater
- * {@link TableRowFilter#CHUNK_SIZE CHUNK_SIZE}.
+ * This is an adapter class for TableFilters that operate only on single rows. It implements the iteration over table
+ * rows with chunking for tables greater {@link TableRowFilter#CHUNK_SIZE CHUNK_SIZE}.
  */
-public abstract class TableRowFilter implements TableFilter, RowFilter {
+public abstract class TableRowFilter extends AbstractTableFilter implements RowFilter {
 
   public static final int CHUNK_SIZE = 1000000;
 

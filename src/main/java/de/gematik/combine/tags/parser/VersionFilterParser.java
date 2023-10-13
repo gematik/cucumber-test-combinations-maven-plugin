@@ -29,6 +29,7 @@ import de.gematik.combine.filter.project.ProjectVersionFilter;
 import de.gematik.combine.filter.table.cell.VersionFilter;
 import de.gematik.combine.tags.ParsedTags;
 import de.gematik.combine.tags.SingleTagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import de.gematik.combine.util.CompareOperator;
 import java.util.List;
 import javax.inject.Named;
@@ -48,14 +49,15 @@ public class VersionFilterParser implements SingleTagParser {
   }
 
   @Override
-  public void parseTagAndRegister(String tagVal, ParsedTags parsedTags) {
-    VersionFilter filter = parseFilterValue(tagVal);
-    List<String> args = checkForOperator(tagVal, filter.getOperator());
+  public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
+    VersionFilter filter = parseFilterValue(preParsedTag.getValue());
+    filter.setSoft(preParsedTag.isSoft());
+    List<String> args = checkForOperator(preParsedTag.getValue(), filter.getOperator());
     String[] columns = args.get(0).split(",");
     if (columns.length == 0 || (columns.length == 1 && columns[0].isBlank())) {
       throw new IllegalArgumentException(format(
           "%s: '%s' does not have any headers, which are necessary for a version "
-              + "filter that is set to a scenario", VERSION_TAG, tagVal));
+              + "filter that is set to a scenario", VERSION_TAG, preParsedTag.getValue()));
     }
     for (String header : columns) {
       parsedTags.addCellFilter(header, filter);

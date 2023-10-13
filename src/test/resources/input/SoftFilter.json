@@ -1,0 +1,44 @@
+[
+  {
+    "value": "Api1",
+    "tags": [
+      "existing"
+    ],
+    "properties": {"homeserver": "A"}
+  },
+  {
+    "value": "Api2",
+    "tags": [
+      "existing"
+    ],
+    "properties": {"homeserver": "A"}
+  },
+  {
+    "value": "Api3",
+    "tags": [
+      "client"
+    ],
+    "properties": {"homeserver": "B"}
+  },
+  {
+    "value": "Api4",
+    "tags": [
+      "client"
+    ],
+    "properties": {"homeserver": "B"}
+  },
+  {
+    "value": "Api5",
+    "tags": [
+      "client"
+    ],
+    "properties": {"homeserver": "C"}
+  },
+  {
+    "value": "Api6",
+    "tags": [
+      "client"
+    ],
+    "properties": {"homeserver": "D"}
+  }
+]

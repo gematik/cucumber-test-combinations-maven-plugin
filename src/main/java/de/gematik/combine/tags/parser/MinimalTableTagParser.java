@@ -20,6 +20,7 @@ import static java.lang.Boolean.parseBoolean;
 
 import de.gematik.combine.tags.ParsedTags;
 import de.gematik.combine.tags.SingleTagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -31,10 +32,10 @@ public class MinimalTableTagParser implements SingleTagParser {
   public static final String MINIMAL_TABLE_TAG = "MinimalTable";
 
   @Override
-  public void parseTagAndRegister(String value, ParsedTags parsedTags) {
+  public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
     boolean minimal = true;
-    if (value != null && !value.isEmpty()) {
-      minimal = parseBoolean(value);
+    if (preParsedTag.getValue() != null && !preParsedTag.getValue().isEmpty()) {
+      minimal = parseBoolean(preParsedTag.getValue());
     }
     boolean finalMinimal = minimal;
     parsedTags.addConfigModifier(config -> config.toBuilder()

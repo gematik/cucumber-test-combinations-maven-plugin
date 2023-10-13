@@ -31,7 +31,7 @@ import lombok.ToString;
  */
 @ToString
 @RequiredArgsConstructor
-public class ShuffleTableFilter implements TableFilter {
+public class ShuffleTableFilter extends AbstractTableFilter {
 
   private final boolean shuffle;
 

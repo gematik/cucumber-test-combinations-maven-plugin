@@ -19,8 +19,10 @@ package de.gematik.combine.tags.parser;
 import static de.gematik.combine.tags.parser.RequirePropertyTagParser.REQUIRE_PROPERTY_TAG;
 
 import de.gematik.combine.filter.table.row.RequirePropertyRowFilter;
+import de.gematik.combine.filter.table.row.TableRowFilter;
 import de.gematik.combine.tags.ParsedTags;
 import de.gematik.combine.tags.SingleTagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -32,12 +34,12 @@ public class RequirePropertyTagParser implements SingleTagParser {
   public static final String REQUIRE_PROPERTY_TAG = "RequireProperty";
 
   @Override
-  public void parseTagAndRegister(String tagValueToParse, ParsedTags parsedTags) {
-    String[] args = tagValueToParse.split(",");
+  public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
+    String[] args = preParsedTag.getValue().split(",");
     if (args.length != 2) {
       throw new IllegalArgumentException(
-          REQUIRE_PROPERTY_TAG + ": '" + tagValueToParse + "' does not have exact 2 arguments");
+          REQUIRE_PROPERTY_TAG + ": '" + preParsedTag.getValue() + "' does not have exact 2 arguments");
     }
-    parsedTags.addTableRowFilter(new RequirePropertyRowFilter(args[0], args[1]));
+    parsedTags.addTableRowFilter((TableRowFilter) new RequirePropertyRowFilter(args[0], args[1]).setSoft(preParsedTag.isSoft()));
   }
 }

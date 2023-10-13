@@ -49,5 +49,6 @@ public class CombineConfiguration {
   private boolean breakIfTableToSmall;
   private int minTableSize;
   private boolean breakIfMinimalTableError;
+  private boolean softFilterToHardFilter;
 
 }

@@ -35,7 +35,7 @@ import lombok.RequiredArgsConstructor;
 @Data
 @RequiredArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class VersionFilter implements CellFilter {
+public class VersionFilter extends AbstractCellFilter {
 
   private final CompareOperator operator;
   private final Version filterVersion;

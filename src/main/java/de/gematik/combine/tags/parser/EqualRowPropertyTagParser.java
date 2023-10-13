@@ -21,6 +21,7 @@ import static de.gematik.combine.tags.parser.EqualRowPropertyTagParser.EQUAL_ROW
 import de.gematik.combine.filter.table.row.EqualRowPropertyFilter;
 import de.gematik.combine.tags.ParsedTags;
 import de.gematik.combine.tags.SingleTagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -32,7 +33,9 @@ public class EqualRowPropertyTagParser implements SingleTagParser {
   public static final String EQUAL_ROW_PROPERTY_TAG = "EqualProperty";
 
   @Override
-  public void parseTagAndRegister(String property, ParsedTags parsedTags) {
-    parsedTags.addTableRowFilter(new EqualRowPropertyFilter(property));
+  public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
+    EqualRowPropertyFilter parser = new EqualRowPropertyFilter(preParsedTag.getValue());
+    parser.setSoft(preParsedTag.isSoft());
+    parsedTags.addTableRowFilter(parser);
   }
 }

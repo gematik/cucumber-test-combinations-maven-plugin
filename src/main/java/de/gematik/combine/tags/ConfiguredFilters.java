@@ -42,7 +42,7 @@ public class ConfiguredFilters {
   public TableFilter combineAllFilters() {
     return Stream.concat(getTableFilters().stream(), getTableRowFilters().stream())
         .sorted()
-        .reduce(x -> x, TableFilter::combine);
+        .reduce(x -> x, TableFilter::merge);
   }
 
   public List<String> getColumns() {

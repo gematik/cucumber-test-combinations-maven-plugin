@@ -1,5 +1,5 @@
 /*
- * Copyright 20023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package de.gematik.combine.tags;
-
-import de.gematik.combine.tags.TagParser.PreParsedTag;
+package de.gematik.combine.filter.table;
 
 /**
- * A SingleTagParser parses a single tag and registers it in the provided {@link ParsedTags} object.
- * Implementations have to be annotated with {@link javax.inject.Named} and the tag name they parse.
- * e.g. `{@code @Named("TagName")}`
+ * This interface is used to set {@link de.gematik.combine.filter.table.TableFilter} and
+ * {@link de.gematik.combine.filter.table.cell.CellFilter} as SoftFilter. SoftFilter should be deleted if not enough
+ * rows for an example could be generated
  */
-public interface SingleTagParser {
+public interface SoftFilter {
 
-  void parseTagAndRegister(PreParsedTag tagValueToParse, ParsedTags parsedTags);
+  default boolean isSoft() {
+    return false;
+  }
+
+  default SoftFilter setSoft(boolean soft) {
+    return this;
+  }
 
 }

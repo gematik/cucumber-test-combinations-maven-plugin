@@ -2,6 +2,12 @@
 
 # Release notes
 
+## 2.9.12
+
+### Features
+
+- SoftFilter Feature implemented
+
 ## 2.9.11
 
 ### Features

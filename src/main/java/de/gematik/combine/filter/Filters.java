@@ -65,8 +65,9 @@ public class Filters {
     }
   }
 
-  public void addCellFilter(String header, List<CellFilter> newCellFilter) {
-    newCellFilter.forEach(cellFilter -> addCellFilter(header, cellFilter));
+  public void addCellFilter(String header, List<CellFilter> newCellFilter,boolean softFilterShouldApply ) {
+
+    newCellFilter.stream().filter(f -> !(f.isSoft() && !softFilterShouldApply)).forEach(cellFilter -> addCellFilter(header, cellFilter));
   }
 
   public List<TableFilter> getTableFilters() {

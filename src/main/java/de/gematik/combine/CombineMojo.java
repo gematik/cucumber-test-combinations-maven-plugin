@@ -19,6 +19,7 @@ package de.gematik.combine;
 import static de.gematik.combine.CombineMojo.ErrorType.MINIMAL_TABLE;
 import static de.gematik.combine.CombineMojo.ErrorType.PROPERTY;
 import static de.gematik.combine.CombineMojo.ErrorType.SIZE;
+import static de.gematik.combine.CombineMojo.ErrorType.WARNING;
 import static de.gematik.combine.tags.parser.AllowDoubleLineupTagParser.ALLOW_DOUBLE_LINEUP_TAG;
 import static de.gematik.combine.tags.parser.AllowSelfCombineTagParser.ALLOW_SELF_COMBINE_TAG;
 import static de.gematik.combine.tags.parser.MinimalTableTagParser.MINIMAL_TABLE_TAG;
@@ -77,6 +78,8 @@ public class CombineMojo extends BaseMojo {
   private static List<String> minimalTableErrorLog = new ArrayList<>();
   @Getter
   private static List<String> propertyErrorLog = new ArrayList<>();
+  @Getter
+  private static List<String> warningsLog = new ArrayList<>();
   private final FileProcessor replacer;
   /**
    * Path to the directory where the rendered templates got stored
@@ -94,8 +97,7 @@ public class CombineMojo extends BaseMojo {
   @Parameter(property = "ending", defaultValue = ".cute")
   String ending;
   /**
-   * The plugin will add these tags to all examples tables where it was not able to add at least one
-   * row
+   * The plugin will add these tags to all examples tables where it was not able to add at least one row
    */
   @Parameter(property = "emptyExamplesTags")
   List<String> emptyExamplesTags;
@@ -110,29 +112,27 @@ public class CombineMojo extends BaseMojo {
   @Parameter(property = "minTableSize", defaultValue = "1")
   int minTableSize;
   /**
-   * The plugin will throw exception if minimal table could not generate valid row for at least one
-   * value
+   * The plugin will throw exception if minimal table could not generate valid row for at least one value
    */
   @Parameter(property = "breakIfMinimalTableError", defaultValue = "false")
   boolean breakIfMinimalTableError;
   /**
-   * Prefix that is added to all plugin specific tags (except version filters!) in the feature file
-   * to categorize them under in the report
+   * Prefix that is added to all plugin specific tags (except version filters!) in the feature file to categorize them
+   * under in the report
    */
   @Getter
   @Parameter(property = "pluginTagCategory", defaultValue = "Plugin")
   String pluginTagCategory;
   /**
-   * Prefix that is added to all version filter tags in the feature file to categorize them under in
-   * the report
+   * Prefix that is added to all version filter tags in the feature file to categorize them under in the report
    */
 
   @Getter
   @Parameter(property = "versionFilterTagCategory", defaultValue = "VersionFilter")
   String versionFilterTagCategory;
   /**
-   * The plugin will look for this property to determine the version of an item, may be set to an
-   * arbitrary string, default is "version"
+   * The plugin will look for this property to determine the version of an item, may be set to an arbitrary string,
+   * default is "version"
    */
   @Getter
   @Parameter(property = "versionProperty", defaultValue = "version")
@@ -162,6 +162,11 @@ public class CombineMojo extends BaseMojo {
    */
   @Parameter(name = "skipComb", defaultValue = "false")
   boolean skipComb;
+  /**
+   * Parameter to decide if SoftFiler should be not considered if minimal table size not reached
+   */
+  @Parameter(name = "softFilterToHardFilter", defaultValue = "false")
+  boolean softFilterToHardFilter;
 
   @SneakyThrows
   public void execute() {
@@ -193,7 +198,7 @@ public class CombineMojo extends BaseMojo {
         .map(file -> stripEnding(file, fileEnding))
         .forEach(file -> replacer.process(file, config, itemsToCombine));
     writeErrors(getClass().getSimpleName(),
-        Stream.of(minimalTableErrorLog, tableSizeErrorLog, propertyErrorLog)
+        Stream.of(minimalTableErrorLog, tableSizeErrorLog, propertyErrorLog, warningsLog)
             .flatMap(Collection::stream)
             .collect(toList()),
         WARN_MESSAGE, true);
@@ -284,6 +289,7 @@ public class CombineMojo extends BaseMojo {
         .breakIfTableToSmall(breakIfTableToSmall)
         .minTableSize(minTableSize)
         .breakIfMinimalTableError(breakIfMinimalTableError)
+        .softFilterToHardFilter(softFilterToHardFilter)
         .build();
   }
 
@@ -328,6 +334,8 @@ public class CombineMojo extends BaseMojo {
       minimalTableErrorLog.add(error);
     } else if (type == PROPERTY) {
       propertyErrorLog.add(error);
+    } else if (type == WARNING) {
+      warningsLog.add("WARNING: " + error);
     }
   }
 
@@ -335,12 +343,14 @@ public class CombineMojo extends BaseMojo {
     tableSizeErrorLog = new ArrayList<>();
     minimalTableErrorLog = new ArrayList<>();
     propertyErrorLog = new ArrayList<>();
+    warningsLog = new ArrayList<>();
   }
 
   public enum ErrorType {
     SIZE,
     MINIMAL_TABLE,
-    PROPERTY
+    PROPERTY,
+    WARNING
   }
 
 }

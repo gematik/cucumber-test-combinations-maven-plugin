@@ -23,6 +23,7 @@ import de.gematik.combine.filter.table.cell.JexlCellFilter;
 import de.gematik.combine.filter.table.row.JexlRowFilter;
 import de.gematik.combine.tags.ParsedTags;
 import de.gematik.combine.tags.SingleTagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import java.util.List;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -35,14 +36,17 @@ public class FilterTagParser implements SingleTagParser {
   public static final String JEXL_ROW_FILTER_TAG = "Filter";
 
   @Override
-  public void parseTagAndRegister(String expression, ParsedTags parsedTags) {
-    List<String> columnReferences = countColumnReferences(expression, parsedTags.getColumns());
+  public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
+    List<String> columnReferences = countColumnReferences(preParsedTag.getValue(), parsedTags.getColumns());
     if (columnReferences.size() == 1) {
       String column = columnReferences.get(0);
-      parsedTags.addCellFilter(column,
-          new JexlCellFilter(column, expression));
+      JexlCellFilter filter = new JexlCellFilter(column, preParsedTag.getValue());
+      filter.setSoft(preParsedTag.isSoft());
+      parsedTags.addCellFilter(column, filter);
     } else {
-      parsedTags.addTableRowFilter(new JexlRowFilter(expression));
+      JexlRowFilter filter = new JexlRowFilter(preParsedTag.getValue());
+      filter.setSoft(preParsedTag.isSoft());
+      parsedTags.addTableRowFilter(filter);
     }
   }
 

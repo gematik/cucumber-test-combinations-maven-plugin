@@ -21,6 +21,7 @@ import static de.gematik.combine.tags.parser.DistinctColumnTagParser.DISTINCT_CO
 import de.gematik.combine.filter.table.DistinctColumnFilter;
 import de.gematik.combine.tags.ParsedTags;
 import de.gematik.combine.tags.SingleTagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -32,7 +33,7 @@ public class DistinctColumnTagParser implements SingleTagParser {
   public static final String DISTINCT_COLUMN_TAG = "DistinctColumn";
 
   @Override
-  public void parseTagAndRegister(String column, ParsedTags parsedTags) {
-    parsedTags.addTableFilter(new DistinctColumnFilter(column));
+  public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
+    parsedTags.addTableFilter(new DistinctColumnFilter(preParsedTag.getValue()).setSoft(preParsedTag.isSoft()));
   }
 }

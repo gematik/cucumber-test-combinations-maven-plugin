@@ -22,6 +22,7 @@ import static java.lang.Integer.parseInt;
 import de.gematik.combine.filter.table.MaxSameColumnPropertyFilter;
 import de.gematik.combine.tags.ParsedTags;
 import de.gematik.combine.tags.SingleTagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -33,12 +34,12 @@ public class MaxSameColumnPropertyTagParser implements SingleTagParser {
   public static final String MAX_SAME_COLUMN_PROPERTY_TAG = "MaxSameColumnProperty";
 
   @Override
-  public void parseTagAndRegister(String tagValueToParse, ParsedTags parsedTags) {
-    String[] args = tagValueToParse.split(",");
+  public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
+    String[] args = preParsedTag.getValue().split(",");
     if (args.length != 3) {
       throw new IllegalArgumentException(
-          "'" + tagValueToParse + "' does not have exact 3 arguments");
+          "'" + preParsedTag.getValue() + "' does not have exact 3 arguments");
     }
-    parsedTags.addTableFilter(new MaxSameColumnPropertyFilter(args[0], args[1], parseInt(args[2])));
+    parsedTags.addTableFilter(new MaxSameColumnPropertyFilter(args[0], args[1], parseInt(args[2])).setSoft(preParsedTag.isSoft()));
   }
 }

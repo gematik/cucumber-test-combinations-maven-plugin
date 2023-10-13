@@ -33,7 +33,7 @@ import lombok.EqualsAndHashCode;
  * that returns an Integer.
  */
 @EqualsAndHashCode
-public class MaxRowsFilter implements TableFilter {
+public class MaxRowsFilter extends AbstractTableFilter {
 
   private final JexlFilter jexlFilter;
 

@@ -17,6 +17,7 @@
 package de.gematik.combine.filter.table.cell;
 
 import de.gematik.combine.filter.project.ProjectCellFilter;
+import de.gematik.combine.filter.table.SoftFilter;
 import de.gematik.combine.model.TableCell;
 import java.util.function.Predicate;
 
@@ -26,7 +27,7 @@ import java.util.function.Predicate;
  * generating the cartesian product and reduce the size of the produced base table significantly. A
  * CellFilter can override a {@link ProjectCellFilter}
  */
-public interface CellFilter extends Predicate<TableCell> {
+public interface CellFilter extends Predicate<TableCell>, SoftFilter {
 
   default CellFilter and(CellFilter other) {
     return value -> Predicate.super.and(other).test(value);

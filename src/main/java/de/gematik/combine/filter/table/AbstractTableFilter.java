@@ -1,5 +1,5 @@
 /*
- * Copyright 20023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package de.gematik.combine.tags;
+package de.gematik.combine.filter.table;
 
-import de.gematik.combine.tags.TagParser.PreParsedTag;
+public abstract class AbstractTableFilter implements TableFilter {
 
-/**
- * A SingleTagParser parses a single tag and registers it in the provided {@link ParsedTags} object.
- * Implementations have to be annotated with {@link javax.inject.Named} and the tag name they parse.
- * e.g. `{@code @Named("TagName")}`
- */
-public interface SingleTagParser {
+  private boolean soft;
 
-  void parseTagAndRegister(PreParsedTag tagValueToParse, ParsedTags parsedTags);
+  @Override
+  public boolean isSoft() {
+    return this.soft;
+  }
 
+  @Override
+  public TableFilter setSoft(boolean soft) {
+    this.soft = soft;
+    return this;
+  }
 }

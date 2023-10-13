@@ -21,6 +21,7 @@ import static java.lang.Boolean.parseBoolean;
 
 import de.gematik.combine.tags.ParsedTags;
 import de.gematik.combine.tags.SingleTagParser;
+import de.gematik.combine.tags.TagParser.PreParsedTag;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -32,10 +33,10 @@ public class AllowDoubleLineupTagParser implements SingleTagParser {
   public static final String ALLOW_DOUBLE_LINEUP_TAG = "AllowDoubleLineup";
 
   @Override
-  public void parseTagAndRegister(String value, ParsedTags parsedTags) {
+  public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
     boolean allow = true;
-    if (value != null && !value.isEmpty()) {
-      allow = parseBoolean(value);
+    if (preParsedTag.getValue() != null && !preParsedTag.getValue().isEmpty()) {
+      allow = parseBoolean(preParsedTag.getValue());
     }
     boolean finalAllow = allow;
     parsedTags.addConfigModifier(config -> config.toBuilder()

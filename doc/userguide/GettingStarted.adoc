@@ -423,6 +423,9 @@ filterConfiguration| Configuration for default filter behavior, see options belo
 |
 [[projectFilters]]
 projectFilters|Set filters that are used across the entire project, see options below: <<project-filters, projectFilters table>>|None
+|countExecutions|Toggle to activate and deactivate report about created examples <<summary_executions, read more>>|true
+|countExecutionsFormat|Comma separated values of `txt or/and json'| json
+
 |===
 
 [[filter-configuration]]
@@ -796,7 +799,8 @@ Works as MaxSameColumnProperty-Tag with count 1.
 
 === SoftFilter
 
-The `SoftFilter`-Feature allows to create `Filter` that will not apply if the requested size of the table could not be generated. First the plugin tries to fill the table with the filter apply and only if the table doesn't have sufficient entries it will handle the generation without all `SoftFilter`
+The `SoftFilter`-Feature allows to create `Filter` that will not apply if the requested size of the table could not be generated.
+First the plugin tries to fill the table with the filter apply and only if the table doesn't have sufficient entries it will handle the generation without all `SoftFilter`
 
 This could be used, when filter are optional or just set to limit the table size.
 
@@ -830,3 +834,9 @@ The prefix could be added to following Tags:
 * @RequireProperty(...) -> @SoftRequireProperty(...)
 * @RequireTag(...) -> @SoftRequireTag(...)
 * @Version(...) -> @SoftVersion(...)
+
+[[summary_executions]]
+=== Summary about generated executions
+
+For debugging purpose a file with the number of examples for each file and szenario is build.
+This will be stored at `./target/generated-combine/countExecutions.<format>`. The export could be delivered in different formats <txt,json>. This could be configured via `countExecutionsFormat` comma separated. If this report is not desired it could be turned of via `countExecutions` set to false.

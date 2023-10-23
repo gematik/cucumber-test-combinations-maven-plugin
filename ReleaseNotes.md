@@ -2,6 +2,10 @@
 
 # Release notes
 
+## 2.9.13
+
+- Summary how many executions are generated are now located at ./target/generated-combine [`docu`](./doc/userguide/GettingStarted.adoc)
+
 ## 2.9.12
 
 ### Features

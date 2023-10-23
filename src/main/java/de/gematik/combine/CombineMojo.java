@@ -1,5 +1,5 @@
 /*
- * Copyright 20023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import static org.apache.commons.io.filefilter.DirectoryFileFilter.DIRECTORY;
 import static org.apache.commons.io.filefilter.FileFilterUtils.suffixFileFilter;
 
 import de.gematik.BaseMojo;
+import de.gematik.combine.count.ExecutionCounter;
 import de.gematik.combine.execution.FileProcessor;
 import de.gematik.combine.model.CombineItem;
 import java.io.File;
@@ -167,6 +168,16 @@ public class CombineMojo extends BaseMojo {
    */
   @Parameter(name = "softFilterToHardFilter", defaultValue = "false")
   boolean softFilterToHardFilter;
+  /**
+   * Parameter to decide if executions should be counted and exported to file
+   */
+  @Parameter(name = "countExecutions", defaultValue = "true")
+  boolean countExecutions;
+  /**
+   * In what formats should the counted executions be exported
+   */
+  @Parameter(name = "countExecutionsFormat", defaultValue = "json")
+  List<String> countExecutionsFormat;
 
   @SneakyThrows
   public void execute() {
@@ -197,6 +208,9 @@ public class CombineMojo extends BaseMojo {
     files.stream()
         .map(file -> stripEnding(file, fileEnding))
         .forEach(file -> replacer.process(file, config, itemsToCombine));
+
+    new ExecutionCounter().count(config);
+
     writeErrors(getClass().getSimpleName(),
         Stream.of(minimalTableErrorLog, tableSizeErrorLog, propertyErrorLog, warningsLog)
             .flatMap(Collection::stream)
@@ -290,6 +304,8 @@ public class CombineMojo extends BaseMojo {
         .minTableSize(minTableSize)
         .breakIfMinimalTableError(breakIfMinimalTableError)
         .softFilterToHardFilter(softFilterToHardFilter)
+        .countExecutions(countExecutions)
+        .countExecutionsFormat(countExecutionsFormat)
         .build();
   }
 

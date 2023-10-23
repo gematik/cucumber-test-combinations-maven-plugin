@@ -1,5 +1,5 @@
 /*
- * Copyright 20023 gematik GmbH
+ * Copyright 2023 gematik GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ public class FileProcessor {
     getPluginLog().info("processed: " + file.getName());
   }
 
-  private static GherkinDocument parseGherkinString(String gherkin) {
+  public static GherkinDocument parseGherkinString(String gherkin) {
     final GherkinParser parser = GherkinParser.builder()
         .includeSource(false)
         .includePickles(false)

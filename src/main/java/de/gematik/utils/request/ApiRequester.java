@@ -20,19 +20,24 @@ import static de.gematik.utils.Utils.getLog;
 import static de.gematik.utils.request.SSLContextFactory.getX509TrustManager;
 import static okhttp3.ConnectionSpec.MODERN_TLS;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
-import javax.net.ssl.SSLContext;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
 import okhttp3.OkHttpClient.Builder;
 import okhttp3.Request;
-import okhttp3.ResponseBody;
+import okhttp3.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
+
+import javax.net.ssl.SSLContext;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ApiRequester {
 
@@ -42,7 +47,10 @@ public class ApiRequester {
   private String clientCertPassword;
   private String proxyHost;
   private Integer proxyPort;
+  @Setter
   private OkHttpClient client;
+  private List<StatusCodes> allowedFam;
+  private List<Integer> allowedCodes;
 
 
   public String getApiResponse(String url) throws MojoExecutionException {
@@ -50,11 +58,24 @@ public class ApiRequester {
       setupAndCreateClient();
     }
     Request request = new Request.Builder().url(url).build();
-    try (ResponseBody body = client.newCall(request).execute().body()) {
-      return body.string();
+    try (Response resp = client.newCall(request).execute();) {
+      validateCode(resp.code());
+      return resp.body().string();
     } catch (IOException e) {
       throw new MojoExecutionException(
           "API did not respond -> " + url + " cause: " + e.getMessage());
+    }
+  }
+
+  private void validateCode(int code) throws MojoExecutionException {
+    if (allowedCodes == null) {
+      if (allowedFam.stream().noneMatch(sc -> sc.isValid(code))) {
+        throw new MojoExecutionException("Response code was " + code + " and not in allowed families" + allowedFam);
+      }
+    } else {
+      if (!allowedCodes.contains(code)) {
+        throw new MojoExecutionException("Response code was " + code + " and not defined in valid response codes " + allowedCodes);
+      }
     }
   }
 
@@ -97,13 +118,32 @@ public class ApiRequester {
     }
   }
 
+  public void setAllowedResponses(String fam, String codes) throws MojoExecutionException {
+    if (StringUtils.isNotBlank(codes)) {
+      try {
+        List<Integer> namedCodes = Arrays.stream(codes.split(",")).map(Integer::valueOf).collect(Collectors.toList());
+        if (namedCodes.stream().anyMatch(i -> i >= 600 || i < 100)) {
+          throw new MojoExecutionException("Codes could only have a range of 100 - 599");
+        }
+        this.allowedCodes = namedCodes;
+      } catch (NumberFormatException ex) {
+        throw new MojoExecutionException("Invalid status code was provided in [" + codes + "]");
+      }
+    } else {
+      try {
+        allowedFam = Arrays.asList(fam.split(",")).stream().map(StatusCodes::valueOf).collect(Collectors.toList());
+      } catch (IllegalArgumentException ex) {
+        throw new MojoExecutionException("Not known statuscode family found in \"" + fam + "\" allowed values: " + Arrays.toString(StatusCodes.values()));
+      }
+    }
+  }
+
   public void setupProxy(String proxyHost, Integer proxyPort) {
     this.proxyHost = proxyHost;
     this.proxyPort = proxyPort;
   }
 
-  public void setupTls(String trustStorePath, String trustStorePassword, String clientCertPath,
-      String clientCertPassword) {
+  public void setupTls(String trustStorePath, String trustStorePassword, String clientCertPath, String clientCertPassword) {
     this.trustStorePath = trustStorePath;
     this.trustStorePassword = trustStorePassword;
     this.clientCertPath = clientCertPath;
@@ -116,5 +156,26 @@ public class ApiRequester {
 
   private Stream<Object> sslParameters() {
     return Stream.of(trustStorePath, trustStorePassword, clientCertPath, clientCertPassword);
+  }
+
+  public enum StatusCodes {
+    INFO(100, 199),
+    SUCCESS(200, 299),
+    REDIRECTION(300, 399),
+    CLIENT_ERROR(400, 499),
+    SERVER_ERROR(500, 599),
+    ALL(100, 599);
+
+    final int from;
+    final int to;
+
+    StatusCodes(int from, int to) {
+      this.from = from;
+      this.to = to;
+    }
+
+    public boolean isValid(int code) {
+      return code >= from && code <= to;
+    }
   }
 }

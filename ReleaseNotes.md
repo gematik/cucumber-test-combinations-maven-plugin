@@ -2,7 +2,21 @@
 
 # Release notes
 
+## 2.9.15
+
+### Features
+
+- For all requests that are made to endpoints can be specified what response codes are valid and the response should be parsed. Read more [`docu`](./doc/userguide/GettingStarted.adoc)
+
+## 2.9.14
+
+### Bugfixes
+
+- The plugin will no longer generate examples in a file that is anotated with @WIP or any other skipping tag 
+
 ## 2.9.13
+
+### Features
 
 - Summary how many executions are generated are now located at ./target/generated-combine [`docu`](./doc/userguide/GettingStarted.adoc)
 

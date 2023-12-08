@@ -41,4 +41,8 @@ public class PrepareItemsConfig {
   private int poolSize;
 
   private GroupMatchStrategyType defaultMatchStrategy;
+
+  private String acceptedResponseFamilies;
+
+  private String allowedResponseCodes;
 }

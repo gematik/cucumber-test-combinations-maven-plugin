@@ -33,14 +33,6 @@ import de.gematik.prepare.pooling.Pooler;
 import de.gematik.utils.request.ApiRequester;
 import io.cucumber.core.internal.com.fasterxml.jackson.core.JsonProcessingException;
 import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -54,6 +46,15 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.json.JSONObject;
+
+import javax.inject.Inject;
+import java.io.File;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Plugin for filling empty gherkin tables with generated combinations
@@ -124,10 +125,7 @@ public class PrepareItemsMojo extends BaseMojo {
   private ItemsCreator itemsCreator;
   private List<CombineItem> items;
   private Pooler pooler;
-
-  public static Log getPluginLog() {
-    return instance.getLog();
-  }
+  private PrepareItemsConfig config;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
@@ -142,7 +140,7 @@ public class PrepareItemsMojo extends BaseMojo {
       getLog().info("String is used to create poolGroups. All other configuration is not ");
       this.poolGroups = new PoolGroupParser().transformStringToGroups(poolGroupString);
     }
-    PrepareItemsConfig config = getCreateItemsConfig();
+    config = getCreateItemsConfig();
     itemsCreator = new ItemsCreator(config);
     pooler = new Pooler(config);
     items = pooler.pool();
@@ -150,6 +148,7 @@ public class PrepareItemsMojo extends BaseMojo {
     apiRequester.setupProxy(getProxyHost(), getProxyPort());
     apiRequester
         .setupTls(getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw());
+    apiRequester.setAllowedResponses(config.getAcceptedResponseFamilies(), config.getAllowedResponseCodes());
     run();
   }
 
@@ -186,7 +185,7 @@ public class PrepareItemsMojo extends BaseMojo {
       writeItemsToFile(processedItems);
     }
     if (!requestsOk) {
-      throw  new MojoExecutionException(
+      throw new MojoExecutionException(
           "Error occurred for following API`s ->\n" + join("\n", apiErrors));
     }
     if (!contextOk) {
@@ -272,6 +271,12 @@ public class PrepareItemsMojo extends BaseMojo {
         .excludedGroups(excludedGroups)
         .poolSize(poolSize)
         .defaultMatchStrategy(defaultMatchStrategy)
+        .acceptedResponseFamilies(getAcceptedResponseFamilies())
+        .allowedResponseCodes(getAllowedResponseCodes())
         .build();
+  }
+
+  public static Log getPluginLog() {
+    return instance.getLog();
   }
 }

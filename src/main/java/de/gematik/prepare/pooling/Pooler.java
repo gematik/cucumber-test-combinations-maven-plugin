@@ -39,6 +39,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 @NoArgsConstructor
 public class Pooler {
 
+  @SuppressWarnings("java:S2245")
   private final Random random = new Random();
 
   @Setter

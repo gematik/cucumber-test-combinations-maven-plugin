@@ -16,6 +16,8 @@
 
 package de.gematik;
 
+import static de.gematik.combine.CombineMojo.TEST_RESOURCES_DIR;
+
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.maven.plugin.AbstractMojo;
@@ -24,8 +26,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import static de.gematik.combine.CombineMojo.TEST_RESOURCES_DIR;
 
 @Getter
 @Setter
@@ -92,5 +92,24 @@ public abstract class BaseMojo extends AbstractMojo {
    */
   @Parameter(property = "breakOnContextError", defaultValue = "true")
   boolean breakOnContextError;
-
+  /**
+   * Decide which response-families are valid for each request and should be parsed. (CSV separated)
+   * Is List<Enum> of:
+   * INFO -> 100-199
+   * SUCCESS -> 200-299
+   * REDIRECTION -> 300-399
+   * CLIENT_ERROR -> 400 - 499
+   * SERVER_ERROR -> 500 - 599
+   * ALL -> All requests are valid
+   * Default Success
+   */
+  @Parameter(property = "responseFamilies", defaultValue = "SUCCESS")
+  String acceptedResponseFamilies;
+  /**
+   * If it's not wanted to work with response-families specific response codes could be named.
+   * Overrides acceptedResponseFamilies
+   * Codes provided in CSV-format
+   */
+  @Parameter(property = "allowedResponseCodes")
+  String allowedResponseCodes;
 }

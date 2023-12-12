@@ -293,7 +293,7 @@ class PoolerTest extends AbstractPrepareTest {
 
     List<CombineItem> res = pooler.pool();
     assertThat(res).hasSize(2);
-    assertThat(res).extracting("value").containsExactlyInAnyOrder("Api7", "Api5");
+    assertThat(res).extracting("value").containsExactlyInAnyOrder("Api11", "Api10");
   }
 
   @Test
@@ -313,9 +313,9 @@ class PoolerTest extends AbstractPrepareTest {
     pooler.setConfig(config);
 
     List<CombineItem> res = pooler.pool();
-    assertThat(res).hasSize(5);
+    assertThat(res).hasSize(7);
     assertThat(res).extracting("value")
-        .containsExactlyInAnyOrder("Api1", "Api3", "Api7", "Api8", "Api9");
+        .containsExactlyInAnyOrder("Api1", "Api3", "Api7", "Api8", "Api9", "Api11", "Api10");
   }
 
   @Test
@@ -329,14 +329,14 @@ class PoolerTest extends AbstractPrepareTest {
         .combineItemsFile(baseInputPath + WITH_LONG_NAMES_FOR_PATTERN)
         .poolGroups(List.of(poolGroup))
         .defaultMatchStrategy(CASE_SENSITIVE_EXACT)
-        .excludedGroups(List.of("D_appRoved_temp", "C_apProved", "B_invalid", "B_not", "A_not"))
+        .excludedGroups(List.of("D_appRoved_temp", "C_apProved", "B_invalid", "B_not", "A_not", "B_approved", "A_approved"))
         .poolSize(3)
         .build();
     pooler.setConfig(config);
 
     List<CombineItem> res = pooler.pool();
     assertThat(res).hasSize(3);
-    assertThat(res).extracting("value").containsExactlyInAnyOrder("Api1", "Api3", "Api5");
+    assertThat(res).extracting("value").containsExactlyInAnyOrder("Api5", "Api10", "Api11");
   }
 
   @Test
@@ -403,7 +403,26 @@ class PoolerTest extends AbstractPrepareTest {
 
     assertThatThrownBy(() -> pooler.pool()).isInstanceOf(MojoExecutionException.class)
         .hasMessage(
-            "Requested 1 for group(s) [_*new] but only found 0 matching group(s) ([]) with matching strategy REGEX");
+            "Could not find at least one match for poolgroup: PoolGroup(groupPattern=[_*new], amount=1, strategy=REGEX)");
+  }
+
+  @Test
+  @SneakyThrows
+  void shouldThrowExceptionIfCouldNotFindEnoughMatchingItems() {
+    PoolGroup p1 = PoolGroup.builder()
+        .groupPattern(List.of(".*_new"))
+        .strategy(REGEX)
+        .amount(3)
+        .build();
+    PrepareItemsConfig config = configBuilder
+        .combineItemsFile(baseInputPath + WITH_LONG_GROUPS_FOR_POOLGROUP_TESTS)
+        .poolGroups(List.of(p1))
+        .build();
+    pooler.setConfig(config);
+
+    assertThatThrownBy(() -> pooler.pool()).isInstanceOf(MojoExecutionException.class)
+        .hasMessage(
+            "Requested 3 for group(s) [.*_new] but only found 2 matching group(s) ([C_new, D_new]) with matching strategy REGEX");
   }
 
   @Test
@@ -446,4 +465,5 @@ class PoolerTest extends AbstractPrepareTest {
     res.sort(CombineItem::compareTo);
     assertThat(res).extracting("value").containsExactlyInAnyOrder("Api1", "Api2");
   }
+
 }

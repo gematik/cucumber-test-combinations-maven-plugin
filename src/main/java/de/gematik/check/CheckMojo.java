@@ -100,6 +100,7 @@ public class CheckMojo extends BaseMojo {
     apiRequester.setupProxy(getProxyHost(), getProxyPort());
     apiRequester.setupTls(
         getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw());
+    apiRequester.setAllowedResponses(getAcceptedResponseFamilies(), getAllowedResponseCodes());
     run();
   }
 

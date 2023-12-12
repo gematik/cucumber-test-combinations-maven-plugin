@@ -70,7 +70,7 @@ public class ApiRequester {
   private void validateCode(int code) throws MojoExecutionException {
     if (allowedCodes == null) {
       if (allowedFam.stream().noneMatch(sc -> sc.isValid(code))) {
-        throw new MojoExecutionException("Response code was " + code + " and not in allowed families" + allowedFam);
+        throw new MojoExecutionException("Response code was " + code + " and not in allowed response families" + allowedFam);
       }
     } else {
       if (!allowedCodes.contains(code)) {
@@ -133,7 +133,7 @@ public class ApiRequester {
       try {
         allowedFam = Arrays.asList(fam.split(",")).stream().map(StatusCodes::valueOf).collect(Collectors.toList());
       } catch (IllegalArgumentException ex) {
-        throw new MojoExecutionException("Not known statuscode family found in \"" + fam + "\" allowed values: " + Arrays.toString(StatusCodes.values()));
+        throw new MojoExecutionException("Unknown status code family found in \"" + fam + "\" allowed values: " + Arrays.toString(StatusCodes.values()));
       }
     }
   }

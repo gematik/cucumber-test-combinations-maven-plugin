@@ -137,7 +137,7 @@ public class PrepareItemsMojo extends BaseMojo {
     checkExpressionSetCorrectly();
     getLog().info("Going to preprocess " + getCombineItemsFile());
     if (StringUtils.isNotBlank(poolGroupString)) {
-      getLog().info("String is used to create poolGroups. All other configuration is not ");
+      getLog().info("String is used to create poolGroups. Overrides other configuration!");
       this.poolGroups = new PoolGroupParser().transformStringToGroups(poolGroupString);
     }
     config = getCreateItemsConfig();

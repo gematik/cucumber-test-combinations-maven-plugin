@@ -165,7 +165,7 @@ class ApiRequesterTest {
     assertThatThrownBy(() -> apiRequester.setAllowedResponses("unknown", ""))
         // assert
         .isInstanceOf(MojoExecutionException.class)
-        .hasMessage("Not known statuscode family found in \"unknown\" allowed values: [INFO, SUCCESS, REDIRECTION, CLIENT_ERROR, SERVER_ERROR, ALL]");
+        .hasMessage("Unknown status code family found in \"unknown\" allowed values: [INFO, SUCCESS, REDIRECTION, CLIENT_ERROR, SERVER_ERROR, ALL]");
   }
 
   private static Stream<Arguments> getFamiliesWithInvalidCodes() {

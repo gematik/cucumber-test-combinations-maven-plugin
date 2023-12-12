@@ -2,6 +2,16 @@
 
 # Release notes
 
+## 2.9.16
+
+### Feature
+
+- If not only one item for requested group is found, even if the requested amount is set to 0, the plugin will stop and return an error.
+
+### Bugfix
+
+- Check goal also refers to accepted response codes now
+
 ## 2.9.15
 
 ### Features
@@ -54,7 +64,7 @@
 - Improved error message if connection to api failed
 - New parameters to disable explicit executions or all executions at once implemented
 
-### Bugs
+### Bugfix
 
 - Check-execution removes double `/` from url
 

@@ -140,7 +140,8 @@ class PoolerTest extends AbstractPrepareTest {
         .build();
     PrepareItemsConfig config = configBuilder
         .combineItemsFile(baseInputPath + FOUR_WITH_GROUP_SET_AND_ONE_WITHOUT)
-        .poolGroups(List.of(poolGroup))
+        .defaultMatchStrategy(WILDCARD)
+        .poolGroups(new ArrayList<>(List.of(poolGroup)))
         .poolSize(groups.size() + 1)
         .build();
     pooler.setConfig(config);
@@ -158,7 +159,7 @@ class PoolerTest extends AbstractPrepareTest {
         .build();
     PrepareItemsConfig config = configBuilder
         .combineItemsFile(baseInputPath + ONE_SINGLE_GROUP_AND_ONE_DOUBLE_GROUP)
-        .poolGroups(List.of(poolGroup))
+        .poolGroups(new ArrayList<>(List.of(poolGroup)))
         .poolSize(2)
         .build();
     pooler.setConfig(config);

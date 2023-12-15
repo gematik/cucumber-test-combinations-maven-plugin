@@ -2,6 +2,17 @@
 
 # Release notes
 
+## 2.9.18
+
+### Feature
+
+- Reworked report about used groups. Only groups where all items are collected are mentioned now. Additionally, the used poolGroups are added and all used items (which can differ) 
+- To execute scenarios will be counted and info added to count summary. Empty scenarios does not count
+
+### Bugfix
+
+- Used groups are now filled with the real data
+
 ## 2.9.16
 
 ### Feature
@@ -64,7 +75,7 @@
 - Improved error message if connection to api failed
 - New parameters to disable explicit executions or all executions at once implemented
 
-### Bugfix
+### Bugs
 
 - Check-execution removes double `/` from url
 

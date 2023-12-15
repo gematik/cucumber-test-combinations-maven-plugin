@@ -1,0 +1,41 @@
+[
+  {
+    "value": "API-1",
+    "groups": [
+      "A"
+    ]
+  },
+  {
+    "value": "API-2",
+    "groups": [
+      "A",
+      "B"
+    ]
+  },
+  {
+    "value": "API-3",
+    "groups": [
+      "C"
+    ]
+  },
+  {
+    "value": "API-4",
+    "groups": [
+      "excluded",
+      "A"
+    ]
+  },
+  {
+    "value": "API-5",
+    "groups": [
+      "excluded",
+      "C"
+    ]
+  },
+  {
+    "value": "API-6",
+    "groups": [
+      "B"
+    ]
+  }
+]

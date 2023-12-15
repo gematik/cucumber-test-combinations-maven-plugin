@@ -17,8 +17,11 @@
 package de.gematik.combine.count;
 
 import java.util.Set;
-import lombok.Getter;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class TotalCounter {
 
   @Getter
@@ -30,6 +33,10 @@ public class TotalCounter {
 
   public int getTotal() {
     return features.stream().map(ExampleCounter::getTotal).reduce(Integer::sum).orElse(0);
+  }
+
+  public long getTotalScenarioAmount(){
+    return features.stream().map(ExampleCounter::getScenarioAmount).reduce(Long::sum).orElse(0L);
   }
 
 }

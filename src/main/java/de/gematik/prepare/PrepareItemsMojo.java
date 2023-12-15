@@ -70,6 +70,7 @@ public class PrepareItemsMojo extends BaseMojo {
   public static final String CONFIG_FAIL_WARN_MESSAGE =
       "=== Caution!!! The generated file is significantly different from your input! ==="
           + "\n          === This is because of the following config errors: ===";
+  public static final String USED_GROUPS_PATH = GENERATED_COMBINE_ITEMS_DIR + File.separator + "usedGroups.json";
   @Getter
   @Setter
   private static PrepareItemsMojo instance;
@@ -93,6 +94,7 @@ public class PrepareItemsMojo extends BaseMojo {
    * Name a list of lists that should be used and how often.
    */
   @Parameter(property = "poolGroups")
+  @Getter
   List<PoolGroup> poolGroups;
   /**
    * Name of all groups of items in combine_items.json explicitly not to use
@@ -115,6 +117,7 @@ public class PrepareItemsMojo extends BaseMojo {
    * Default matching strategy. If no strategy is named in poolGroup this will be applied
    */
   @Parameter(name = "defaultMatchStrategy", defaultValue = "WILDCARD")
+  @Getter
   GroupMatchStrategyType defaultMatchStrategy;
   /**
    * Parameter to decide if prepare-execution should be run
@@ -126,6 +129,10 @@ public class PrepareItemsMojo extends BaseMojo {
   private List<CombineItem> items;
   private Pooler pooler;
   private PrepareItemsConfig config;
+
+  public static Log getPluginLog() {
+    return instance.getLog();
+  }
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
@@ -140,6 +147,7 @@ public class PrepareItemsMojo extends BaseMojo {
       getLog().info("String is used to create poolGroups. Overrides other configuration!");
       this.poolGroups = new PoolGroupParser().transformStringToGroups(poolGroupString);
     }
+    setDefaultForEmptyStrategyInPoolGroups();
     config = getCreateItemsConfig();
     itemsCreator = new ItemsCreator(config);
     pooler = new Pooler(config);
@@ -150,6 +158,15 @@ public class PrepareItemsMojo extends BaseMojo {
         .setupTls(getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw());
     apiRequester.setAllowedResponses(config.getAcceptedResponseFamilies(), config.getAllowedResponseCodes());
     run();
+  }
+
+  private void setDefaultForEmptyStrategyInPoolGroups() {
+    poolGroups = poolGroups.stream().map(p -> {
+      if (p.getStrategy() == null) {
+        p.setStrategy(defaultMatchStrategy);
+      }
+      return p;
+    }).collect(toList());
   }
 
   protected void checkExpressionSetCorrectly() throws MojoExecutionException {
@@ -230,29 +247,35 @@ public class PrepareItemsMojo extends BaseMojo {
 
   @SneakyThrows
   private void writeUsedGroupsToFile(List<CombineItem> finalListOfItems) {
-    Map<String, List<String>> usedGroups = finalListOfItems.stream().map(CombineItem::getGroups)
-        .flatMap(Collection::stream)
-        .collect(Collectors.toSet())
-        .stream()
-        .collect(Collectors.toMap(String::toString,
-            e -> finalListOfItems.stream().filter(i -> i.getGroups().contains(e))
-                .map(CombineItem::produceValueUrl).collect(toList())));
-
-    List<String> usedWithoutGroups = finalListOfItems.stream()
-        .filter(e -> e.getGroups().isEmpty())
-        .map(CombineItem::produceValueUrl)
-        .collect(Collectors.toList());
+    Map<String, List<String>> usedGroups =
+        finalListOfItems.stream()
+            .map(CombineItem::getGroups)
+            .flatMap(Collection::stream)
+            .distinct()
+            .filter(pooler::matchAny)
+            .collect(Collectors.toMap(
+                String::toString,
+                e -> finalListOfItems.stream()
+                    .filter(i -> i.getGroups().contains(e))
+                    .map(CombineItem::produceValueUrl)
+                    .collect(toList())));
+    List<String> usedItems = finalListOfItems.stream().map(CombineItem::produceValueUrl).collect(toList());
     JSONObject result = new JSONObject();
     result.put("usedGroups", usedGroups);
-    result.put("usedItemsWithoutGroup", usedWithoutGroups);
     result.put("excludedGroups", excludedGroups);
-    File file = new File(GENERATED_COMBINE_ITEMS_DIR + File.separator + "usedGroups.json");
-    FileUtils.writeStringToFile(file,
-        new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result), UTF_8);
-    System.setProperty("cutest.plugin.groups.used", mapGroupsToString(usedGroups));
+    result.put("poolGroups", poolGroups);
+    result.put("usedItems", usedItems);
+    File file = new File(USED_GROUPS_PATH);
+    FileUtils.writeStringToFile(file, result.toString(), UTF_8);
+    System.setProperty("cutest.plugin.groups.usedGroups", mapGroupsToString(usedGroups));
     System.setProperty("cutest.plugin.groups.excluded", join(",", excludedGroups));
-    System.setProperty("cutest.plugin.groups.usedWithoutGroup", join(",", usedWithoutGroups));
+    System.setProperty("cutest.plugin.groups.poolGroupString", poolGroupsToString());
+    System.setProperty("cutest.plugin.groups.usedItems", join(",", usedItems));
     getLog().info("Created new used group file -> " + file.getAbsolutePath());
+  }
+
+  private String poolGroupsToString() {
+    return join(";", poolGroups.stream().map(PoolGroup::toPoolGroupString).collect(toList()));
   }
 
   private String mapGroupsToString(Map<String, List<String>> map) {
@@ -274,9 +297,5 @@ public class PrepareItemsMojo extends BaseMojo {
         .acceptedResponseFamilies(getAcceptedResponseFamilies())
         .allowedResponseCodes(getAllowedResponseCodes())
         .build();
-  }
-
-  public static Log getPluginLog() {
-    return instance.getLog();
   }
 }

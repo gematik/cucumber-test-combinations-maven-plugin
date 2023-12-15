@@ -16,11 +16,14 @@
 
 package de.gematik.prepare.pooling;
 
-import java.util.List;
+import static java.lang.String.join;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -32,4 +35,7 @@ public class PoolGroup {
   private int amount;
   private GroupMatchStrategyType strategy;
 
+  public String toPoolGroupString() {
+    return String.format("%s,%s,%s", join("|", groupPattern), amount, strategy);
+  }
 }

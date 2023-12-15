@@ -18,32 +18,44 @@ package de.gematik.combine.count;
 
 import static de.gematik.BaseMojo.GENERATED_COMBINE_ITEMS_DIR;
 import static de.gematik.combine.count.ExecutionCounter.COUNT_EXECUTION_FILE_NAME;
+import static io.cucumber.core.internal.com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.gematik.combine.CombineConfiguration;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 class ExecutionCounterTest {
 
   private final String OUTPUT_DIR = "./src/test/resources/featureFiles/correct";
   private final String OUTPUT_DIR_WRONG = "./src/test/resources/featureFiles/sameName";
+  private final String OUTPUT_DIR_EMPTY_SCENARIOS = "./src/test/resources/featureFiles/emptyScenarios";
+
   private ExecutionCounter underTest = new ExecutionCounter();
+  private CombineConfiguration.CombineConfigurationBuilder configBuilder;
 
   @BeforeEach
   void deleteOldFiles() {
     try {
       Arrays.stream(Objects.requireNonNull(new File(GENERATED_COMBINE_ITEMS_DIR).listFiles())).forEach(File::delete);
+      configBuilder = CombineConfiguration.builder()
+          .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false);
     } catch (Exception ex) {
       System.err.println(ex);
     }
@@ -54,6 +66,7 @@ class ExecutionCounterTest {
   void textAndJsonFileShouldBeCreated() {
     // arrange
     CombineConfiguration config = CombineConfiguration.builder()
+        .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false)
         .countExecutionsFormat(List.of("txt", "json"))
         .countExecutions(true)
         .outputDir(OUTPUT_DIR)
@@ -70,6 +83,7 @@ class ExecutionCounterTest {
   void shouldNotCreateFilesIfCountExecutionsSetToFalse() {
     // arrange
     CombineConfiguration config = CombineConfiguration.builder()
+        .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false)
         .countExecutionsFormat(List.of("txt", "json"))
         .countExecutions(false)
         .outputDir(OUTPUT_DIR)
@@ -85,6 +99,7 @@ class ExecutionCounterTest {
   void onlyTextFileShouldBeCreated() {
     // arrange
     CombineConfiguration config = CombineConfiguration.builder()
+        .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false)
         .countExecutionsFormat(List.of("txt"))
         .countExecutions(true)
         .outputDir(OUTPUT_DIR)
@@ -100,6 +115,7 @@ class ExecutionCounterTest {
   void shouldCountCorrectly() {
     // arrange
     CombineConfiguration config = CombineConfiguration.builder()
+        .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false)
         .countExecutionsFormat(List.of("json"))
         .countExecutions(true)
         .outputDir(OUTPUT_DIR)
@@ -121,6 +137,7 @@ class ExecutionCounterTest {
   void shouldThrowExceptionBecauseFileNamedTheSame() {
     // arrange
     CombineConfiguration config = CombineConfiguration.builder()
+        .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false)
         .countExecutionsFormat(List.of("json"))
         .countExecutions(true)
         .outputDir(OUTPUT_DIR_WRONG)
@@ -132,5 +149,22 @@ class ExecutionCounterTest {
         .hasMessage("Could not count features correctly because 2 feature files named the same: SameName");
   }
 
-
+  @Test
+  @SneakyThrows
+  void shouldNotCountEmptyScenarios() {
+    // arrange
+    CombineConfiguration config = CombineConfiguration.builder()
+        .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false)
+        .countExecutionsFormat(List.of("json","txt"))
+        .countExecutions(true)
+        .outputDir(OUTPUT_DIR_EMPTY_SCENARIOS)
+        .build();
+    // act
+    underTest.count(config);
+    String counterString = FileUtils.readFileToString(new File(GENERATED_COMBINE_ITEMS_DIR + "/countExecution.json"), UTF_8);
+    TotalCounter tc = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(counterString, TotalCounter.class);
+    // assert
+    assertThat(tc.getTotalScenarioAmount()).isEqualTo(3);
+    assertThat(tc.getFeatures().stream().map(ExampleCounter::getScenarios).map(Map::values).mapToLong(Collection::size).sum()).isEqualTo(5);
+  }
 }

@@ -17,7 +17,10 @@
 package de.gematik.prepare;
 
 import static de.gematik.prepare.PrepareItemsMojo.GENERATED_COMBINE_ITEMS_DIR;
+import static de.gematik.prepare.PrepareItemsMojo.USED_GROUPS_PATH;
+import static de.gematik.prepare.pooling.GroupMatchStrategyType.WILDCARD;
 import static de.gematik.utils.Utils.getItemsToCombine;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
@@ -30,22 +33,28 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.jayway.jsonpath.JsonPath;
 import de.gematik.combine.model.CombineItem;
-import java.io.File;
-import java.util.List;
-import java.util.stream.Stream;
+import de.gematik.prepare.pooling.PoolGroup;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
 class PrepareItemsMojoTest extends AbstractPrepareTest {
 
   public static final String ONLY_VALUE_JSON = "src/test/resources/input/inputOnlyValue.json";
   public static final String URL_VALUE_JSON = "src/test/resources/input/inputValueAndUrl.json";
+  public static final String POOL_TEST = "src/test/resources/input/poolTest.json";
 
 
   @Test
@@ -162,5 +171,59 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
     mojo.setBreakOnContextError(false);
     mojo.setCombineItemsFile(ONLY_VALUE_JSON);
     mojo.run();
+  }
+
+  @Test
+  @SneakyThrows
+  void shouldCreateUsedGroupCorrectly() {
+    // arrange
+    mojo.setCombineItemsFile(POOL_TEST);
+    mojo.setDefaultMatchStrategy(WILDCARD);
+    mojo.setPropertyExpressions(List.of());
+    mojo.setTagExpressions(List.of());
+    mojo.setExcludedGroups(List.of("excluded"));
+    mojo.setPoolGroupString("A");
+    // act
+    mojo.execute();
+    // assert
+    String jsonString = FileUtils.readFileToString(new File(USED_GROUPS_PATH), UTF_8);
+    List<String> usedItems = JsonPath.read(jsonString, "$.usedItems");
+    List<PoolGroup> poolGroups = JsonPath.read(jsonString, "$.poolGroups");
+    List<String> usedGroups = JsonPath.read(jsonString, "$.usedGroups.A");
+    Assertions.assertAll(
+        () -> assertThat(usedItems).hasSize(2),
+        () -> assertThat(poolGroups).hasSize(1),
+        () -> assertThat(usedGroups).hasSize(2),
+        () -> assertThat(usedGroups).containsExactlyInAnyOrder("API-1", "API-2")
+    );
+
+  }
+
+  @Test
+  @SneakyThrows
+  void shouldAddRandomlySelectedGroupToPoolGroups() {
+    // arrange
+    mojo.setCombineItemsFile(POOL_TEST);
+    mojo.setDefaultMatchStrategy(WILDCARD);
+    mojo.setPropertyExpressions(List.of());
+    mojo.setTagExpressions(List.of());
+    mojo.setExcludedGroups(List.of("excluded"));
+    mojo.setPoolGroupString("C");
+    mojo.setPoolSize(2);
+    // act
+    mojo.execute();
+    // assert
+    String jsonString = FileUtils.readFileToString(new File(USED_GROUPS_PATH), UTF_8);
+    System.out.println(jsonString);
+    List<String> usedItems = JsonPath.read(jsonString, "$.usedItems");
+    List<PoolGroup> poolGroups = JsonPath.read(jsonString, "$.poolGroups");
+    Map<String, List<String>> usedGroups = JsonPath.read(jsonString, "$.usedGroups");
+    Assertions.assertAll(
+        () -> assertThat(usedItems).as("1").hasSize(3),
+        () -> assertThat(poolGroups).as("2").hasSize(2),
+        () -> assertThat(usedGroups).containsKey("C"),
+        () -> assertThat(usedGroups.keySet()).hasSize(2)
+    );
+
   }
 }

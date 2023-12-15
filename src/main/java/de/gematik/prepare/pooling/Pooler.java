@@ -16,6 +16,10 @@
 
 package de.gematik.prepare.pooling;
 
+import static de.gematik.prepare.pooling.strategies.MatchStrategy.MATCHING;
+import static de.gematik.utils.Utils.getItemsToCombine;
+import static java.lang.String.format;
+
 import de.gematik.combine.model.CombineItem;
 import de.gematik.prepare.PrepareItemsConfig;
 import de.gematik.prepare.PrepareItemsMojo;
@@ -24,13 +28,14 @@ import lombok.Setter;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static de.gematik.prepare.pooling.strategies.MatchStrategy.MATCHING;
-import static de.gematik.utils.Utils.getItemsToCombine;
-import static java.lang.String.format;
 
 @NoArgsConstructor
 public class Pooler {
@@ -130,6 +135,7 @@ public class Pooler {
           .collect(Collectors.toList());
       items.addAll(newItems);
       leftItems.removeAll(newItems);
+      config.getPoolGroups().add(new PoolGroup(List.of(randomGroup), 0, config.getDefaultMatchStrategy()));
     }
     return items;
   }
@@ -160,5 +166,9 @@ public class Pooler {
 
   private GroupMatcher getMatcher(GroupMatchStrategyType strategy, List<String> groups) {
     return new GroupMatcher(groups, strategy);
+  }
+
+  public boolean matchAny(String s) {
+    return config.getPoolGroups().stream().anyMatch(poolGroup -> !getMatcher(poolGroup).getAllMatchingGroups(Set.of(s)).isEmpty());
   }
 }

@@ -25,6 +25,10 @@ import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.messages.types.Feature;
 import io.cucumber.messages.types.FeatureChild;
 import io.cucumber.messages.types.GherkinDocument;
+import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
+import org.apache.maven.plugin.MojoExecutionException;
+
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -34,9 +38,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import lombok.SneakyThrows;
-import org.apache.commons.io.FileUtils;
-import org.apache.maven.plugin.MojoExecutionException;
 
 public class ExecutionCounter {
 
@@ -93,27 +94,28 @@ public class ExecutionCounter {
   }
 
   private void writeExecutionsToFile(CombineConfiguration config) {
+    TotalCounter totalCounter = new TotalCounter(exampleCounter);
     if (config.getCountExecutionsFormat().contains("json")) {
-      createJsonFile();
+      createJsonFile(totalCounter);
     }
     if (config.getCountExecutionsFormat().contains("txt")) {
-      createTxtFile();
+      createTxtFile(totalCounter);
     }
   }
 
   @SneakyThrows
-  private void createJsonFile() {
+  private void createJsonFile(TotalCounter totalCounter) {
     writeLineToStatisticFile(
-        new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(new TotalCounter(exampleCounter)),
+        new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(totalCounter),
         ".json", true);
   }
 
-  private void createTxtFile() {
-    Integer total = exampleCounter.stream().map(ExampleCounter::getTotal).reduce(Integer::sum).orElse(0);
-    writeLineToStatisticFile("total -> " + total, ".txt", true);
+  private void createTxtFile(TotalCounter totalCounter) {
+    writeLineToStatisticFile("total -> " + totalCounter.getTotal(), ".txt", true);
+    writeLineToStatisticFile("totalScenarios -> " + totalCounter.getTotalScenarioAmount(), ".txt", false);
     exampleCounter.stream().forEach(e -> {
       writeLineToStatisticFile(
-          "\n" + e.getName() + " -> " + e.getScenarios().values().stream().reduce(Integer::sum).orElse(0), ".txt");
+          "\n" + e.getName() + " -> " + e.getScenarios().values().stream().reduce(Integer::sum).orElse(0) + " SzenarioAmount => " +e.getScenarioAmount(), ".txt");
       e.getScenarios().forEach((k, v) -> writeLineToStatisticFile("\t" + k + " -> " + v, ".txt"));
     });
   }

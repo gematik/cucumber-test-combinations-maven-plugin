@@ -141,9 +141,10 @@ An additionally summary file will be created to retrace which groups are used an
 This can be found at `./target/generated-combine/usedGroups.json`
 In addition this information will be set in java runtime environment and can be accessed later via:
 
-* cutest.plugin.groups.used
+* cutest.plugin.groups.usedGroups
 * cutest.plugin.groups.excluded
-* cutest.plugin.groups.usedWithoutGroup
+* cutest.plugin.groups.poolGroupString
+* cutest.plugin.groups.usedItems
 
 ==== Matching Strategy
 

@@ -16,23 +16,33 @@
 
 package de.gematik.combine.count;
 
-import java.util.Map;
-import java.util.TreeMap;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Map;
+import java.util.TreeMap;
 
 @Getter
 @EqualsAndHashCode
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class ExampleCounter implements Comparable<ExampleCounter> {
 
-  private final String name;
-  private Map<String, Integer> scenarios = new TreeMap<>();
+  private String name;
+  private Map<String, Integer> scenarios;
+
+  public ExampleCounter(String name) {
+    this.name = name;
+    this.scenarios = new TreeMap<>();
+  }
 
   public Integer getTotal() {
     return scenarios.values().stream().reduce(Integer::sum).orElse(0);
+  }
+
+  public long getScenarioAmount() {
+    return scenarios.entrySet().stream().filter(e -> e.getValue() > 0).count();
   }
 
   public void addScenario(String name, int size) {

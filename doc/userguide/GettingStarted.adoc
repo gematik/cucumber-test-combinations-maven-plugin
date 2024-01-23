@@ -90,6 +90,7 @@ Further explanation <<Matching Strategy,here>>|WILDCARD
 |skipComb|Parameter to decide if combine-execution should be run|false
 |breakOnFailedRequest|_global option, has to be set here: <<_overall_configuration_and_parameters,overall options>>!_|true
 |breakOnContextError|_global option, has to be set here: <<_overall_configuration_and_parameters,overall options>>!_|true
+|envVarFormat|Can be set to html. This leads to <div> surrounded values for environment variables `cutest.plugin.groups.` -> `usedGroups`, `excluded`, `poolGroupString` and `usedItems`|
 |===
 
 [#_pooling]

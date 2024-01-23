@@ -124,6 +124,11 @@ public class PrepareItemsMojo extends BaseMojo {
    */
   @Parameter(name = "skipPrep", defaultValue = "false")
   boolean skipPrep;
+  /**
+   * Parameter to decide what format the environment variables should have
+   */
+  @Parameter(name = "envVarFormat")
+  String envVarFormat;
 
   private ItemsCreator itemsCreator;
   private List<CombineItem> items;
@@ -268,20 +273,24 @@ public class PrepareItemsMojo extends BaseMojo {
     File file = new File(USED_GROUPS_PATH);
     FileUtils.writeStringToFile(file, result.toString(), UTF_8);
     System.setProperty("cutest.plugin.groups.usedGroups", mapGroupsToString(usedGroups));
-    System.setProperty("cutest.plugin.groups.excluded", join(",", excludedGroups));
-    System.setProperty("cutest.plugin.groups.poolGroupString", poolGroupsToString());
-    System.setProperty("cutest.plugin.groups.usedItems", join(",", usedItems));
+    System.setProperty("cutest.plugin.groups.excluded", mapToString(",", excludedGroups));
+    System.setProperty("cutest.plugin.groups.poolGroupString", mapToString(";", poolGroups.stream().map(PoolGroup::toPoolGroupString).collect(toList())));
+    System.setProperty("cutest.plugin.groups.usedItems", mapToString(",", usedItems));
     getLog().info("Created new used group file -> " + file.getAbsolutePath());
   }
 
-  private String poolGroupsToString() {
-    return join(";", poolGroups.stream().map(PoolGroup::toPoolGroupString).collect(toList()));
-  }
 
   private String mapGroupsToString(Map<String, List<String>> map) {
     StringBuilder sb = new StringBuilder();
-    map.forEach((k, v) -> sb.append(" [" + k + "]: " + join(" | ", v)));
+    map.forEach((k, v) -> sb.append(" [" + k + "]: " + mapToString(" | ", v)));
     return sb.toString();
+  }
+
+  private String mapToString(String defaultDelimiter, List<String> usedItems) {
+    if(envVarFormat.equalsIgnoreCase("html")){
+      return usedItems.stream().map(s -> "<div>" + s + "</div>").collect(Collectors.joining());
+    }
+    return join(defaultDelimiter, usedItems);
   }
 
   private PrepareItemsConfig getCreateItemsConfig() {

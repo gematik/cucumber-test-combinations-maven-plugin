@@ -49,6 +49,7 @@ public abstract class AbstractPrepareTest {
     mojo = spy(new PrepareItemsMojo(apiRequester));
     lenient().when(mojo.getLog()).thenReturn(log);
     mojo.setItemsCreator(itemsCreator);
+    mojo.setEnvVarFormat("");
     lenient().doReturn("{}").when(apiRequester).getApiResponse(any());
     PrepareItemsMojo.setInstance(mojo);
   }

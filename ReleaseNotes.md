@@ -2,6 +2,12 @@
 
 # Release notes
 
+## 2.9.19
+
+### Feature
+
+- The environment variables () written in the environment variables can now be formatted in html style for better use 
+
 ## 2.9.18
 
 ### Feature

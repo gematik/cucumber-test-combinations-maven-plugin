@@ -38,8 +38,6 @@ public class MinimalTableTagParser implements SingleTagParser {
       minimal = parseBoolean(preParsedTag.getValue());
     }
     boolean finalMinimal = minimal;
-    parsedTags.addConfigModifier(config -> config.toBuilder()
-        .minimalTable(finalMinimal)
-        .build());
+    parsedTags.addConfigModifier(config -> config.toBuilder().minimalTable(finalMinimal).build());
   }
 }

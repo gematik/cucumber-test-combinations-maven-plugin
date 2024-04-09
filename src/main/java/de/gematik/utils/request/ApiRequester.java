@@ -20,6 +20,14 @@ import static de.gematik.utils.Utils.getLog;
 import static de.gematik.utils.request.SSLContextFactory.getX509TrustManager;
 import static okhttp3.ConnectionSpec.MODERN_TLS;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
+import javax.net.ssl.SSLContext;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
@@ -29,16 +37,6 @@ import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 
-import javax.net.ssl.SSLContext;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public class ApiRequester {
 
   private String trustStorePath;
@@ -47,18 +45,16 @@ public class ApiRequester {
   private String clientCertPassword;
   private String proxyHost;
   private Integer proxyPort;
-  @Setter
-  private OkHttpClient client;
+  @Setter private OkHttpClient client;
   private List<StatusCodes> allowedFam;
   private List<Integer> allowedCodes;
-
 
   public String getApiResponse(String url) throws MojoExecutionException {
     if (client == null) {
       setupAndCreateClient();
     }
     Request request = new Request.Builder().url(url).build();
-    try (Response resp = client.newCall(request).execute();) {
+    try (Response resp = client.newCall(request).execute()) {
       validateCode(resp.code());
       return resp.body().string();
     } catch (IOException e) {
@@ -70,17 +66,21 @@ public class ApiRequester {
   private void validateCode(int code) throws MojoExecutionException {
     if (allowedCodes == null) {
       if (allowedFam.stream().noneMatch(sc -> sc.isValid(code))) {
-        throw new MojoExecutionException("Response code was " + code + " and not in allowed response families" + allowedFam);
+        throw new MojoExecutionException(
+            "Response code was " + code + " and not in allowed response families" + allowedFam);
       }
     } else {
       if (!allowedCodes.contains(code)) {
-        throw new MojoExecutionException("Response code was " + code + " and not defined in valid response codes " + allowedCodes);
+        throw new MojoExecutionException(
+            "Response code was "
+                + code
+                + " and not defined in valid response codes "
+                + allowedCodes);
       }
     }
   }
 
   @SneakyThrows
-  @SuppressWarnings("java:S5527")
   private void setupAndCreateClient() {
     Builder builder = new Builder();
     checkAndConfigureProxy(builder);
@@ -88,14 +88,18 @@ public class ApiRequester {
     client = builder.build();
   }
 
+  @SuppressWarnings("java:S5527")
   private void checkAndConfigureMtls(Builder builder) throws MojoExecutionException {
     if (sslParameters().noneMatch(Objects::isNull)) {
-      SSLContext sslContext = SSLContextFactory.createAndGetSSLContext(clientCertPath,
-          trustStorePath, clientCertPassword,
-          trustStorePassword);
-      builder.hostnameVerifier((hostname, session) -> true)
+      SSLContext sslContext =
+          SSLContextFactory.createAndGetSSLContext(
+              clientCertPath, trustStorePath, clientCertPassword, trustStorePassword);
+      builder
+          .hostnameVerifier((hostname, session) -> true)
           .connectionSpecs(List.of(MODERN_TLS))
-          .sslSocketFactory(sslContext.getSocketFactory(), getX509TrustManager(trustStorePath, trustStorePassword))
+          .sslSocketFactory(
+              sslContext.getSocketFactory(),
+              getX509TrustManager(trustStorePath, trustStorePassword))
           .build();
       getLog().info("Using mTLS");
     } else if (sslParameters().allMatch(Objects::isNull)) {
@@ -113,15 +117,14 @@ public class ApiRequester {
     } else if (proxyParameters().allMatch(Objects::isNull)) {
       getLog().warn("Using no proxy");
     } else {
-      throw new MojoExecutionException(
-          "You tried to set a proxy but one parameter is missing");
+      throw new MojoExecutionException("You tried to set a proxy but one parameter is missing");
     }
   }
 
   public void setAllowedResponses(String fam, String codes) throws MojoExecutionException {
     if (StringUtils.isNotBlank(codes)) {
       try {
-        List<Integer> namedCodes = Arrays.stream(codes.split(",")).map(Integer::valueOf).collect(Collectors.toList());
+        List<Integer> namedCodes = Arrays.stream(codes.split(",")).map(Integer::valueOf).toList();
         if (namedCodes.stream().anyMatch(i -> i >= 600 || i < 100)) {
           throw new MojoExecutionException("Codes could only have a range of 100 - 599");
         }
@@ -131,9 +134,13 @@ public class ApiRequester {
       }
     } else {
       try {
-        allowedFam = Arrays.asList(fam.split(",")).stream().map(StatusCodes::valueOf).collect(Collectors.toList());
+        allowedFam = Arrays.stream(fam.split(",")).map(StatusCodes::valueOf).toList();
       } catch (IllegalArgumentException ex) {
-        throw new MojoExecutionException("Unknown status code family found in \"" + fam + "\" allowed values: " + Arrays.toString(StatusCodes.values()));
+        throw new MojoExecutionException(
+            "Unknown status code family found in \""
+                + fam
+                + "\" allowed values: "
+                + Arrays.toString(StatusCodes.values()));
       }
     }
   }
@@ -143,7 +150,11 @@ public class ApiRequester {
     this.proxyPort = proxyPort;
   }
 
-  public void setupTls(String trustStorePath, String trustStorePassword, String clientCertPath, String clientCertPassword) {
+  public void setupTls(
+      String trustStorePath,
+      String trustStorePassword,
+      String clientCertPath,
+      String clientCertPassword) {
     this.trustStorePath = trustStorePath;
     this.trustStorePassword = trustStorePassword;
     this.clientCertPath = clientCertPath;

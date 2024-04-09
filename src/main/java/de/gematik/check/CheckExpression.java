@@ -29,5 +29,4 @@ public class CheckExpression {
 
   private String id;
   private String expression;
-
 }

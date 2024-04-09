@@ -29,8 +29,8 @@ public class NonNullableMap<K, V> implements Map<K, V> {
   private final Map<K, V> innerMap;
   private final Function<K, V> defaultValue;
 
-  public static <K, V> NonNullableMap<K, V> nonNullableMap(Map<K, V> innerMap,
-      Function<K, V> defaultValue) {
+  public static <K, V> NonNullableMap<K, V> nonNullableMap(
+      Map<K, V> innerMap, Function<K, V> defaultValue) {
     return new NonNullableMap<>(innerMap, defaultValue);
   }
 

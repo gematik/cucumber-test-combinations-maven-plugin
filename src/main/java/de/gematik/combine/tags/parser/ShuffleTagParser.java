@@ -39,8 +39,7 @@ public class ShuffleTagParser implements SingleTagParser {
       shuffle = parseBoolean(preParsedTag.getValue());
     }
     boolean finalShuffle = shuffle;
-    parsedTags.addConfigModifier(config -> config.toBuilder()
-        .shuffleCombinations(finalShuffle)
-        .build());
+    parsedTags.addConfigModifier(
+        config -> config.toBuilder().shuffleCombinations(finalShuffle).build());
   }
 }

@@ -39,6 +39,7 @@ public class DistinctColumnPropertyTagParser implements SingleTagParser {
       throw new IllegalArgumentException(
           "'" + preParsedTag.getValue() + "' does not have exact 2 arguments");
     }
-    parsedTags.addTableFilter(new MaxSameColumnPropertyFilter(args[0], args[1], 1).setSoft(preParsedTag.isSoft()));
+    parsedTags.addTableFilter(
+        new MaxSameColumnPropertyFilter(args[0], args[1], 1).setSoft(preParsedTag.isSoft()));
   }
 }

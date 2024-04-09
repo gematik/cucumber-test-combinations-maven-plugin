@@ -57,21 +57,21 @@ public final class FilterTagMapper {
     MAP.put(JexlRowFilter.class, FilterTagParser.JEXL_ROW_FILTER_TAG);
     MAP.put(VersionFilter.class, VersionFilterParser.VERSION_TAG);
     MAP.put(ProjectVersionFilter.class, VersionFilterParser.VERSION_TAG);
-    MAP.put(DistinctRowPropertyFilter.class,
-        DistinctRowPropertyTagParser.DISTINCT_ROW_PROPERTY_TAG);
+    MAP.put(
+        DistinctRowPropertyFilter.class, DistinctRowPropertyTagParser.DISTINCT_ROW_PROPERTY_TAG);
     MAP.put(EqualRowPropertyFilter.class, EqualRowPropertyTagParser.EQUAL_ROW_PROPERTY_TAG);
     MAP.put(RequireTagRowFilter.class, RequireTagTagParser.REQUIRE_TAG_TAG);
     MAP.put(SelfCombineFilter.class, AllowSelfCombineTagParser.ALLOW_SELF_COMBINE_TAG);
     MAP.put(DistinctColumnFilter.class, DistinctColumnTagParser.DISTINCT_COLUMN_TAG);
     MAP.put(DoubleLineupFilter.class, AllowDoubleLineupTagParser.ALLOW_DOUBLE_LINEUP_TAG);
     MAP.put(MaxRowsFilter.class, MaxRowsTagParser.MAX_ROWS_TAG);
-    MAP.put(MaxSameColumnPropertyFilter.class,
+    MAP.put(
+        MaxSameColumnPropertyFilter.class,
         MaxSameColumnPropertyTagParser.MAX_SAME_COLUMN_PROPERTY_TAG);
     MAP.put(ShuffleTableFilter.class, ShuffleTagParser.SHUFFLE_TAG);
   }
 
-  private FilterTagMapper() {
-  }
+  private FilterTagMapper() {}
 
   @NonNull
   public static String getTagName(Class<?> clazz) {
@@ -79,8 +79,9 @@ public final class FilterTagMapper {
   }
 
   public static Tag filterToTag(String value, Object caller) {
-    String s = format("@%s(%s)",
-        (caller instanceof String) ? caller : getTagName(caller.getClass()), value);
+    String s =
+        format(
+            "@%s(%s)", (caller instanceof String) ? caller : getTagName(caller.getClass()), value);
     return new Tag(new Location(0L, 0L), s, s);
   }
 }

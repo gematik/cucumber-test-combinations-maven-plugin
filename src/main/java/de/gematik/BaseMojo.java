@@ -18,97 +18,83 @@ package de.gematik;
 
 import static de.gematik.combine.CombineMojo.TEST_RESOURCES_DIR;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
 public abstract class BaseMojo extends AbstractMojo {
 
-  /**
-   * Path to the directory where the combined items get stored
-   */
+  /** Path to the directory where the combined items get stored */
   public static final String GENERATED_COMBINE_ITEMS_DIR =
       "." + File.separator + "target" + File.separator + "generated-combine";
+
   protected final List<String> apiErrors = new ArrayList<>();
 
-  /**
-   * Path to file that contains the values to combine
-   */
-  @Parameter(property = "combineItemsFile", defaultValue = TEST_RESOURCES_DIR
-      + "combine_items.json")
+  /** Path to file that contains the values to combine */
+  @Parameter(
+      property = "combineItemsFile",
+      defaultValue = TEST_RESOURCES_DIR + "combine_items.json")
   String combineItemsFile;
-  /**
-   * Path to truststore
-   */
+
+  /** Path to truststore */
   @Parameter(property = "truststore")
   String truststore;
-  /**
-   * Path to truststore
-   */
+
+  /** Path to truststore */
   @Parameter(property = "truststorePw")
   String truststorePw;
-  /**
-   * Path to truststore
-   */
+
+  /** Path to truststore */
   @Parameter(property = "clientCertStore")
   String clientCertStore;
-  /**
-   * Path to truststore
-   */
+
+  /** Path to truststore */
   @Parameter(property = "clientCertStorePw")
   String clientCertStorePw;
-  /**
-   * Host to use for proxy
-   */
+
+  /** Host to use for proxy */
   @Parameter(property = "proxyHost")
   String proxyHost;
-  /**
-   * Port to use for proxy
-   */
+
+  /** Port to use for proxy */
   @Parameter(property = "proxyPort")
   Integer proxyPort;
-  /**
-   * Parameter to decide if plugin should be executed. All executions are skipped
-   */
+
+  /** Parameter to decide if plugin should be executed. All executions are skipped */
   @Parameter(property = "skip", defaultValue = "false")
   boolean skip;
+
   /**
    * Decide if run should break on one or more failed requests. If set to false, will generate a
    * combine_items.json file with responding APIs only (if any).
    */
   @Parameter(name = "breakOnFailedRequest", defaultValue = "true")
   boolean breakOnFailedRequest;
+
   /**
-   * Decide if the build should break
-   * if at least one manual set Tag/Property does not match the found
-   * value on info endpoint.
+   * Decide if the build should break if at least one manual set Tag/Property does not match the
+   * found value on info endpoint.
    */
   @Parameter(property = "breakOnContextError", defaultValue = "true")
   boolean breakOnContextError;
+
   /**
    * Decide which response-families are valid for each request and should be parsed. (CSV separated)
-   * Is List<Enum> of:
-   * INFO -> 100-199
-   * SUCCESS -> 200-299
-   * REDIRECTION -> 300-399
-   * CLIENT_ERROR -> 400 - 499
-   * SERVER_ERROR -> 500 - 599
-   * ALL -> All requests are valid
-   * Default Success
+   * Is List<Enum> of: INFO -> 100-199 SUCCESS -> 200-299 REDIRECTION -> 300-399 CLIENT_ERROR -> 400
+   * - 499 SERVER_ERROR -> 500 - 599 ALL -> All requests are valid Default Success
    */
   @Parameter(property = "responseFamilies", defaultValue = "SUCCESS")
   String acceptedResponseFamilies;
+
   /**
    * If it's not wanted to work with response-families specific response codes could be named.
-   * Overrides acceptedResponseFamilies
-   * Codes provided in CSV-format
+   * Overrides acceptedResponseFamilies Codes provided in CSV-format
    */
   @Parameter(property = "allowedResponseCodes")
   String allowedResponseCodes;

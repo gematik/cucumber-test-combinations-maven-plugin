@@ -33,12 +33,11 @@ import lombok.SneakyThrows;
 
 public class SSLContextFactory {
 
-  private SSLContextFactory() {
-  }
+  private SSLContextFactory() {}
 
   @SneakyThrows
-  public static SSLContext createAndGetSSLContext(String keyStore, String trustStore,
-      String keyStorePassword, String trustStorePassword) {
+  public static SSLContext createAndGetSSLContext(
+      String keyStore, String trustStore, String keyStorePassword, String trustStorePassword) {
 
     final KeyManager[] keyManagers = getKeyManagers(keyStore, keyStorePassword);
     final TrustManager[] trustManagers = getTrustManagers(trustStore, trustStorePassword);
@@ -62,8 +61,8 @@ public class SSLContextFactory {
 
   @SneakyThrows
   private static TrustManager[] getTrustManagers(String trustStore, String trustStorePassword) {
-    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
-        getDefaultAlgorithm());
+    TrustManagerFactory trustManagerFactory =
+        TrustManagerFactory.getInstance(getDefaultAlgorithm());
     KeyStore ks = KeyStore.getInstance("pkcs12");
     try (FileInputStream fis = new FileInputStream(trustStore)) {
       ks.load(fis, trustStorePassword.toCharArray());
@@ -78,13 +77,15 @@ public class SSLContextFactory {
 
       @Override
       @SuppressWarnings("java:S4830")
-      public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+      public void checkClientTrusted(X509Certificate[] chain, String authType)
+          throws CertificateException {
         // just trust all
       }
 
       @Override
       @SuppressWarnings("java:S4830")
-      public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+      public void checkServerTrusted(X509Certificate[] chain, String authType)
+          throws CertificateException {
         // just trust all
       }
 
@@ -98,7 +99,6 @@ public class SSLContextFactory {
             .flatMap(Arrays::stream)
             .toArray(X509Certificate[]::new);
       }
-
     };
   }
 }

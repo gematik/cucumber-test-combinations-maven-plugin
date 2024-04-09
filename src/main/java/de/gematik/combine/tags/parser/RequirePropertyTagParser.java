@@ -38,8 +38,13 @@ public class RequirePropertyTagParser implements SingleTagParser {
     String[] args = preParsedTag.getValue().split(",");
     if (args.length != 2) {
       throw new IllegalArgumentException(
-          REQUIRE_PROPERTY_TAG + ": '" + preParsedTag.getValue() + "' does not have exact 2 arguments");
+          REQUIRE_PROPERTY_TAG
+              + ": '"
+              + preParsedTag.getValue()
+              + "' does not have exact 2 arguments");
     }
-    parsedTags.addTableRowFilter((TableRowFilter) new RequirePropertyRowFilter(args[0], args[1]).setSoft(preParsedTag.isSoft()));
+    parsedTags.addTableRowFilter(
+        (TableRowFilter)
+            new RequirePropertyRowFilter(args[0], args[1]).setSoft(preParsedTag.isSoft()));
   }
 }

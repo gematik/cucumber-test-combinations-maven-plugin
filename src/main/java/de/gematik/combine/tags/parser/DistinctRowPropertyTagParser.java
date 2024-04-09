@@ -38,5 +38,4 @@ public class DistinctRowPropertyTagParser implements SingleTagParser {
     parser.setSoft(preParsedTag.isSoft());
     parsedTags.addTableRowFilter(parser);
   }
-
 }

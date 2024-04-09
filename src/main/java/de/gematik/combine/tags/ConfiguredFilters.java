@@ -16,7 +16,6 @@
 
 package de.gematik.combine.tags;
 
-
 import static java.util.Collections.unmodifiableList;
 
 import de.gematik.combine.FilterConfiguration;
@@ -31,13 +30,10 @@ import lombok.experimental.Delegate;
 @RequiredArgsConstructor
 public class ConfiguredFilters {
 
-  @Getter
-  private final FilterConfiguration actualConfig;
+  @Getter private final FilterConfiguration actualConfig;
   private final List<String> columns;
 
-  @Delegate
-  private final Filters filters;
-
+  @Delegate private final Filters filters;
 
   public TableFilter combineAllFilters() {
     return Stream.concat(getTableFilters().stream(), getTableRowFilters().stream())
@@ -48,5 +44,4 @@ public class ConfiguredFilters {
   public List<String> getColumns() {
     return unmodifiableList(columns);
   }
-
 }

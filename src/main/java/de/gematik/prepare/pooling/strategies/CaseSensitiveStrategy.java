@@ -28,5 +28,4 @@ public class CaseSensitiveStrategy extends MatchStrategy {
   protected boolean doesMatch(String group) {
     return this.pattern.stream().anyMatch(group::contains);
   }
-
 }

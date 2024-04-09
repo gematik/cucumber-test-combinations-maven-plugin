@@ -29,8 +29,8 @@ public class PoolGroupParser {
     List<PoolGroup> poolGroups = new ArrayList<>();
     for (String s : splitted) {
       String[] groupSplit = s.split(",");
-      PoolGroupBuilder poolGroup = PoolGroup.builder()
-          .groupPattern(Arrays.asList(groupSplit[0].split("\\|")));
+      PoolGroupBuilder poolGroup =
+          PoolGroup.builder().groupPattern(Arrays.asList(groupSplit[0].split("\\|")));
       if (groupSplit.length > 1 && StringUtils.isNotBlank(groupSplit[1])) {
         poolGroup.amount(Integer.parseInt(groupSplit[1]));
       }

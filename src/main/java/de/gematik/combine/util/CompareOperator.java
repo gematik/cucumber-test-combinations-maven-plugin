@@ -35,8 +35,7 @@ public enum CompareOperator {
 
   public static final String OPERATOR_FORMAT = "--%s--";
 
-  @Getter
-  private final String literal;
+  @Getter private final String literal;
   private final List<Integer> matchingResults;
 
   public static String getUsableOperators() {
@@ -48,5 +47,4 @@ public enum CompareOperator {
   public boolean includesResultOf(Integer comparedToResult) {
     return matchingResults.contains(comparedToResult);
   }
-
 }

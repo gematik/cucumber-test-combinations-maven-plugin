@@ -35,7 +35,6 @@ import java.util.List;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-
 @Named(VERSION_TAG)
 @Singleton
 @SuppressWarnings("unused")
@@ -55,9 +54,11 @@ public class VersionFilterParser implements SingleTagParser {
     List<String> args = checkForOperator(preParsedTag.getValue(), filter.getOperator());
     String[] columns = args.get(0).split(",");
     if (columns.length == 0 || (columns.length == 1 && columns[0].isBlank())) {
-      throw new IllegalArgumentException(format(
-          "%s: '%s' does not have any headers, which are necessary for a version "
-              + "filter that is set to a scenario", VERSION_TAG, preParsedTag.getValue()));
+      throw new IllegalArgumentException(
+          format(
+              "%s: '%s' does not have any headers, which are necessary for a version "
+                  + "filter that is set to a scenario",
+              VERSION_TAG, preParsedTag.getValue()));
     }
     for (String header : columns) {
       parsedTags.addCellFilter(header, filter);
@@ -89,12 +90,12 @@ public class VersionFilterParser implements SingleTagParser {
         continue;
       }
       if (args.size() != 2) {
-        throw new IllegalArgumentException(format(
-            "%s: '%s' does not have the right number of arguments", VERSION_TAG, val));
+        throw new IllegalArgumentException(
+            format("%s: '%s' does not have the right number of arguments", VERSION_TAG, val));
       }
       return getVersionFilter(op, args.get(1));
     }
-    throw new IllegalArgumentException(format(
-        "A version filter must contain a comparison operator: %s", getUsableOperators()));
+    throw new IllegalArgumentException(
+        format("A version filter must contain a comparison operator: %s", getUsableOperators()));
   }
 }

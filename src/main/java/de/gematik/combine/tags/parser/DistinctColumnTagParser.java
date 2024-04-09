@@ -34,6 +34,7 @@ public class DistinctColumnTagParser implements SingleTagParser {
 
   @Override
   public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
-    parsedTags.addTableFilter(new DistinctColumnFilter(preParsedTag.getValue()).setSoft(preParsedTag.isSoft()));
+    parsedTags.addTableFilter(
+        new DistinctColumnFilter(preParsedTag.getValue()).setSoft(preParsedTag.isSoft()));
   }
 }

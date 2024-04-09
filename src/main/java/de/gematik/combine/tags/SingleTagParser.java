@@ -26,5 +26,4 @@ import de.gematik.combine.tags.TagParser.PreParsedTag;
 public interface SingleTagParser {
 
   void parseTagAndRegister(PreParsedTag tagValueToParse, ParsedTags parsedTags);
-
 }

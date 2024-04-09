@@ -23,10 +23,6 @@ import static java.lang.String.format;
 import de.gematik.combine.model.CombineItem;
 import de.gematik.prepare.PrepareItemsConfig;
 import de.gematik.prepare.PrepareItemsMojo;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.apache.maven.plugin.MojoExecutionException;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +32,9 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.apache.maven.plugin.MojoExecutionException;
 
 @NoArgsConstructor
 public class Pooler {
@@ -43,21 +42,21 @@ public class Pooler {
   @SuppressWarnings("java:S2245")
   private final Random random = new Random();
 
-  @Setter
-  private PrepareItemsConfig config;
-
+  @Setter private PrepareItemsConfig config;
 
   public Pooler(PrepareItemsConfig config) {
     this.config = config;
   }
 
   public List<CombineItem> pool() throws MojoExecutionException {
-    List<CombineItem> allCombineItems = getItemsToCombine(new File(config.getCombineItemsFile()), PrepareItemsMojo.getInstance(), false);
+    List<CombineItem> allCombineItems =
+        getItemsToCombine(
+            new File(config.getCombineItemsFile()), PrepareItemsMojo.getInstance(), false);
     allCombineItems.removeAll(
         allCombineItems.stream()
             .filter(
                 e -> getMatcher(config.getExcludedGroups()).order(e.getGroups()).equals(MATCHING))
-            .collect(Collectors.toList()));
+            .toList());
     Set<CombineItem> items = getNeededItemsFromGroup(allCombineItems);
     if (config.getPoolSize() <= 0 && !items.isEmpty()) {
       return new ArrayList<>(items);
@@ -79,36 +78,45 @@ public class Pooler {
     return items;
   }
 
-  private Collection<? extends CombineItem> getRequestedAmountFromPoolGroup(PoolGroup poolGroup,
-      List<CombineItem> allCombineItems) throws
-      MojoExecutionException {
+  private Collection<? extends CombineItem> getRequestedAmountFromPoolGroup(
+      PoolGroup poolGroup, List<CombineItem> allCombineItems) throws MojoExecutionException {
 
     GroupMatcher matcher = getMatcher(poolGroup);
     List<CombineItem> selectedItems = new ArrayList<>();
 
     List<CombineItem> matchingItems = matcher.getAllItemsMatching(allCombineItems);
     if (matchingItems.isEmpty()) {
-      throw new MojoExecutionException("Could not find at least one match for poolgroup: " + poolGroup);
+      throw new MojoExecutionException(
+          "Could not find at least one match for poolgroup: " + poolGroup);
     }
     List<String> matchingGroups = matcher.getAllMatchingGroups(matchingItems);
 
     if (matchingGroups.size() < poolGroup.getAmount()) {
-      throw new MojoExecutionException(format(
-          "Requested %s for group(s) %s but only found %s matching group(s) (%s) with matching strategy %s",
-          poolGroup.getAmount(), poolGroup.getGroupPattern(), matchingGroups.size(), matchingGroups,
-          poolGroup.getStrategy()));
+      throw new MojoExecutionException(
+          format(
+              "Requested %s for group(s) %s but only found %s matching group(s) (%s) with matching strategy %s",
+              poolGroup.getAmount(),
+              poolGroup.getGroupPattern(),
+              matchingGroups.size(),
+              matchingGroups,
+              poolGroup.getStrategy()));
     }
     if (poolGroup.getAmount() < 1) {
-      return allCombineItems.stream().filter(item -> matcher.order(item).equals(MATCHING))
+      return allCombineItems.stream()
+          .filter(item -> matcher.order(item).equals(MATCHING))
           .collect(Collectors.toSet());
     }
-    IntStream.range(0, poolGroup.getAmount()).forEach(i -> {
-      String randomGroup = selectRandomGroup(matchingItems, matcher);
-      List<CombineItem> randomSelectedItems = matchingItems.stream()
-          .filter(item -> item.getGroups().contains(randomGroup)).collect(Collectors.toList());
-      matchingItems.removeAll(randomSelectedItems);
-      selectedItems.addAll(randomSelectedItems);
-    });
+    IntStream.range(0, poolGroup.getAmount())
+        .forEach(
+            i -> {
+              String randomGroup = selectRandomGroup(matchingItems, matcher);
+              List<CombineItem> randomSelectedItems =
+                  matchingItems.stream()
+                      .filter(item -> item.getGroups().contains(randomGroup))
+                      .toList();
+              matchingItems.removeAll(randomSelectedItems);
+              selectedItems.addAll(randomSelectedItems);
+            });
     return selectedItems;
   }
 
@@ -128,14 +136,18 @@ public class Pooler {
         leftItems.remove(randomItem);
         continue;
       }
-      String randomGroup = new ArrayList<>(randomItem.getGroups())
-          .get(random.nextInt(randomItem.getGroups().size()));
-      List<CombineItem> newItems = leftItems.stream()
-          .filter(i -> getMatcher(List.of(randomGroup)).order(i).equals(MATCHING))
-          .collect(Collectors.toList());
+      String randomGroup =
+          new ArrayList<>(randomItem.getGroups())
+              .get(random.nextInt(randomItem.getGroups().size()));
+      List<CombineItem> newItems =
+          leftItems.stream()
+              .filter(i -> getMatcher(List.of(randomGroup)).order(i).equals(MATCHING))
+              .toList();
       items.addAll(newItems);
       leftItems.removeAll(newItems);
-      config.getPoolGroups().add(new PoolGroup(List.of(randomGroup), 0, config.getDefaultMatchStrategy()));
+      config
+          .getPoolGroups()
+          .add(new PoolGroup(List.of(randomGroup), 0, config.getDefaultMatchStrategy()));
     }
     return items;
   }
@@ -150,13 +162,18 @@ public class Pooler {
 
   private long countGroups(Collection<CombineItem> itemList) {
     long itemsWithoutGroup = itemList.stream().filter(i -> i.getGroups().isEmpty()).count();
-    long sumGroupsFromItems = itemList.stream().map(CombineItem::getGroups)
-        .flatMap(Collection::stream).collect(Collectors.toSet()).size();
+    long sumGroupsFromItems =
+        itemList.stream()
+            .map(CombineItem::getGroups)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet())
+            .size();
     return sumGroupsFromItems + itemsWithoutGroup;
   }
 
   private GroupMatcher getMatcher(PoolGroup poolGroup) {
-    return poolGroup.getStrategy() == null ? getMatcher(poolGroup.getGroupPattern())
+    return poolGroup.getStrategy() == null
+        ? getMatcher(poolGroup.getGroupPattern())
         : getMatcher(poolGroup.getStrategy(), poolGroup.getGroupPattern());
   }
 
@@ -169,6 +186,7 @@ public class Pooler {
   }
 
   public boolean matchAny(String s) {
-    return config.getPoolGroups().stream().anyMatch(poolGroup -> !getMatcher(poolGroup).getAllMatchingGroups(Set.of(s)).isEmpty());
+    return config.getPoolGroups().stream()
+        .anyMatch(poolGroup -> !getMatcher(poolGroup).getAllMatchingGroups(Set.of(s)).isEmpty());
   }
 }

@@ -53,40 +53,33 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-/**
- * Plugin checks api with jexl expression
- */
+/** Plugin checks api with jexl expression */
 @Setter
 @Getter
 @Mojo(name = "check", defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES)
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class CheckMojo extends BaseMojo {
 
-  @Setter
-  @Getter
-  private static CheckMojo instance;
+  @Setter @Getter private static CheckMojo instance;
   private final ApiRequester apiRequester;
   private final List<String> errors = new ArrayList<>();
 
-  /**
-   * Path that will be used for checking
-   */
+  /** Path that will be used for checking */
   @Parameter(property = "checkPath")
   String checkPath;
-  /**
-   * List of Expression with id that could be referenced in combine_item
-   */
+
+  /** List of Expression with id that could be referenced in combine_item */
   @Parameter(property = "checkExpressions")
   List<CheckExpression> checkExpressions = new ArrayList<>();
+
   /**
    * Jexl statement that will be applied on the result of the checkPath result if no other
    * expression is mentioned
    */
   @Parameter(property = "defaultCheckExpressions")
   String defaultCheckExpressions;
-  /**
-   * Parameter to decide if check-execution should be run
-   */
+
+  /** Parameter to decide if check-execution should be run */
   @Parameter(name = "skipCheck", defaultValue = "false")
   boolean skipCheck;
 
@@ -108,11 +101,8 @@ public class CheckMojo extends BaseMojo {
     return instance.getLog();
   }
 
-  public static final JexlEngine JEXL_ENGINE = new JexlBuilder()
-      .strict(true)
-      .silent(false)
-      .safe(false)
-      .create();
+  public static final JexlEngine JEXL_ENGINE =
+      new JexlBuilder().strict(true).silent(false).safe(false).create();
 
   @SneakyThrows
   private void run() {
@@ -122,17 +112,19 @@ public class CheckMojo extends BaseMojo {
     writeErrors(getClass().getSimpleName(), errors, "Some checks failed");
     boolean requestsOk = apiErrors.isEmpty() || !isBreakOnFailedRequest();
     boolean checksOk = errors.isEmpty() || !isBreakOnContextError();
-    List<String> allErrors = Stream.of(apiErrors, errors)
-        .flatMap(Collection::stream)
-        .collect(Collectors.toList());
+    List<String> allErrors =
+        Stream.of(apiErrors, errors).flatMap(Collection::stream).collect(Collectors.toList());
     if (requestsOk && checksOk) {
-      String msg = allErrors.isEmpty() ? " successfully!"
-          : format(" with %d errors:%n%s", allErrors.size(), join("\n", allErrors));
+      String msg =
+          allErrors.isEmpty()
+              ? " successfully!"
+              : format(" with %d errors:%n%s", allErrors.size(), join("\n", allErrors));
       getLog().info(format("API checks passed%s", msg));
     } else {
       throw new MojoExecutionException(
           "Something went wrong during api check! At least one of your api could not pass "
-              + "the check. See error log at " + GENERATED_COMBINE_ITEMS_DIR);
+              + "the check. See error log at "
+              + GENERATED_COMBINE_ITEMS_DIR);
     }
   }
 
@@ -140,8 +132,11 @@ public class CheckMojo extends BaseMojo {
     JexlExpression expression;
     try {
       String expressionString = getExpression(item);
-      getLog().info(format("Checking %s with expression \"%s\"", getItemAsString(item),
-          expressionString.replace("\n", "")));
+      getLog()
+          .info(
+              format(
+                  "Checking %s with expression \"%s\"",
+                  getItemAsString(item), expressionString.replace("\n", "")));
       expression = JEXL_ENGINE.createExpression(expressionString);
     } catch (MojoExecutionException | JexlException e) {
       getLog().error(e.getMessage());
@@ -158,8 +153,8 @@ public class CheckMojo extends BaseMojo {
       context.set("$", jsonContext);
       context.set("ITEM", item);
       if (FALSE.equals(expression.evaluate(context))) {
-        String errorMsg = format("Check fails for %s and expression \"%s\"", getItemAsString(item),
-            expression);
+        String errorMsg =
+            format("Check fails for %s and expression \"%s\"", getItemAsString(item), expression);
         getLog().error(errorMsg);
         errors.add(errorMsg);
       }
@@ -167,8 +162,9 @@ public class CheckMojo extends BaseMojo {
       getLog().error(e.getMessage());
       apiErrors.add(e.getMessage());
     } catch (JsonProcessingException e) {
-      String errorMsg = format("Requested check endpoint for %s but was not well formatted",
-          getItemAsString(item));
+      String errorMsg =
+          format(
+              "Requested check endpoint for %s but was not well formatted", getItemAsString(item));
       getLog().error(errorMsg);
       errors.add(errorMsg);
     }
@@ -181,7 +177,8 @@ public class CheckMojo extends BaseMojo {
     return checkExpressions.stream()
         .filter(e -> e.getId().equals(combineItem.getCheckExpressionId()))
         .map(CheckExpression::getExpression)
-        .findFirst().orElse(getDefaultCheckExpressions(combineItem));
+        .findFirst()
+        .orElse(getDefaultCheckExpressions(combineItem));
   }
 
   private String getDefaultCheckExpressions(CombineItem item) throws MojoExecutionException {
@@ -200,5 +197,4 @@ public class CheckMojo extends BaseMojo {
       throws MojoExecutionException, JsonProcessingException {
     return new ObjectMapper().readValue(apiRequester.getApiResponse(url), Map.class);
   }
-
 }

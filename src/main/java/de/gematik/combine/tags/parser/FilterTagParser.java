@@ -37,7 +37,8 @@ public class FilterTagParser implements SingleTagParser {
 
   @Override
   public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
-    List<String> columnReferences = countColumnReferences(preParsedTag.getValue(), parsedTags.getColumns());
+    List<String> columnReferences =
+        countColumnReferences(preParsedTag.getValue(), parsedTags.getColumns());
     if (columnReferences.size() == 1) {
       String column = columnReferences.get(0);
       JexlCellFilter filter = new JexlCellFilter(column, preParsedTag.getValue());
@@ -51,8 +52,6 @@ public class FilterTagParser implements SingleTagParser {
   }
 
   private List<String> countColumnReferences(String expression, List<String> columns) {
-    return columns.stream()
-        .filter(expression::contains)
-        .collect(toList());
+    return columns.stream().filter(expression::contains).collect(toList());
   }
 }

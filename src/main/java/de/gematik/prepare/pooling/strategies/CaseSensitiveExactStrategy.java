@@ -28,5 +28,4 @@ public class CaseSensitiveExactStrategy extends MatchStrategy {
   protected boolean doesMatch(String group) {
     return this.pattern.stream().anyMatch(e -> e.equals(group));
   }
-
 }

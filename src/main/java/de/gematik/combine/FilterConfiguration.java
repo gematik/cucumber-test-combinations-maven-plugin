@@ -33,40 +33,31 @@ import org.apache.maven.plugins.annotations.Parameter;
 @NoArgsConstructor
 public class FilterConfiguration {
 
-  /**
-   * Decide if a distinct item is allowed to show up twice in one line
-   */
+  /** Decide if a distinct item is allowed to show up twice in one line */
   @Default
   @Parameter(property = "allowSelfCombine", defaultValue = "false")
   private boolean allowSelfCombine = false;
 
   /**
-   * Decide if one combination of items is allowed to show up in different
-   * lineups (e.g. | Api1 | Api2 |  and  | Api2 | Api1 | )
+   * Decide if one combination of items is allowed to show up in different lineups (e.g. | Api1 |
+   * Api2 | and | Api2 | Api1 | )
    */
   @Default
   @Parameter(property = "allowDoubleLineup", defaultValue = "false")
   private boolean allowDoubleLineup = false;
 
-  /**
-   * global maximum of rows for each table
-   */
+  /** global maximum of rows for each table */
   @Default
   @Parameter(property = "maxTableRows", defaultValue = "" + Integer.MAX_VALUE)
   private int maxTableRows = Integer.MAX_VALUE;
 
-  /**
-   * shuffles the generated table
-   */
+  /** shuffles the generated table */
   @Default
   @Parameter(property = "shuffleCombinations", defaultValue = "false")
   private boolean shuffleCombinations = false;
 
-  /**
-   * Creates a minimal table
-   */
+  /** Creates a minimal table */
   @Default
   @Parameter(property = "minimalTable", defaultValue = "false")
   private boolean minimalTable = false;
-
 }

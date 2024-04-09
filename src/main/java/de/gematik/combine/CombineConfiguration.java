@@ -32,18 +32,12 @@ public class CombineConfiguration {
   private String templateDir;
   private String outputDir;
   private String combineItemFile;
-  @Builder.Default
-  private String templateFileEnding = ".cute";
-  @Builder.Default
-  private String pluginTagCategory = "Plugin";
-  @Builder.Default
-  private String versionFilterTagCategory = "VersionFilter";
-  @Builder.Default
-  private List<String> emptyExamplesTags = new ArrayList<>();
-  @Builder.Default
-  private List<String> defaultExamplesTags = new ArrayList<>();
-  @Builder.Default
-  private List<String> skipTags = new ArrayList<>();
+  @Builder.Default private String templateFileEnding = ".cute";
+  @Builder.Default private String pluginTagCategory = "Plugin";
+  @Builder.Default private String versionFilterTagCategory = "VersionFilter";
+  @Builder.Default private List<String> emptyExamplesTags = new ArrayList<>();
+  @Builder.Default private List<String> defaultExamplesTags = new ArrayList<>();
+  @Builder.Default private List<String> skipTags = new ArrayList<>();
   private FilterConfiguration filterConfiguration;
   private ProjectFilters projectFilters;
   private boolean breakIfTableToSmall;
@@ -52,5 +46,4 @@ public class CombineConfiguration {
   private boolean softFilterToHardFilter;
   private boolean countExecutions;
   private List<String> countExecutionsFormat;
-
 }

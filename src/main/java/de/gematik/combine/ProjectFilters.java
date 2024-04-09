@@ -38,12 +38,12 @@ import org.apache.maven.plugins.annotations.Parameter;
 @NoArgsConstructor
 public class ProjectFilters {
 
-  @Getter
-  private final List<ProjectCellFilter> cellFilters = new ArrayList<>();
-  @Getter
-  private final List<ProjectRowFilter> rowFilters = new ArrayList<>();
+  @Getter private final List<ProjectCellFilter> cellFilters = new ArrayList<>();
+  @Getter private final List<ProjectRowFilter> rowFilters = new ArrayList<>();
+
   @Parameter(name = "version")
   String version;
+
   private ProjectCellFilter versionFilter;
 
   public void parseProjectFilters() {

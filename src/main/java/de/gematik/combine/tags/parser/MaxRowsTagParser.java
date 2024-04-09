@@ -39,11 +39,10 @@ public class MaxRowsTagParser implements SingleTagParser {
   public void parseTagAndRegister(PreParsedTag preParsedTag, ParsedTags parsedTags) {
     if (isDigits(preParsedTag.getValue()) && isParsable(preParsedTag.getValue())) {
       int maxRows = parseInt(preParsedTag.getValue());
-      parsedTags.addConfigModifier(config -> config.toBuilder()
-          .maxTableRows(maxRows)
-          .build());
+      parsedTags.addConfigModifier(config -> config.toBuilder().maxTableRows(maxRows).build());
     } else {
-      parsedTags.addTableFilter(new MaxRowsFilter(preParsedTag.getValue()).setSoft(preParsedTag.isSoft()));
+      parsedTags.addTableFilter(
+          new MaxRowsFilter(preParsedTag.getValue()).setSoft(preParsedTag.isSoft()));
     }
   }
 }

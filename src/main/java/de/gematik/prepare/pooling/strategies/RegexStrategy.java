@@ -29,5 +29,4 @@ public class RegexStrategy extends MatchStrategy {
   protected boolean doesMatch(String group) {
     return pattern.stream().anyMatch(e -> Pattern.compile(e).matcher(group).matches());
   }
-
 }

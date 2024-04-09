@@ -29,6 +29,4 @@ public class PropertyExpression {
 
   private String property;
   private String expression;
-
 }
-

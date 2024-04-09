@@ -40,6 +40,8 @@ public class MaxSameColumnPropertyTagParser implements SingleTagParser {
       throw new IllegalArgumentException(
           "'" + preParsedTag.getValue() + "' does not have exact 3 arguments");
     }
-    parsedTags.addTableFilter(new MaxSameColumnPropertyFilter(args[0], args[1], parseInt(args[2])).setSoft(preParsedTag.isSoft()));
+    parsedTags.addTableFilter(
+        new MaxSameColumnPropertyFilter(args[0], args[1], parseInt(args[2]))
+            .setSoft(preParsedTag.isSoft()));
   }
 }

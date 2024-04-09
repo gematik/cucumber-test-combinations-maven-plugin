@@ -2,17 +2,24 @@
 
 # Release notes
 
+## 2.9.20
+
+### Bugfix
+
+- Subfolders in the templateDir will no longer rise an AccessDeniedException
+
 ## 2.9.19
 
 ### Feature
 
-- The environment variables () written in the environment variables can now be formatted in html style for better use 
+- The environment variables () written in the environment variables can now be formatted in html style for better use
 
 ## 2.9.18
 
 ### Feature
 
-- Reworked report about used groups. Only groups where all items are collected are mentioned now. Additionally, the used poolGroups are added and all used items (which can differ) 
+- Reworked report about used groups. Only groups where all items are collected are mentioned now. Additionally, the used
+  poolGroups are added and all used items (which can differ)
 - To execute scenarios will be counted and info added to count summary. Empty scenarios does not count
 
 ### Bugfix
@@ -23,7 +30,8 @@
 
 ### Feature
 
-- If not only one item for requested group is found, even if the requested amount is set to 0, the plugin will stop and return an error.
+- If not only one item for requested group is found, even if the requested amount is set to 0, the plugin will stop and
+  return an error.
 
 ### Bugfix
 
@@ -33,19 +41,21 @@
 
 ### Features
 
-- For all requests that are made to endpoints can be specified what response codes are valid and the response should be parsed. Read more [`docu`](./doc/userguide/GettingStarted.adoc)
+- For all requests that are made to endpoints can be specified what response codes are valid and the response should be
+  parsed. Read more [`docu`](./doc/userguide/GettingStarted.adoc)
 
 ## 2.9.14
 
 ### Bugfixes
 
-- The plugin will no longer generate examples in a file that is anotated with @WIP or any other skipping tag 
+- The plugin will no longer generate examples in a file that is anotated with @WIP or any other skipping tag
 
 ## 2.9.13
 
 ### Features
 
-- Summary how many executions are generated are now located at ./target/generated-combine [`docu`](./doc/userguide/GettingStarted.adoc)
+- Summary how many executions are generated are now located at
+  ./target/generated-combine [`docu`](./doc/userguide/GettingStarted.adoc)
 
 ## 2.9.12
 

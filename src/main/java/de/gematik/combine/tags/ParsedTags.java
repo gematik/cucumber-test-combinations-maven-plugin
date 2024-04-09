@@ -16,7 +16,6 @@
 
 package de.gematik.combine.tags;
 
-
 import static de.gematik.combine.filter.ConfigFilterMapper.toFilters;
 import static de.gematik.combine.util.NonNullableMap.nonNullableMap;
 import static java.util.Collections.emptyList;
@@ -41,28 +40,30 @@ public class ParsedTags {
 
   private final List<ConfigModifier> configModifiers = new ArrayList<>();
 
-  @Delegate
-  private final Filters filters = new Filters();
+  @Delegate private final Filters filters = new Filters();
 
   public void addConfigModifier(ConfigModifier configurationTag) {
     configModifiers.add(configurationTag);
   }
 
   public FilterConfiguration getActualConfig(FilterConfiguration defaultConfig) {
-    return configModifiers.stream()
-        .reduce(x -> x, ConfigModifier::merge)
-        .apply(defaultConfig);
+    return configModifiers.stream().reduce(x -> x, ConfigModifier::merge).apply(defaultConfig);
   }
 
-  public ConfiguredFilters configureFilters(CombineConfiguration config, boolean softFilterShouldApply) {
+  public ConfiguredFilters configureFilters(
+      CombineConfiguration config, boolean softFilterShouldApply) {
     FilterConfiguration actualConfig = getActualConfig(config.getFilterConfiguration());
 
     Filters allFilters = toFilters(actualConfig);
 
-    getTableFilters().stream().filter(f -> !(f.isSoft() && !softFilterShouldApply)).forEach(allFilters::addTableFilter);
-    getTableRowFilters().stream().filter(f -> !(f.isSoft() && !softFilterShouldApply))
+    getTableFilters().stream()
+        .filter(f -> !(f.isSoft() && !softFilterShouldApply))
+        .forEach(allFilters::addTableFilter);
+    getTableRowFilters().stream()
+        .filter(f -> !(f.isSoft() && !softFilterShouldApply))
         .forEach(allFilters::addTableRowFilter);
-    getCellFilters().forEach((key, value) -> allFilters.addCellFilter(key, value, softFilterShouldApply));
+    getCellFilters()
+        .forEach((key, value) -> allFilters.addCellFilter(key, value, softFilterShouldApply));
     checkAndAddProjectFilters(config, allFilters);
     return new ConfiguredFilters(actualConfig, columns, allFilters);
   }
@@ -89,18 +90,17 @@ public class ParsedTags {
         .forEach(allFilters::addTableRowFilter);
   }
 
-  private static void addCellFilters(String header, Filters allFilters,
-      ProjectFilters projectFilters) {
+  private static void addCellFilters(
+      String header, Filters allFilters, ProjectFilters projectFilters) {
     projectFilters.getCellFilters().stream()
         .filter(cellFilter -> isFilterOverriddenInScenario(cellFilter, allFilters, header))
         .forEach(cellFilter -> allFilters.addCellFilter(header, cellFilter));
   }
 
-  private static boolean isFilterOverriddenInScenario(Object filter, Filters allFilters,
-      String header) {
+  private static boolean isFilterOverriddenInScenario(
+      Object filter, Filters allFilters, String header) {
     if (nonNull(header)) {
-      return nonNullableMap(allFilters.getCellFilters(), x -> emptyList())
-          .get(header).stream()
+      return nonNullableMap(allFilters.getCellFilters(), x -> emptyList()).get(header).stream()
           .noneMatch(filter.getClass().getSuperclass()::isInstance);
     } else {
       return allFilters.getTableRowFilters().stream()
@@ -121,6 +121,7 @@ public class ParsedTags {
   }
 
   private boolean cellFiltersHaveSoft() {
-    return getCellFilters().entrySet().stream().anyMatch(s -> s.getValue().stream().anyMatch(CellFilter::isSoft));
+    return getCellFilters().entrySet().stream()
+        .anyMatch(s -> s.getValue().stream().anyMatch(CellFilter::isSoft));
   }
 }

@@ -25,10 +25,6 @@ import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.messages.types.Feature;
 import io.cucumber.messages.types.FeatureChild;
 import io.cucumber.messages.types.GherkinDocument;
-import lombok.SneakyThrows;
-import org.apache.commons.io.FileUtils;
-import org.apache.maven.plugin.MojoExecutionException;
-
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -37,19 +33,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
+import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
+import org.apache.maven.plugin.MojoExecutionException;
 
 public class ExecutionCounter {
 
   public static final String COUNT_EXECUTION_FILE_NAME = "countExecution";
-  private Set<ExampleCounter> exampleCounter = new TreeSet<>();
+  private final Set<ExampleCounter> exampleCounter = new TreeSet<>();
 
   public void count(CombineConfiguration config) {
     if (!config.isCountExecutions()) {
       return;
     }
     List<File> featureFiles = getFeatureFiles(new File(config.getOutputDir()));
-    List<GherkinDocument> features = featureFiles.stream().map(this::transformToGherkin).collect(Collectors.toList());
+    List<GherkinDocument> features = featureFiles.stream().map(this::transformToGherkin).toList();
     countExecutions(features);
     writeExecutionsToFile(config);
   }
@@ -59,8 +57,9 @@ public class ExecutionCounter {
     for (File f : requireNonNull(file.listFiles())) {
       if (f.isDirectory()) {
         files.addAll(getFeatureFiles(f));
+      } else {
+        files.add(f);
       }
-      files.add(f);
     }
     return files;
   }
@@ -83,13 +82,19 @@ public class ExecutionCounter {
     ExampleCounter counter = new ExampleCounter(feature.getName());
     if (exampleCounter.contains(counter)) {
       throw new MojoExecutionException(
-          "Could not count features correctly because 2 feature files named the same: " + feature.getName());
+          "Could not count features correctly because 2 feature files named the same: "
+              + feature.getName());
     }
     exampleCounter.add(counter);
     for (FeatureChild c : feature.getChildren()) {
-      c.getScenario().ifPresent(
-          s -> s.getExamples()
-              .forEach(e -> counter.addScenario(c.getScenario().get().getName(), e.getTableBody().size())));
+      c.getScenario()
+          .ifPresent(
+              s ->
+                  s.getExamples()
+                      .forEach(
+                          e ->
+                              counter.addScenario(
+                                  c.getScenario().get().getName(), e.getTableBody().size())));
     }
   }
 
@@ -107,17 +112,28 @@ public class ExecutionCounter {
   private void createJsonFile(TotalCounter totalCounter) {
     writeLineToStatisticFile(
         new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(totalCounter),
-        ".json", true);
+        ".json",
+        true);
   }
 
   private void createTxtFile(TotalCounter totalCounter) {
     writeLineToStatisticFile("total -> " + totalCounter.getTotal(), ".txt", true);
-    writeLineToStatisticFile("totalScenarios -> " + totalCounter.getTotalScenarioAmount(), ".txt", false);
-    exampleCounter.stream().forEach(e -> {
-      writeLineToStatisticFile(
-          "\n" + e.getName() + " -> " + e.getScenarios().values().stream().reduce(Integer::sum).orElse(0) + " SzenarioAmount => " +e.getScenarioAmount(), ".txt");
-      e.getScenarios().forEach((k, v) -> writeLineToStatisticFile("\t" + k + " -> " + v, ".txt"));
-    });
+    writeLineToStatisticFile(
+        "totalScenarios -> " + totalCounter.getTotalScenarioAmount(), ".txt", false);
+    exampleCounter.stream()
+        .forEach(
+            e -> {
+              writeLineToStatisticFile(
+                  "\n"
+                      + e.getName()
+                      + " -> "
+                      + e.getScenarios().values().stream().reduce(Integer::sum).orElse(0)
+                      + " SzenarioAmount => "
+                      + e.getScenarioAmount(),
+                  ".txt");
+              e.getScenarios()
+                  .forEach((k, v) -> writeLineToStatisticFile("\t" + k + " -> " + v, ".txt"));
+            });
   }
 
   private void writeLineToStatisticFile(String s, String fileEnding) {
@@ -126,8 +142,11 @@ public class ExecutionCounter {
 
   @SneakyThrows
   private static void writeLineToStatisticFile(String s, String fileEnding, boolean override) {
-    FileUtils.write(new File(GENERATED_COMBINE_ITEMS_DIR + File.separator + COUNT_EXECUTION_FILE_NAME + fileEnding),
+    FileUtils.write(
+        new File(
+            GENERATED_COMBINE_ITEMS_DIR + File.separator + COUNT_EXECUTION_FILE_NAME + fileEnding),
         s + "\n",
-        StandardCharsets.UTF_8, !override);
+        StandardCharsets.UTF_8,
+        !override);
   }
 }

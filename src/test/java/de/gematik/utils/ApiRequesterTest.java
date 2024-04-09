@@ -25,6 +25,13 @@ import static org.mockito.Mockito.when;
 
 import de.gematik.utils.request.ApiRequester;
 import de.gematik.utils.request.ApiRequester.StatusCodes;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -36,35 +43,24 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
 class ApiRequesterTest {
 
   @Test
   void shouldThrowExceptionIfOnlyOneProxyParameterIsMissing() {
     ApiRequester apiRequester = new ApiRequester();
     apiRequester.setupProxy("host", null);
-    assertThrows(MojoExecutionException.class,
-        () -> apiRequester.getApiResponse("anyUrl"));
+    assertThrows(MojoExecutionException.class, () -> apiRequester.getApiResponse("anyUrl"));
     apiRequester.setupProxy(null, 420);
-    assertThrows(MojoExecutionException.class,
-        () -> apiRequester.getApiResponse("anyUrl"));
+    assertThrows(MojoExecutionException.class, () -> apiRequester.getApiResponse("anyUrl"));
   }
 
   @ParameterizedTest
   @MethodSource("getWrongSSLParams")
-  void shouldThrowExceptionIfOnlyOneSSLParameterIsMissing(String trust, String trustPw,
-                                                          String client, String clientPw) {
+  void shouldThrowExceptionIfOnlyOneSSLParameterIsMissing(
+      String trust, String trustPw, String client, String clientPw) {
     ApiRequester apiRequester = new ApiRequester();
     apiRequester.setupTls(trust, trustPw, client, clientPw);
-    assertThrows(MojoExecutionException.class,
-        () -> apiRequester.getApiResponse("anyUrl"));
+    assertThrows(MojoExecutionException.class, () -> apiRequester.getApiResponse("anyUrl"));
   }
 
   @ParameterizedTest
@@ -80,13 +76,16 @@ class ApiRequesterTest {
     apiRequester.setAllowedResponses(families, "");
     when(client.newCall(any())).thenReturn(call);
     when(call.execute()).thenReturn(res);
-    codes.forEach(i -> {
-      when(res.code()).thenReturn(i);
-      // act
-      MojoExecutionException ex = assertThrows(MojoExecutionException.class, ()
-          // assert
-          -> apiRequester.getApiResponse("http://someUrl"));
-    });
+    codes.forEach(
+        i -> {
+          when(res.code()).thenReturn(i);
+          // act
+          assertThrows(
+              MojoExecutionException.class,
+              ()
+              // assert
+              -> apiRequester.getApiResponse("http://someUrl"));
+        });
   }
 
   @Test
@@ -102,10 +101,11 @@ class ApiRequesterTest {
 
     Random random = new Random();
     ApiRequester apiRequester = new ApiRequester();
-    List<Integer> randomValues = IntStream.range(0, 50).mapToObj(i -> random.nextInt(499) + 100).collect(Collectors.toList());
-    apiRequester.setAllowedResponses("", randomValues.stream().map(String::valueOf).collect(Collectors.joining(",")));
+    List<Integer> randomValues =
+        IntStream.range(0, 50).mapToObj(i -> random.nextInt(499) + 100).toList();
+    apiRequester.setAllowedResponses(
+        "", randomValues.stream().map(String::valueOf).collect(Collectors.joining(",")));
     apiRequester.setClient(client);
-
 
     when(client.newCall(any())).thenReturn(call);
     when(call.execute()).thenReturn(res);
@@ -120,7 +120,11 @@ class ApiRequesterTest {
       } else {
         assertThatThrownBy(() -> apiRequester.getApiResponse("http://someUrl"))
             .isInstanceOf(MojoExecutionException.class)
-            .hasMessage("Response code was " + i + " and not defined in valid response codes " + randomValues);
+            .hasMessage(
+                "Response code was "
+                    + i
+                    + " and not defined in valid response codes "
+                    + randomValues);
       }
     }
     // assert
@@ -165,18 +169,22 @@ class ApiRequesterTest {
     assertThatThrownBy(() -> apiRequester.setAllowedResponses("unknown", ""))
         // assert
         .isInstanceOf(MojoExecutionException.class)
-        .hasMessage("Unknown status code family found in \"unknown\" allowed values: [INFO, SUCCESS, REDIRECTION, CLIENT_ERROR, SERVER_ERROR, ALL]");
+        .hasMessage(
+            "Unknown status code family found in \"unknown\" allowed values: [INFO, SUCCESS, REDIRECTION, CLIENT_ERROR, SERVER_ERROR, ALL]");
   }
 
   private static Stream<Arguments> getFamiliesWithInvalidCodes() {
     List<Arguments> args = new ArrayList<>();
     for (List<StatusCodes> codes : generateCombinations(Arrays.asList(StatusCodes.values()))) {
-      List<Integer> invalidIds = IntStream.range(100, 600)
-          .filter(i -> codes.stream().noneMatch(status -> status.isValid(i)))
-          .boxed()
-          .collect(Collectors.toList());
-      if (invalidIds.size() > 0) {
-        args.add(Arguments.of(codes.stream().map(Enum::name).collect(Collectors.joining(",")), invalidIds));
+      List<Integer> invalidIds =
+          IntStream.range(100, 600)
+              .filter(i -> codes.stream().noneMatch(status -> status.isValid(i)))
+              .boxed()
+              .collect(Collectors.toList());
+      if (!invalidIds.isEmpty()) {
+        args.add(
+            Arguments.of(
+                codes.stream().map(Enum::name).collect(Collectors.joining(",")), invalidIds));
       }
     }
     return args.stream();
@@ -202,14 +210,17 @@ class ApiRequesterTest {
     return input.length() == 4 ? input : padWithLeadingZeros("0" + input);
   }
 
-
   public static List<List<StatusCodes>> generateCombinations(List<StatusCodes> elements) {
     List<List<StatusCodes>> result = new ArrayList<>();
     generateCombinationsHelper(elements, 0, new ArrayList<>(), result);
     return result.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
   }
 
-  private static void generateCombinationsHelper(List<StatusCodes> elements, int currentIndex, List<StatusCodes> currentCombination, List<List<StatusCodes>> result) {
+  private static void generateCombinationsHelper(
+      List<StatusCodes> elements,
+      int currentIndex,
+      List<StatusCodes> currentCombination,
+      List<List<StatusCodes>> result) {
     if (currentIndex == elements.size()) {
       result.add(new ArrayList<>(currentCombination));
       return;

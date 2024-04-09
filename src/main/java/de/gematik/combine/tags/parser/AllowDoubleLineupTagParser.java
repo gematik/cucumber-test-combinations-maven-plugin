@@ -39,8 +39,7 @@ public class AllowDoubleLineupTagParser implements SingleTagParser {
       allow = parseBoolean(preParsedTag.getValue());
     }
     boolean finalAllow = allow;
-    parsedTags.addConfigModifier(config -> config.toBuilder()
-        .allowDoubleLineup(finalAllow)
-        .build());
+    parsedTags.addConfigModifier(
+        config -> config.toBuilder().allowDoubleLineup(finalAllow).build());
   }
 }

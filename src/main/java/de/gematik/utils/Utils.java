@@ -76,8 +76,10 @@ public class Utils {
       combineItems = Arrays.asList(mapper.readValue(br, CombineItem[].class));
     } catch (JsonMappingException | JsonParseException e) {
       mojo.getLog().error(e.getMessage());
-      throw new MojoExecutionException(format("JSON could not be properly processed -> %s: %s",
-          file.getName(), e.getOriginalMessage()));
+      throw new MojoExecutionException(
+          format(
+              "JSON could not be properly processed -> %s: %s",
+              file.getName(), e.getOriginalMessage()));
     }
     return new ArrayList<>(combineItems);
   }
@@ -106,7 +108,8 @@ public class Utils {
   }
 
   @SneakyThrows
-  public static void writeErrors(String msgPreamble, List<String> errors, String message, boolean shouldAppend) {
+  public static void writeErrors(
+      String msgPreamble, List<String> errors, String message, boolean shouldAppend) {
     if (errors.isEmpty()) {
       return;
     }

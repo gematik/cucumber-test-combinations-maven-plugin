@@ -16,7 +16,6 @@
 
 package de.gematik.prepare;
 
-
 import static de.gematik.prepare.PrepareItemsMojo.getPluginLog;
 import static java.util.Objects.nonNull;
 
@@ -40,14 +39,10 @@ public class ItemsCreator {
   private final PrepareItemsConfig config;
   private JexlContext context;
 
-  @Getter
-  private final List<String> contextErrors = new ArrayList<>();
+  @Getter private final List<String> contextErrors = new ArrayList<>();
 
-  public static final JexlEngine JEXL_ENGINE = new JexlBuilder()
-      .strict(true)
-      .silent(false)
-      .safe(false)
-      .create();
+  public static final JexlEngine JEXL_ENGINE =
+      new JexlBuilder().strict(true).silent(false).safe(false).create();
 
   public ItemsCreator(PrepareItemsConfig config) {
     this.config = config;
@@ -62,19 +57,26 @@ public class ItemsCreator {
   }
 
   private void checkTagExpression(CombineItem item, TagExpression tagExpression) {
-    getPluginLog().debug("Evaluating tag expression -> " + tagExpression.getExpression() + " - "
-        + tagExpression.getTag());
+    getPluginLog()
+        .debug(
+            "Evaluating tag expression -> "
+                + tagExpression.getExpression()
+                + " - "
+                + tagExpression.getTag());
     var newTags = new HashSet<>(item.getTags());
 
     try {
-      Boolean result = (Boolean) JEXL_ENGINE.createExpression(tagExpression.getExpression())
-          .evaluate(context);
+      Boolean result =
+          (Boolean) JEXL_ENGINE.createExpression(tagExpression.getExpression()).evaluate(context);
       if (result != null && result) {
         newTags.add(tagExpression.getTag());
       } else {
         if (item.getTags().contains(tagExpression.getTag())) {
           contextErrors.add(
-              ERROR_START + item.getValue() + " -> for tag " + tagExpression.getTag()
+              ERROR_START
+                  + item.getValue()
+                  + " -> for tag "
+                  + tagExpression.getTag()
                   + " extension "
                   + tagExpression.getExpression()
                   + " should return true");
@@ -89,8 +91,8 @@ public class ItemsCreator {
   }
 
   private void checkPropertyExpression(CombineItem item, PropertyExpression propertyExpression) {
-    Entry<String, String> entry = evaluatePropertyExpression(propertyExpression,
-        item.getProperties(), item);
+    Entry<String, String> entry =
+        evaluatePropertyExpression(propertyExpression, item.getProperties(), item);
     var propertiesCopy = new HashMap<>(item.getProperties());
     if (entry != null) {
       propertiesCopy.put(entry.getKey(), entry.getValue());
@@ -100,22 +102,28 @@ public class ItemsCreator {
     }
   }
 
-  private Entry<String, String> evaluatePropertyExpression(PropertyExpression propertyExpression,
-      Map<String, String> existingProperties, CombineItem item) {
+  private Entry<String, String> evaluatePropertyExpression(
+      PropertyExpression propertyExpression,
+      Map<String, String> existingProperties,
+      CombineItem item) {
     getPluginLog().debug("evaluating " + propertyExpression.getExpression());
     String value;
     try {
-      value = (String) JEXL_ENGINE.createExpression(propertyExpression.getExpression())
-          .evaluate(context);
+      value =
+          (String)
+              JEXL_ENGINE.createExpression(propertyExpression.getExpression()).evaluate(context);
     } catch (JexlException ex) {
       getPluginLog().warn(ex.getMessage());
       return null;
     }
     if (value == null) {
       contextErrors.add(
-          ERROR_START + item.getValue() + (nonNull(item.getUrl()) ? " url: " + item.getUrl()
-              : "") + " -> at property "
-              + propertyExpression.getProperty() + ": Could not find any value at -> "
+          ERROR_START
+              + item.getValue()
+              + (nonNull(item.getUrl()) ? " url: " + item.getUrl() : "")
+              + " -> at property "
+              + propertyExpression.getProperty()
+              + ": Could not find any value at -> "
               + propertyExpression.getExpression());
       return null;
     }
@@ -123,19 +131,21 @@ public class ItemsCreator {
       String existingProperty = existingProperties.get(propertyExpression.getProperty());
       if (!value.equals(existingProperty)) {
         contextErrors.add(
-            ERROR_START + item.getValue() + (nonNull(item.getUrl()) ? " url: " + item.getUrl()
-                : "") + " -> at property "
-                + propertyExpression.getProperty() + ": Found value -> \"" + value
-                + "\" differ from -> \"" + existingProperty + "\" for expression -> "
+            ERROR_START
+                + item.getValue()
+                + (nonNull(item.getUrl()) ? " url: " + item.getUrl() : "")
+                + " -> at property "
+                + propertyExpression.getProperty()
+                + ": Found value -> \""
+                + value
+                + "\" differ from -> \""
+                + existingProperty
+                + "\" for expression -> "
                 + propertyExpression.getExpression());
       }
     }
     Entry<String, String> keyValue = Map.entry(propertyExpression.getProperty(), value);
     getPluginLog().debug("proceeded property -> " + keyValue);
     return keyValue;
-
   }
-
 }
-
-

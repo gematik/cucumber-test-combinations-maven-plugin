@@ -33,6 +33,14 @@ import de.gematik.prepare.pooling.Pooler;
 import de.gematik.utils.request.ApiRequester;
 import io.cucumber.core.internal.com.fasterxml.jackson.core.JsonProcessingException;
 import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -47,18 +55,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.json.JSONObject;
 
-import javax.inject.Inject;
-import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-/**
- * Plugin for filling empty gherkin tables with generated combinations
- */
+/** Plugin for filling empty gherkin tables with generated combinations */
 @Mojo(name = "prepare-items", defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES)
 @Setter
 @RequiredArgsConstructor(onConstructor_ = @Inject)
@@ -70,42 +67,36 @@ public class PrepareItemsMojo extends BaseMojo {
   public static final String CONFIG_FAIL_WARN_MESSAGE =
       "=== Caution!!! The generated file is significantly different from your input! ==="
           + "\n          === This is because of the following config errors: ===";
-  public static final String USED_GROUPS_PATH = GENERATED_COMBINE_ITEMS_DIR + File.separator + "usedGroups.json";
-  @Getter
-  @Setter
-  private static PrepareItemsMojo instance;
+  public static final String USED_GROUPS_PATH =
+      GENERATED_COMBINE_ITEMS_DIR + File.separator + "usedGroups.json";
+  @Getter @Setter private static PrepareItemsMojo instance;
   private final ApiRequester apiRequester;
-  /**
-   * Location to info
-   */
+
+  /** Location to info */
   @Parameter(property = "infoResourceLocation")
   String infoResourceLocation;
-  /**
-   * Expression and tag to set if expression is true
-   */
+
+  /** Expression and tag to set if expression is true */
   @Parameter(property = "tagExpressions")
   List<TagExpression> tagExpressions;
-  /**
-   * List of Expressions that set as property
-   */
+
+  /** List of Expressions that set as property */
   @Parameter(property = "propertyExpressions")
   List<PropertyExpression> propertyExpressions;
-  /**
-   * Name a list of lists that should be used and how often.
-   */
+
+  /** Name a list of lists that should be used and how often. */
   @Parameter(property = "poolGroups")
   @Getter
   List<PoolGroup> poolGroups;
-  /**
-   * Name of all groups of items in combine_items.json explicitly not to use
-   */
+
+  /** Name of all groups of items in combine_items.json explicitly not to use */
   @Parameter(property = "excludedGroups")
   List<String> excludedGroups;
-  /**
-   * Size of to use different groups
-   */
+
+  /** Size of to use different groups */
   @Parameter(property = "poolSize", defaultValue = "0")
   int poolSize;
+
   /**
    * This is another way to define poolGroups. Will override 'poolGroups' Pattern GroupPattern is
    * mandatory. Amount == (0 || null) means all, Strategy == null -> default strategy
@@ -113,20 +104,17 @@ public class PrepareItemsMojo extends BaseMojo {
    */
   @Parameter(property = "poolGroupString")
   String poolGroupString;
-  /**
-   * Default matching strategy. If no strategy is named in poolGroup this will be applied
-   */
+
+  /** Default matching strategy. If no strategy is named in poolGroup this will be applied */
   @Parameter(name = "defaultMatchStrategy", defaultValue = "WILDCARD")
   @Getter
   GroupMatchStrategyType defaultMatchStrategy;
-  /**
-   * Parameter to decide if prepare-execution should be run
-   */
+
+  /** Parameter to decide if prepare-execution should be run */
   @Parameter(name = "skipPrep", defaultValue = "false")
   boolean skipPrep;
-  /**
-   * Parameter to decide what format the environment variables should have
-   */
+
+  /** Parameter to decide what format the environment variables should have */
   @Parameter(name = "envVarFormat")
   String envVarFormat;
 
@@ -159,51 +147,67 @@ public class PrepareItemsMojo extends BaseMojo {
     items = pooler.pool();
     writeUsedGroupsToFile(items);
     apiRequester.setupProxy(getProxyHost(), getProxyPort());
-    apiRequester
-        .setupTls(getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw());
-    apiRequester.setAllowedResponses(config.getAcceptedResponseFamilies(), config.getAllowedResponseCodes());
+    apiRequester.setupTls(
+        getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw());
+    apiRequester.setAllowedResponses(
+        config.getAcceptedResponseFamilies(), config.getAllowedResponseCodes());
     run();
   }
 
   private void setDefaultForEmptyStrategyInPoolGroups() {
-    poolGroups = poolGroups.stream().map(p -> {
-      if (p.getStrategy() == null) {
-        p.setStrategy(defaultMatchStrategy);
-      }
-      return p;
-    }).collect(toList());
+    poolGroups =
+        poolGroups.stream()
+            .map(
+                p -> {
+                  if (p.getStrategy() == null) {
+                    p.setStrategy(defaultMatchStrategy);
+                  }
+                  return p;
+                })
+            .collect(toList());
   }
 
   protected void checkExpressionSetCorrectly() throws MojoExecutionException {
-    Optional<TagExpression> checkTag = tagExpressions.stream()
-        .filter(t -> t.getExpression() == null || t.getTag() == null).findAny();
+    Optional<TagExpression> checkTag =
+        tagExpressions.stream()
+            .filter(t -> t.getExpression() == null || t.getTag() == null)
+            .findAny();
     if (checkTag.isPresent()) {
-      throw new MojoExecutionException(format("Erroneous configuration: missing %s in %s",
-          checkTag.get().getExpression() == null ? "expression" : "tag", checkTag.get()));
+      throw new MojoExecutionException(
+          format(
+              "Erroneous configuration: missing %s in %s",
+              checkTag.get().getExpression() == null ? "expression" : "tag", checkTag.get()));
     }
-    Optional<PropertyExpression> checkProperty = propertyExpressions.stream()
-        .filter(t -> t.getExpression() == null || t.getProperty() == null).findAny();
+    Optional<PropertyExpression> checkProperty =
+        propertyExpressions.stream()
+            .filter(t -> t.getExpression() == null || t.getProperty() == null)
+            .findAny();
     if (checkProperty.isPresent()) {
-      throw new MojoExecutionException(format("Erroneous configuration: missing %s in %s",
-          checkProperty.get().getExpression() == null ? "expression" : "property",
-          checkProperty.get()));
+      throw new MojoExecutionException(
+          format(
+              "Erroneous configuration: missing %s in %s",
+              checkProperty.get().getExpression() == null ? "expression" : "property",
+              checkProperty.get()));
     }
   }
 
   protected void run() throws MojoExecutionException {
-    List<CombineItem> processedItems = items.stream()
-        .map(this::processItem)
-        .filter(Objects::nonNull)
-        .collect(toList());
+    List<CombineItem> processedItems =
+        items.stream().map(this::processItem).filter(Objects::nonNull).toList();
     boolean requestsOk = apiErrors.isEmpty() || !isBreakOnFailedRequest();
     boolean contextOk = itemsCreator.getContextErrors().isEmpty() || !isBreakOnContextError();
     writeErrors(getClass().getSimpleName(), apiErrors, FAILED_REQ_WARN_MESSAGE, false);
-    writeErrors(getClass().getSimpleName(), itemsCreator.getContextErrors(),
-        CONFIG_FAIL_WARN_MESSAGE, apiErrors.isEmpty());
+    writeErrors(
+        getClass().getSimpleName(),
+        itemsCreator.getContextErrors(),
+        CONFIG_FAIL_WARN_MESSAGE,
+        apiErrors.isEmpty());
     if (requestsOk && contextOk) {
-      getLog().info(
-          format("Successfully processed %s items, writing to file %s",
-              processedItems.size(), getCombineItemsFile()));
+      getLog()
+          .info(
+              format(
+                  "Successfully processed %s items, writing to file %s",
+                  processedItems.size(), getCombineItemsFile()));
       writeItemsToFile(processedItems);
     }
     if (!requestsOk) {
@@ -212,8 +216,8 @@ public class PrepareItemsMojo extends BaseMojo {
     }
     if (!contextOk) {
       throw new MojoExecutionException(
-          "Different tags or properties where found ->\n" + join("\n",
-              itemsCreator.getContextErrors()));
+          "Different tags or properties where found ->\n"
+              + join("\n", itemsCreator.getContextErrors()));
     }
   }
 
@@ -221,8 +225,8 @@ public class PrepareItemsMojo extends BaseMojo {
     String url = item.getUrl() == null ? item.getValue() : item.getUrl();
     try {
       getLog().info("Connecting to " + url);
-      Map<?, ?> apiInfo = getApiInfo(
-          nonNull(infoResourceLocation) ? url + infoResourceLocation : url);
+      Map<?, ?> apiInfo =
+          getApiInfo(nonNull(infoResourceLocation) ? url + infoResourceLocation : url);
       itemsCreator.evaluateExpressions(item, apiInfo);
       return item;
     } catch (MojoExecutionException ex) {
@@ -247,7 +251,8 @@ public class PrepareItemsMojo extends BaseMojo {
     getLog().info("Created new combine item file -> " + fileName);
     FileUtils.writeStringToFile(
         new File(fileName),
-        new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(items), UTF_8);
+        new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(items),
+        UTF_8);
   }
 
   @SneakyThrows
@@ -258,13 +263,15 @@ public class PrepareItemsMojo extends BaseMojo {
             .flatMap(Collection::stream)
             .distinct()
             .filter(pooler::matchAny)
-            .collect(Collectors.toMap(
-                String::toString,
-                e -> finalListOfItems.stream()
-                    .filter(i -> i.getGroups().contains(e))
-                    .map(CombineItem::produceValueUrl)
-                    .collect(toList())));
-    List<String> usedItems = finalListOfItems.stream().map(CombineItem::produceValueUrl).collect(toList());
+            .collect(
+                Collectors.toMap(
+                    String::toString,
+                    e ->
+                        finalListOfItems.stream()
+                            .filter(i -> i.getGroups().contains(e))
+                            .map(CombineItem::produceValueUrl)
+                            .toList()));
+    List<String> usedItems = finalListOfItems.stream().map(CombineItem::produceValueUrl).toList();
     JSONObject result = new JSONObject();
     result.put("usedGroups", usedGroups);
     result.put("excludedGroups", excludedGroups);
@@ -274,11 +281,12 @@ public class PrepareItemsMojo extends BaseMojo {
     FileUtils.writeStringToFile(file, result.toString(), UTF_8);
     System.setProperty("cutest.plugin.groups.usedGroups", mapGroupsToString(usedGroups));
     System.setProperty("cutest.plugin.groups.excluded", mapToString(",", excludedGroups));
-    System.setProperty("cutest.plugin.groups.poolGroupString", mapToString(";", poolGroups.stream().map(PoolGroup::toPoolGroupString).collect(toList())));
+    System.setProperty(
+        "cutest.plugin.groups.poolGroupString",
+        mapToString(";", poolGroups.stream().map(PoolGroup::toPoolGroupString).toList()));
     System.setProperty("cutest.plugin.groups.usedItems", mapToString(",", usedItems));
     getLog().info("Created new used group file -> " + file.getAbsolutePath());
   }
-
 
   private String mapGroupsToString(Map<String, List<String>> map) {
     StringBuilder sb = new StringBuilder();
@@ -287,7 +295,7 @@ public class PrepareItemsMojo extends BaseMojo {
   }
 
   private String mapToString(String defaultDelimiter, List<String> usedItems) {
-    if(envVarFormat.equalsIgnoreCase("html")){
+    if (envVarFormat.equalsIgnoreCase("html")) {
       return usedItems.stream().map(s -> "<div>" + s + "</div>").collect(Collectors.joining());
     }
     return join(defaultDelimiter, usedItems);

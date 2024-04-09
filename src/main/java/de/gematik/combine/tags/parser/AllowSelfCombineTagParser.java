@@ -39,9 +39,6 @@ public class AllowSelfCombineTagParser implements SingleTagParser {
       allow = parseBoolean(preParsedTag.getValue());
     }
     boolean finalAllow = allow;
-    parsedTags.addConfigModifier(config -> config.toBuilder()
-        .allowSelfCombine(finalAllow)
-        .build());
-
+    parsedTags.addConfigModifier(config -> config.toBuilder().allowSelfCombine(finalAllow).build());
   }
 }

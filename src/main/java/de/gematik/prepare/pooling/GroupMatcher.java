@@ -56,7 +56,9 @@ public class GroupMatcher {
 
   public List<String> getAllMatchingGroups(Set<String> groups) {
     MatchStrategy strategy = getStrategy();
-    return groups.stream().filter(e -> strategy.match(Set.of(e)).equals(MATCHING)).toList();
+    return groups.stream()
+        .filter(e -> strategy.match(Set.of(e)).equals(MATCHING))
+        .collect(Collectors.toList());
   }
 
   public List<CombineItem> getAllItemsMatching(List<CombineItem> allItems) {
@@ -66,13 +68,19 @@ public class GroupMatcher {
   }
 
   private MatchStrategy getStrategy() {
-    return switch (strategyType) {
-      case CASE_INSENSITIVE -> new CaseInsensitiveStrategy(groups);
-      case CASE_INSENSITIVE_EXACT -> new CaseInsensitiveExactStrategy(groups);
-      case CASE_SENSITIVE -> new CaseSensitiveStrategy(groups);
-      case CASE_SENSITIVE_EXACT -> new CaseSensitiveExactStrategy(groups);
-      case REGEX -> new RegexStrategy(groups);
-      default -> new WildcardStrategy(groups);
-    };
+    switch (strategyType) {
+      case CASE_INSENSITIVE:
+        return new CaseInsensitiveStrategy(groups);
+      case CASE_INSENSITIVE_EXACT:
+        return new CaseInsensitiveExactStrategy(groups);
+      case CASE_SENSITIVE:
+        return new CaseSensitiveStrategy(groups);
+      case CASE_SENSITIVE_EXACT:
+        return new CaseSensitiveExactStrategy(groups);
+      case REGEX:
+        return new RegexStrategy(groups);
+      default:
+        return new WildcardStrategy(groups);
+    }
   }
 }

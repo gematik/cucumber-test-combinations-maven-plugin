@@ -34,7 +34,8 @@ public class WildcardStrategy extends MatchStrategy {
 
   private boolean match(String group, String itemGroup) {
     itemGroup = itemGroup.toLowerCase();
-    List<String> parts = Stream.of(group.split("\\*")).filter(StringUtils::isNotBlank).toList();
+    List<String> parts =
+        Stream.of(group.split("\\*")).filter(StringUtils::isNotBlank).collect(Collectors.toList());
     if (!group.startsWith("*") && !itemGroup.startsWith(parts.get(0))) {
       return false;
     }

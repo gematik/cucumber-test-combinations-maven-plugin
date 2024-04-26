@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -47,7 +48,8 @@ public class ExecutionCounter {
       return;
     }
     List<File> featureFiles = getFeatureFiles(new File(config.getOutputDir()));
-    List<GherkinDocument> features = featureFiles.stream().map(this::transformToGherkin).toList();
+    List<GherkinDocument> features =
+        featureFiles.stream().map(this::transformToGherkin).collect(Collectors.toList());
     countExecutions(features);
     writeExecutionsToFile(config);
   }

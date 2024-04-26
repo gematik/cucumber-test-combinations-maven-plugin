@@ -42,6 +42,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import lombok.Getter;
@@ -202,7 +203,7 @@ public class CombineMojo extends BaseMojo {
         getClass().getSimpleName(),
         Stream.of(minimalTableErrorLog, tableSizeErrorLog, propertyErrorLog, warningsLog)
             .flatMap(Collection::stream)
-            .toList(),
+            .collect(Collectors.toList()),
         WARN_MESSAGE,
         true);
     if (config.isBreakIfTableToSmall() && !tableSizeErrorLog.isEmpty()) {
@@ -284,7 +285,7 @@ public class CombineMojo extends BaseMojo {
         .versionFilterTagCategory(versionFilterTagCategory)
         .emptyExamplesTags(emptyExamplesTags)
         .defaultExamplesTags(defaultExamplesTags)
-        .skipTags(skipTags.stream().map(String::toLowerCase).toList())
+        .skipTags(skipTags.stream().map(String::toLowerCase).collect(Collectors.toList()))
         .filterConfiguration(filterConfiguration)
         .projectFilters(projectFilters)
         .breakIfTableToSmall(breakIfTableToSmall)

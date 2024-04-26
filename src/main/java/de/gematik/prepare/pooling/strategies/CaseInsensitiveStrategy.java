@@ -17,11 +17,12 @@
 package de.gematik.prepare.pooling.strategies;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CaseInsensitiveStrategy extends MatchStrategy {
 
   public CaseInsensitiveStrategy(List<String> groups) {
-    super(groups.stream().map(String::toLowerCase).toList());
+    super(groups.stream().map(String::toLowerCase).collect(Collectors.toList()));
   }
 
   @Override

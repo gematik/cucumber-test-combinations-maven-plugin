@@ -26,6 +26,7 @@ import java.net.Proxy;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.net.ssl.SSLContext;
 import lombok.Setter;
@@ -54,7 +55,7 @@ public class ApiRequester {
       setupAndCreateClient();
     }
     Request request = new Request.Builder().url(url).build();
-    try (Response resp = client.newCall(request).execute()) {
+    try (Response resp = client.newCall(request).execute(); ) {
       validateCode(resp.code());
       return resp.body().string();
     } catch (IOException e) {
@@ -124,7 +125,8 @@ public class ApiRequester {
   public void setAllowedResponses(String fam, String codes) throws MojoExecutionException {
     if (StringUtils.isNotBlank(codes)) {
       try {
-        List<Integer> namedCodes = Arrays.stream(codes.split(",")).map(Integer::valueOf).toList();
+        List<Integer> namedCodes =
+            Arrays.stream(codes.split(",")).map(Integer::valueOf).collect(Collectors.toList());
         if (namedCodes.stream().anyMatch(i -> i >= 600 || i < 100)) {
           throw new MojoExecutionException("Codes could only have a range of 100 - 599");
         }
@@ -134,7 +136,10 @@ public class ApiRequester {
       }
     } else {
       try {
-        allowedFam = Arrays.stream(fam.split(",")).map(StatusCodes::valueOf).toList();
+        allowedFam =
+            Arrays.asList(fam.split(",")).stream()
+                .map(StatusCodes::valueOf)
+                .collect(Collectors.toList());
       } catch (IllegalArgumentException ex) {
         throw new MojoExecutionException(
             "Unknown status code family found in \""

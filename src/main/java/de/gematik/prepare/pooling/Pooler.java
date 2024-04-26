@@ -56,7 +56,7 @@ public class Pooler {
         allCombineItems.stream()
             .filter(
                 e -> getMatcher(config.getExcludedGroups()).order(e.getGroups()).equals(MATCHING))
-            .toList());
+            .collect(Collectors.toList()));
     Set<CombineItem> items = getNeededItemsFromGroup(allCombineItems);
     if (config.getPoolSize() <= 0 && !items.isEmpty()) {
       return new ArrayList<>(items);
@@ -113,7 +113,7 @@ public class Pooler {
               List<CombineItem> randomSelectedItems =
                   matchingItems.stream()
                       .filter(item -> item.getGroups().contains(randomGroup))
-                      .toList();
+                      .collect(Collectors.toList());
               matchingItems.removeAll(randomSelectedItems);
               selectedItems.addAll(randomSelectedItems);
             });
@@ -142,7 +142,7 @@ public class Pooler {
       List<CombineItem> newItems =
           leftItems.stream()
               .filter(i -> getMatcher(List.of(randomGroup)).order(i).equals(MATCHING))
-              .toList();
+              .collect(Collectors.toList());
       items.addAll(newItems);
       leftItems.removeAll(newItems);
       config

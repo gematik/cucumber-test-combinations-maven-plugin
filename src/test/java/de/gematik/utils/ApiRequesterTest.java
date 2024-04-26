@@ -102,7 +102,9 @@ class ApiRequesterTest {
     Random random = new Random();
     ApiRequester apiRequester = new ApiRequester();
     List<Integer> randomValues =
-        IntStream.range(0, 50).mapToObj(i -> random.nextInt(499) + 100).toList();
+        IntStream.range(0, 50)
+            .mapToObj(i -> random.nextInt(499) + 100)
+            .collect(Collectors.toList());
     apiRequester.setAllowedResponses(
         "", randomValues.stream().map(String::valueOf).collect(Collectors.joining(",")));
     apiRequester.setClient(client);

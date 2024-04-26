@@ -193,7 +193,7 @@ public class PrepareItemsMojo extends BaseMojo {
 
   protected void run() throws MojoExecutionException {
     List<CombineItem> processedItems =
-        items.stream().map(this::processItem).filter(Objects::nonNull).toList();
+        items.stream().map(this::processItem).filter(Objects::nonNull).collect(Collectors.toList());
     boolean requestsOk = apiErrors.isEmpty() || !isBreakOnFailedRequest();
     boolean contextOk = itemsCreator.getContextErrors().isEmpty() || !isBreakOnContextError();
     writeErrors(getClass().getSimpleName(), apiErrors, FAILED_REQ_WARN_MESSAGE, false);
@@ -270,8 +270,9 @@ public class PrepareItemsMojo extends BaseMojo {
                         finalListOfItems.stream()
                             .filter(i -> i.getGroups().contains(e))
                             .map(CombineItem::produceValueUrl)
-                            .toList()));
-    List<String> usedItems = finalListOfItems.stream().map(CombineItem::produceValueUrl).toList();
+                            .collect(Collectors.toList())));
+    List<String> usedItems =
+        finalListOfItems.stream().map(CombineItem::produceValueUrl).collect(Collectors.toList());
     JSONObject result = new JSONObject();
     result.put("usedGroups", usedGroups);
     result.put("excludedGroups", excludedGroups);
@@ -283,7 +284,9 @@ public class PrepareItemsMojo extends BaseMojo {
     System.setProperty("cutest.plugin.groups.excluded", mapToString(",", excludedGroups));
     System.setProperty(
         "cutest.plugin.groups.poolGroupString",
-        mapToString(";", poolGroups.stream().map(PoolGroup::toPoolGroupString).toList()));
+        mapToString(
+            ";",
+            poolGroups.stream().map(PoolGroup::toPoolGroupString).collect(Collectors.toList())));
     System.setProperty("cutest.plugin.groups.usedItems", mapToString(",", usedItems));
     getLog().info("Created new used group file -> " + file.getAbsolutePath());
   }

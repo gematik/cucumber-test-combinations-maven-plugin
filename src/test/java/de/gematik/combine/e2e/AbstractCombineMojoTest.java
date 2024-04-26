@@ -17,7 +17,6 @@
 package de.gematik.combine.e2e;
 
 import static de.gematik.combine.DependencyInstances.FILE_PROCESSOR;
-import static java.nio.file.Files.readAllBytes;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static org.mockito.Mockito.spy;
@@ -26,6 +25,7 @@ import static org.mockito.Mockito.when;
 import de.gematik.combine.CombineMojo;
 import de.gematik.combine.FilterConfiguration;
 import java.io.File;
+import java.nio.file.Files;
 import java.util.Arrays;
 import lombok.SneakyThrows;
 import org.apache.maven.plugin.logging.Log;
@@ -39,8 +39,7 @@ abstract class AbstractCombineMojoTest {
 
   public static final String WITHOUT_FILTERS_FILE_ENDING = ".withoutFilters";
 
-  @Mock
-  protected Log log;
+  @Mock protected Log log;
 
   protected CombineMojo combineMojo;
 
@@ -68,11 +67,12 @@ abstract class AbstractCombineMojoTest {
 
   @SneakyThrows
   String readFile(String name) {
-    File f = Arrays.stream(requireNonNull(new File(outputDir()).listFiles()))
-        .filter(file -> file.getName().equals(name))
-        .findAny()
-        .orElseThrow();
-    String renderedString = new String(readAllBytes(f.toPath()));
+    File f =
+        Arrays.stream(requireNonNull(new File(outputDir()).listFiles()))
+            .filter(file -> file.getName().equals(name))
+            .findAny()
+            .orElseThrow();
+    String renderedString = Files.readString(f.toPath());
     return renderedString.replace(" ", "");
   }
 
@@ -99,5 +99,4 @@ abstract class AbstractCombineMojoTest {
   protected boolean breakIfMinimalTableError() {
     return false;
   }
-
 }

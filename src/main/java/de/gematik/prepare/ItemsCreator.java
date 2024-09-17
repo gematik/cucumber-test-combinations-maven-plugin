@@ -41,11 +41,12 @@ public class ItemsCreator {
 
   @Getter private final List<String> contextErrors = new ArrayList<>();
 
-  public static final JexlEngine JEXL_ENGINE =
-      new JexlBuilder().strict(true).silent(false).safe(false).create();
+  private final JexlEngine jexlEngine;
 
   public ItemsCreator(PrepareItemsConfig config) {
     this.config = config;
+    jexlEngine =
+        new JexlBuilder().strict(!config.isAcceptUnknownInfo()).silent(false).safe(false).create();
   }
 
   public Void evaluateExpressions(CombineItem item, Map<?, ?> jsonContext) {
@@ -67,7 +68,7 @@ public class ItemsCreator {
 
     try {
       Boolean result =
-          (Boolean) JEXL_ENGINE.createExpression(tagExpression.getExpression()).evaluate(context);
+          (Boolean) jexlEngine.createExpression(tagExpression.getExpression()).evaluate(context);
       if (result != null && result) {
         newTags.add(tagExpression.getTag());
       } else {
@@ -111,7 +112,7 @@ public class ItemsCreator {
     try {
       value =
           (String)
-              JEXL_ENGINE.createExpression(propertyExpression.getExpression()).evaluate(context);
+              jexlEngine.createExpression(propertyExpression.getExpression()).evaluate(context);
     } catch (JexlException ex) {
       getPluginLog().warn(ex.getMessage());
       return null;

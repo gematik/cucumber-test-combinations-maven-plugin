@@ -2,6 +2,12 @@
 
 # Release notes
 
+## 2.10.0
+
+### Feature
+
+- A new flag for prepare allows undefined tags and properties (see [`docu`](./doc/userguide/GettingStarted.adoc))
+
 ## 2.9.20
 
 ### Bugfix

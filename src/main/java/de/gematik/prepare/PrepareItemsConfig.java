@@ -45,4 +45,6 @@ public class PrepareItemsConfig {
   private String acceptedResponseFamilies;
 
   private String allowedResponseCodes;
+
+  private boolean acceptUnknownInfo;
 }

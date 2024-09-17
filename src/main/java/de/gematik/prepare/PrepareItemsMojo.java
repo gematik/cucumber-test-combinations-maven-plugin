@@ -118,6 +118,13 @@ public class PrepareItemsMojo extends BaseMojo {
   @Parameter(name = "envVarFormat")
   String envVarFormat;
 
+  /**
+   * Fields not known to the info API will be evaluated as false, instead of null and leading to an
+   * error.
+   */
+  @Parameter(property = "acceptUnknownInfo", defaultValue = "true")
+  boolean acceptUnknownInfo;
+
   private ItemsCreator itemsCreator;
   private List<CombineItem> items;
   private Pooler pooler;
@@ -316,6 +323,7 @@ public class PrepareItemsMojo extends BaseMojo {
         .defaultMatchStrategy(defaultMatchStrategy)
         .acceptedResponseFamilies(getAcceptedResponseFamilies())
         .allowedResponseCodes(getAllowedResponseCodes())
+        .acceptUnknownInfo(acceptUnknownInfo)
         .build();
   }
 }

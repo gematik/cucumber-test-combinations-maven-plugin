@@ -50,11 +50,21 @@ class ItemsCreatorTest extends AbstractPrepareTest {
           arguments("set tag", "{\"key\": true}", "$.key", true),
           arguments("unset tag", "{\"key\": false}", "$.key", false),
           arguments("check invalid path", "{\"someKey\": false}", "$.nonExistent", false),
-          arguments("set tag from nested path", "{\"nested\": {\"key\": true}}", "$.nested.key",
-              true),
+          arguments("negated invalid path", "{\"someKey\": false}", "not($.nonExistent)", true),
+          arguments(
+              "set tag from nested path", "{\"nested\": {\"key\": true}}", "$.nested.key", true),
           arguments("set tag from compare", "{\"key\": \"value\"}", "$.key=='value'", true),
-          arguments("unset tag from compare", "{\"key\": \"value\"}", "$.key=='other'", false)
-      );
+          arguments("unset tag from compare", "{\"key\": \"value\"}", "$.key=='other'", false),
+          arguments(
+              "chained evaluation",
+              "{\"canSendMessages\": true, \"isInsurance\": false}",
+              "$.canSendMessages and not($.isInsurance)",
+              true),
+          arguments(
+              "chained evaluation with invalid key",
+              "{\"canSendMessages\": true}",
+              "$.canSendMessages and not($.isInsurance)",
+              true));
     }
 
     @SneakyThrows
@@ -63,16 +73,17 @@ class ItemsCreatorTest extends AbstractPrepareTest {
     void tagTests(String description, String json, String expression, boolean isTagSet) {
       // arrange
       String tagName = "newTag";
-      creator = new ItemsCreator(PrepareItemsConfig.builder()
-          .tagExpressions(List.of(new TagExpression(tagName, expression)))
-          .propertyExpressions(List.of())
-          .build());
+      creator =
+          new ItemsCreator(
+              PrepareItemsConfig.builder()
+                  .tagExpressions(List.of(new TagExpression(tagName, expression)))
+                  .propertyExpressions(List.of())
+                  .acceptUnknownInfo(true)
+                  .build());
 
       Map<?, ?> context = objectMapper.readValue(json, Map.class);
 
-      CombineItem combineItem = CombineItem.builder()
-          .value("someItem")
-          .build();
+      CombineItem combineItem = CombineItem.builder().value("someItem").build();
 
       // act
       creator.evaluateExpressions(combineItem, context);
@@ -83,35 +94,52 @@ class ItemsCreatorTest extends AbstractPrepareTest {
 
     public Stream<Arguments> alterTagTests() {
       return Stream.of(
-          arguments("add new tag", Set.of("initialTag"), "{\"key\": true}",
-              new TagExpression("otherTag", "$.key"), Set.of("initialTag", "otherTag")),
-          arguments("set existing tag again", Set.of("initialTag"), "{\"key\": true}",
-              new TagExpression("initialTag", "$.key"), Set.of("initialTag")),
-          arguments("remove existing tag", Set.of("initialTag"), "{\"key\": false}",
-              new TagExpression("initialTag", "$.key"), Set.of()),
-          arguments("expression not found and remove", Set.of("initialTag"),
+          arguments(
+              "add new tag",
+              Set.of("initialTag"),
+              "{\"key\": true}",
+              new TagExpression("otherTag", "$.key"),
+              Set.of("initialTag", "otherTag")),
+          arguments(
+              "set existing tag again",
+              Set.of("initialTag"),
+              "{\"key\": true}",
+              new TagExpression("initialTag", "$.key"),
+              Set.of("initialTag")),
+          arguments(
+              "remove existing tag",
+              Set.of("initialTag"),
+              "{\"key\": false}",
+              new TagExpression("initialTag", "$.key"),
+              Set.of()),
+          arguments(
+              "expression not found and remove",
+              Set.of("initialTag"),
               "{\"otherKey\": false}",
-              new TagExpression("initialTag", "$.key"), Set.of())
-      );
+              new TagExpression("initialTag", "$.key"),
+              Set.of()));
     }
 
     @SneakyThrows
     @MethodSource
     @ParameterizedTest(name = "{0}")
-    void alterTagTests(String description, Set<String> initialTags, String json,
-        TagExpression expression, Set<String> expectedTags) {
+    void alterTagTests(
+        String description,
+        Set<String> initialTags,
+        String json,
+        TagExpression expression,
+        Set<String> expectedTags) {
       // arrange
-      creator = new ItemsCreator(PrepareItemsConfig.builder()
-          .tagExpressions(List.of(expression))
-          .propertyExpressions(List.of())
-          .build());
+      creator =
+          new ItemsCreator(
+              PrepareItemsConfig.builder()
+                  .tagExpressions(List.of(expression))
+                  .propertyExpressions(List.of())
+                  .build());
 
       Map<?, ?> context = objectMapper.readValue(json, Map.class);
 
-      CombineItem combineItem = CombineItem.builder()
-          .value("someItem")
-          .tags(initialTags)
-          .build();
+      CombineItem combineItem = CombineItem.builder().value("someItem").tags(initialTags).build();
 
       // act
       creator.evaluateExpressions(combineItem, context);
@@ -122,34 +150,44 @@ class ItemsCreatorTest extends AbstractPrepareTest {
 
     public Stream<Arguments> addErrorTests() {
       return Stream.of(
-          arguments("Tag not found", new TagExpression("myTag", "$.target"),
-              "{\"differentTarget\": true}", Set.of("myTag")),
-          arguments("Tag found but false", new TagExpression("myTag", "$.target"),
-              "{\"target\": false}", Set.of("myTag")),
-          arguments("Nested tag not found", new TagExpression("myTag", "$.app.target"),
-              "{\"app\": {\"differentTarget\": false}}", Set.of("myTag")),
-          arguments("Nested tag found but false", new TagExpression("myTag", "$.app.target"),
-              "{\"app\": {\"target\": false}}", Set.of("myTag"))
-      );
+          arguments(
+              "Tag not found",
+              new TagExpression("myTag", "$.target"),
+              "{\"differentTarget\": true}",
+              Set.of("myTag")),
+          arguments(
+              "Tag found but false",
+              new TagExpression("myTag", "$.target"),
+              "{\"target\": false}",
+              Set.of("myTag")),
+          arguments(
+              "Nested tag not found",
+              new TagExpression("myTag", "$.app.target"),
+              "{\"app\": {\"differentTarget\": false}}",
+              Set.of("myTag")),
+          arguments(
+              "Nested tag found but false",
+              new TagExpression("myTag", "$.app.target"),
+              "{\"app\": {\"target\": false}}",
+              Set.of("myTag")));
     }
-
 
     @SneakyThrows
     @MethodSource
     @ParameterizedTest(name = "{0}")
-    void addErrorTests(String description, TagExpression expression, String json,
-        Set<String> initialTags) {
+    void addErrorTests(
+        String description, TagExpression expression, String json, Set<String> initialTags) {
       // arrange
-      creator = new ItemsCreator(PrepareItemsConfig.builder()
-          .tagExpressions(List.of(expression))
-          .propertyExpressions(List.of())
-          .build());
+      creator =
+          new ItemsCreator(
+              PrepareItemsConfig.builder()
+                  .tagExpressions(List.of(expression))
+                  .propertyExpressions(List.of())
+                  .build());
       Map<?, ?> context = objectMapper.readValue(json, Map.class);
 
-      CombineItem combineItem = CombineItem.builder()
-          .value("http://myApi.com:8080")
-          .tags(initialTags)
-          .build();
+      CombineItem combineItem =
+          CombineItem.builder().value("http://myApi.com:8080").tags(initialTags).build();
 
       // act
       creator.evaluateExpressions(combineItem, context);
@@ -157,7 +195,6 @@ class ItemsCreatorTest extends AbstractPrepareTest {
       // assert
       assertThat(creator.getContextErrors()).as("Test \"" + description + "\" failed!").hasSize(1);
     }
-
   }
 
   @Nested
@@ -166,44 +203,74 @@ class ItemsCreatorTest extends AbstractPrepareTest {
 
     public Stream<Arguments> propertyTests() {
       return Stream.of(
-          arguments("add property", Map.of(), "{\"key\": \"newValue\"}",
-              new PropertyExpression("prop", "$.key"), Map.of("prop", "newValue")),
-          arguments("override property", Map.of("prop", "oldValue"), "{\"key\": \"newValue\"}",
-              new PropertyExpression("prop", "$.key"), Map.of("prop", "newValue")),
-          arguments("add additional property", Map.of("existing", "value"),
+          arguments(
+              "add property",
+              Map.of(),
+              "{\"key\": \"newValue\"}",
+              new PropertyExpression("prop", "$.key"),
+              Map.of("prop", "newValue")),
+          arguments(
+              "override property",
+              Map.of("prop", "oldValue"),
+              "{\"key\": \"newValue\"}",
+              new PropertyExpression("prop", "$.key"),
+              Map.of("prop", "newValue")),
+          arguments(
+              "add additional property",
+              Map.of("existing", "value"),
               "{\"key\": \"newValue\"}",
               new PropertyExpression("prop", "$.key"),
               Map.of("existing", "value", "prop", "newValue")),
-          arguments("add property from deep path", Map.of(),
+          arguments(
+              "add property from deep path",
+              Map.of(),
               "{\"nested\":{\"prop\": \"newValue\"}}",
-              new PropertyExpression("prop", "$.nested.prop"), Map.of("prop", "newValue")),
-          arguments("expression does not exist but was set", Map.of(),
+              new PropertyExpression("prop", "$.nested.prop"),
+              Map.of("prop", "newValue")),
+          arguments(
+              "expression does not exist but was set",
+              Map.of(),
               "{\"prop\": \"newValue\"}",
-              new PropertyExpression("prop", "$.notExistingProp"), Map.of()),
-          arguments("expression does not exist and not set", Map.of(), "{\"prop\": \"newValue\"}",
-              new PropertyExpression("prop", "$.notExistingProp"), Map.of()),
-          arguments("add property with expression", Map.of(), "{\"key\": true}}",
-              new PropertyExpression("prop", "$.key==true ? 'yes' : 'no'"), Map.of("prop", "yes"))
-      );
+              new PropertyExpression("prop", "$.notExistingProp"),
+              Map.of()),
+          arguments(
+              "expression does not exist and not set",
+              Map.of(),
+              "{\"prop\": \"newValue\"}",
+              new PropertyExpression("prop", "$.notExistingProp"),
+              Map.of()),
+          arguments(
+              "add property with expression",
+              Map.of(),
+              "{\"key\": true}}",
+              new PropertyExpression("prop", "$.key==true ? 'yes' : 'no'"),
+              Map.of("prop", "yes")));
     }
 
     @SneakyThrows
     @MethodSource
     @ParameterizedTest(name = "{0}")
-    void propertyTests(String description, Map<String, String> initialProperties, String json,
-        PropertyExpression expression, Map<String, String> expectedProperties) {
+    void propertyTests(
+        String description,
+        Map<String, String> initialProperties,
+        String json,
+        PropertyExpression expression,
+        Map<String, String> expectedProperties) {
       // arrange
-      creator = new ItemsCreator(PrepareItemsConfig.builder()
-          .tagExpressions(List.of())
-          .propertyExpressions(List.of(expression))
-          .build());
+      creator =
+          new ItemsCreator(
+              PrepareItemsConfig.builder()
+                  .tagExpressions(List.of())
+                  .propertyExpressions(List.of(expression))
+                  .build());
 
       Map<?, ?> context = objectMapper.readValue(json, Map.class);
 
-      CombineItem combineItem = CombineItem.builder()
-          .value("http://myApi.com:8080")
-          .properties(initialProperties)
-          .build();
+      CombineItem combineItem =
+          CombineItem.builder()
+              .value("http://myApi.com:8080")
+              .properties(initialProperties)
+              .build();
 
       // act
       withMockedPluginLog(() -> creator.evaluateExpressions(combineItem, context));
@@ -214,36 +281,51 @@ class ItemsCreatorTest extends AbstractPrepareTest {
 
     public Stream<Arguments> propertyErrorTests() {
       return Stream.of(
-          arguments("property not found", Map.of(), "{\"otherTarget\": \"newValue\"}",
+          arguments(
+              "property not found",
+              Map.of(),
+              "{\"otherTarget\": \"newValue\"}",
               new PropertyExpression("prop", "$.target")),
-          arguments("different property", Map.of("prop", "jsonValue"),
-              "{\"target\": \"propValue\"}", new PropertyExpression("prop", "$.target")),
-          arguments("nested property not found", Map.of(),
+          arguments(
+              "different property",
+              Map.of("prop", "jsonValue"),
+              "{\"target\": \"propValue\"}",
+              new PropertyExpression("prop", "$.target")),
+          arguments(
+              "nested property not found",
+              Map.of(),
               "{\"nested\":{\"differentTarget\": \"newValue\"}}",
               new PropertyExpression("prop", "$.nested.target")),
-          arguments("nested different property", Map.of("prop", "jsonValue"),
+          arguments(
+              "nested different property",
+              Map.of("prop", "jsonValue"),
               "{\"nested\":{\"target\": \"newValue\"}}",
-              new PropertyExpression("prop", "$.nested.target"))
-      );
+              new PropertyExpression("prop", "$.nested.target")));
     }
 
     @SneakyThrows
     @MethodSource
     @ParameterizedTest(name = "{0}")
-    void propertyErrorTests(String description, Map<String, String> initialProperties, String json,
+    void propertyErrorTests(
+        String description,
+        Map<String, String> initialProperties,
+        String json,
         PropertyExpression expression) {
       // arrange
-      creator = new ItemsCreator(PrepareItemsConfig.builder()
-          .tagExpressions(List.of())
-          .propertyExpressions(List.of(expression))
-          .build());
+      creator =
+          new ItemsCreator(
+              PrepareItemsConfig.builder()
+                  .tagExpressions(List.of())
+                  .propertyExpressions(List.of(expression))
+                  .build());
 
       Map<?, ?> context = objectMapper.readValue(json, Map.class);
 
-      CombineItem combineItem = CombineItem.builder()
-          .value("http://myApi.com:8080")
-          .properties(initialProperties)
-          .build();
+      CombineItem combineItem =
+          CombineItem.builder()
+              .value("http://myApi.com:8080")
+              .properties(initialProperties)
+              .build();
 
       // act
       creator.evaluateExpressions(combineItem, context);

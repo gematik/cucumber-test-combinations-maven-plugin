@@ -28,15 +28,6 @@ This enables you for a proper investigation.
 [%header,cols="1,2,1"]
 |===
 |Option name|Description|Default
-|skip|The parameter `skip` can be set to true. This will disable alle executions at once.|false
-|breakOnFailedRequest|By default, the plugin will raise an exception and break the build if one or more API(s) are not reachable.
-
-If set to false, the errors will be noted in the log, but the plugin will continue working with the APIs it has reached.|true
-|breakOnContextError|If a tag or property should have been set but isn't,
-or the given input expects context values that an API does not conform to, the plugin will break the build.
-
-If set to false, all information from the info API will override the given input context.|true
-
 |acceptedResponseFamilies a|All requests that are made against any API are tested by response code. A list (CSV) of families can be named to cover multiple response codes. Families are:
 
 - INFO -> 100-199
@@ -44,9 +35,17 @@ If set to false, all information from the info API will override the given input
 - REDIRECTION -> 300-399
 - CLIENT_ERROR -> 400 - 499
 - SERVER_ERROR -> 500 - 599
-- ALL -> All requests are valid
-|SUCCESS
+- ALL -> All requests are valid|SUCCESS
 |allowedResponseCodes a|If only some status codes should be allowed, use this parameter and name the allowed status codes (CSV). e.g. 200,201. This will override any configuration at `acceptedResponseFamilies`|
+|breakOnFailedRequest|By default, the plugin will raise an exception and break the build if one or more API(s) are not reachable.
+
+If set to false, the errors will be noted in the log, but the plugin will continue working with the APIs it has reached.|true
+|breakOnContextError|If a tag or property should have been set but isn't,
+or the given input expects context values that an API does not conform to, the plugin will break the build.
+
+If set to false, all information from the info API will override the given input context.|true
+|skip|The parameter `skip` can be set to true. This will disable alle executions at once.|false
+
 |===
 
 == [[PREPARE]]Prepare goal
@@ -69,14 +68,19 @@ IMPORTANT: *If you want to use this goal, it has to be executed before the combi
 [%header,cols="1,2,1"]
 |===
 |Option name|Description|Default
+|acceptUnknownInfo| If one of the fields referenced in tags or properties cannot be found in the info API this would lead to an error. When this flag is set to true, unknown fields will be interpreted as false. This will allow further arithmetic operations. Set the flag to false, if an error during preparation should indicate a missing field in the info API.|true
+|breakOnFailedRequest|_global option, has to be set here: <<_overall_configuration_and_parameters,overall options>>!_|true
+|breakOnContextError|_global option, has to be set here: <<_overall_configuration_and_parameters,overall options>>!_|true
 |combineItemsFile|Path to json file that contains the values to prepare.
 For further information click <<combine_items,here>>|"./src/test/resources/ combine_items.json"
+|envVarFormat|Can be set to html. This leads to <div> surrounded values for environment variables `cutest.plugin.groups.` -> `usedGroups`, `excluded`, `poolGroupString` and `usedItems`|
 |infoResourceLocation[[infoResourceLocation]]|Location to the info-endpoint, if this is not he root location.
 For example if the URL is localhost:8080 and the info-endpoint is at /app/info you have to provide app/info here.|
-|tagExpressions|This is a list of complex data and define which tags have to be set under what conditions.
-Read more <<Expressions,here>>|
 |propertyExpressions|This is a list of complex data and define which property have to be set under what conditions.
 Read more <<Expressions, here>>|
+|skipComb|Parameter to decide if combine-execution should be run|false
+|tagExpressions|This is a list of complex data and define which tags have to be set under what conditions.
+Read more <<Expressions,here>>|
 |truststore|Path of truststore|
 |truststorePw|Truststore password|
 |clientCertStore|Path of client-cert-store|
@@ -87,10 +91,6 @@ Read more <<_pool_groups,here>>|
 |poolSize|Size of to use different groups|0
 |defaultMatchStrategy|Describes the strategy how the groups should be matched.
 Further explanation <<Matching Strategy,here>>|WILDCARD
-|skipComb|Parameter to decide if combine-execution should be run|false
-|breakOnFailedRequest|_global option, has to be set here: <<_overall_configuration_and_parameters,overall options>>!_|true
-|breakOnContextError|_global option, has to be set here: <<_overall_configuration_and_parameters,overall options>>!_|true
-|envVarFormat|Can be set to html. This leads to <div> surrounded values for environment variables `cutest.plugin.groups.` -> `usedGroups`, `excluded`, `poolGroupString` and `usedItems`|
 |===
 
 [#_pooling]
@@ -852,4 +852,7 @@ The prefix could be added to following Tags:
 === Summary about generated executions
 
 For debugging purpose a file with the number of examples for each file and szenario is build.
-This will be stored at `./target/generated-combine/countExecutions.<format>`. The export could be delivered in different formats <txt,json>. This could be configured via `countExecutionsFormat` comma separated. If this report is not desired it could be turned of via `countExecutions` set to false.
+This will be stored at `./target/generated-combine/countExecutions.<format>`.
+The export could be delivered in different formats <txt,json>.
+This could be configured via `countExecutionsFormat` comma separated.
+If this report is not desired it could be turned of via `countExecutions` set to false.

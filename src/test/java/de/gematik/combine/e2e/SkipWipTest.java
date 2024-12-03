@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
-
 class SkipWipTest extends AbstractCombineMojoTest {
 
   public static final String WIP_FILE = "wip";

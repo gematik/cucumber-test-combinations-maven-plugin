@@ -28,7 +28,7 @@ Below there is an example of how it could be used:
         <version>2.7.0</version>
         <configuration>
           <outputDir>${project.build.directory}/features/</outputDir>
-          <templateDir>./src/test/resources/templates/</templateDir>
+          <templateSources>./src/test/resources/templates/</templateSources>
           <combineItemsFile>./src/test/resources/combine_items.json</combineItemsFile>
         </configuration>
         <executions>

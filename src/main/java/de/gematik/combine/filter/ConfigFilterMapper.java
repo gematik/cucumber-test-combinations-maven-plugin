@@ -27,8 +27,7 @@ import java.util.List;
 
 public class ConfigFilterMapper {
 
-  private ConfigFilterMapper() {
-  }
+  private ConfigFilterMapper() {}
 
   public static Filters toFilters(FilterConfiguration config) {
     Filters filters = new Filters();
@@ -38,17 +37,13 @@ public class ConfigFilterMapper {
   }
 
   private static List<TableRowFilter> getRowFilters(FilterConfiguration config) {
-    return List.of(
-        new SelfCombineFilter(config.isAllowSelfCombine())
-    );
+    return List.of(new SelfCombineFilter(config.isAllowSelfCombine()));
   }
 
   private static List<TableFilter> getTableFilters(FilterConfiguration config) {
     return List.of(
         new ShuffleTableFilter(config.isShuffleCombinations()),
         new DoubleLineupFilter(config.isAllowDoubleLineup()),
-        new MaxRowsFilter("" + config.getMaxTableRows())
-    );
+        new MaxRowsFilter("" + config.getMaxTableRows()));
   }
-
 }

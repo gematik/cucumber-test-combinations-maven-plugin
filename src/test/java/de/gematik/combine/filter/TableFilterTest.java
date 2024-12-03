@@ -34,24 +34,25 @@ class TableFilterTest {
 
   @Test
   void shouldOrderTableFilter() {
-    List<TableFilter> filters = Stream.of(
-            new MaxRowsFilter("1"),
-            new DistinctRowPropertyFilter("lala"),
-            new DoubleLineupFilter(false),
-            new JexlRowFilter("expression"),
-            new DistinctColumnFilter("column"),
-            new SelfCombineFilter(false)
-        )
-        .sorted()
-        .collect(toList());
+    List<TableFilter> filters =
+        Stream.of(
+                new MaxRowsFilter("1"),
+                new DistinctRowPropertyFilter("lala"),
+                new DoubleLineupFilter(false),
+                new JexlRowFilter("expression"),
+                new DistinctColumnFilter("column"),
+                new SelfCombineFilter(false))
+            .sorted()
+            .collect(toList());
 
-    assertThat(filters).extracting(f -> f.getClass().getSimpleName())
-        .containsExactly("DistinctRowPropertyFilter",
+    assertThat(filters)
+        .extracting(f -> f.getClass().getSimpleName())
+        .containsExactly(
+            "DistinctRowPropertyFilter",
             "JexlRowFilter",
             "SelfCombineFilter",
             "DistinctColumnFilter",
             "DoubleLineupFilter",
             "MaxRowsFilter");
   }
-
 }

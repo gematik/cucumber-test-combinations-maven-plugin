@@ -19,9 +19,11 @@ package de.gematik.combine.filter.table.cell;
 import de.gematik.combine.filter.table.SoftFilter;
 
 /**
- * This class extends all classes that should be {@link de.gematik.combine.filter.table.cell.CellFilter} with property
- * <i>soft</i>, so the {@link de.gematik.combine.filter.table.cell.CellFilter} interface can stay functional interface.
- * All Filters should extend this class and not implement {@link de.gematik.combine.filter.table.cell.CellFilter}
+ * This class extends all classes that should be {@link
+ * de.gematik.combine.filter.table.cell.CellFilter} with property <i>soft</i>, so the {@link
+ * de.gematik.combine.filter.table.cell.CellFilter} interface can stay functional interface. All
+ * Filters should extend this class and not implement {@link
+ * de.gematik.combine.filter.table.cell.CellFilter}
  */
 public abstract class AbstractCellFilter implements CellFilter {
 
@@ -37,5 +39,4 @@ public abstract class AbstractCellFilter implements CellFilter {
     this.soft = soft;
     return this;
   }
-
 }

@@ -36,11 +36,12 @@ class RequirePropertyTagParserTest {
 
   private static RequirePropertyTagParser parser = new RequirePropertyTagParser();
 
-  @Mock
-  ParsedTags parsedTags;
+  @Mock ParsedTags parsedTags;
 
   @ParameterizedTest
-  @CsvSource(delimiter = '|', value = {"Header_1", "someValue,AnotherValue,additionalValue"})
+  @CsvSource(
+      delimiter = '|',
+      value = {"Header_1", "someValue,AnotherValue,additionalValue"})
   void shouldThrowIllegalArgumentExceptionIfNot2ArgumentsDelivered(String value) {
     // arrange
     PreParsedTag preParsedTag = new PreParsedTag(DISTINCT_COLUMN_PROPERTY_TAG, value);
@@ -49,7 +50,6 @@ class RequirePropertyTagParserTest {
         // assert
         .isInstanceOf(IllegalArgumentException.class);
   }
-
 
   @Test
   void shouldParseSuccessfully() {

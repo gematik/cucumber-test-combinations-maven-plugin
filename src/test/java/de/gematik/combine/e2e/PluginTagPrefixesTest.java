@@ -43,5 +43,4 @@ public class PluginTagPrefixesTest extends AbstractCombineMojoTest {
     assertThat(strippedStr.split(PLUGIN_TAG_CATEGORY)).hasSize(2);
     assertThat(strippedStr.split(VERSION_FILTER_TAG_CATEGORY)).hasSize(4);
   }
-
 }

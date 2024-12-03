@@ -33,15 +33,16 @@ class ParsedTagsTest {
 
   @ParameterizedTest
   @CsvSource({
-      "true,false,false",
-      "true,true,false",
-      "true,true,true",
-      "false,true,false",
-      "true,false,true",
-      "false,false,false",
-      "false,false,true"
+    "true,false,false",
+    "true,true,false",
+    "true,true,true",
+    "false,true,false",
+    "true,false,true",
+    "false,false,false",
+    "false,false,true"
   })
-  void returnFalseIfNoSoftFilterIncluded(boolean softTableFilter, boolean softTableRowFilter, boolean softCellFilter) {
+  void returnFalseIfNoSoftFilterIncluded(
+      boolean softTableFilter, boolean softTableRowFilter, boolean softCellFilter) {
     // arrange
     ParsedTags parsedTags = new ParsedTags(new ArrayList<>());
 
@@ -52,25 +53,28 @@ class ParsedTagsTest {
     CellFilter c = getCellFilter(softCellFilter);
     parsedTags.addCellFilter("Header_1", c);
     // assert
-    assertThat(parsedTags.containSoftFilter()).isEqualTo(softCellFilter || softTableFilter || softTableRowFilter);
+    assertThat(parsedTags.containSoftFilter())
+        .isEqualTo(softCellFilter || softTableFilter || softTableRowFilter);
   }
 
   private CellFilter getCellFilter(boolean softCellFilter) {
-    return (CellFilter) new AbstractCellFilter() {
-      @Override
-      public boolean test(TableCell tableCell) {
-        return false;
-      }
-    }.setSoft(softCellFilter);
+    return (CellFilter)
+        new AbstractCellFilter() {
+          @Override
+          public boolean test(TableCell tableCell) {
+            return false;
+          }
+        }.setSoft(softCellFilter);
   }
 
   private TableRowFilter getTableRowFilter(boolean softTableRowFilter) {
-    return (TableRowFilter) new TableRowFilter() {
-      @Override
-      public boolean test(List<TableCell> tableCells) {
-        return false;
-      }
-    }.setSoft(softTableRowFilter);
+    return (TableRowFilter)
+        new TableRowFilter() {
+          @Override
+          public boolean test(List<TableCell> tableCells) {
+            return false;
+          }
+        }.setSoft(softTableRowFilter);
   }
 
   private TableFilter getTableFilter(boolean softTableFilter) {

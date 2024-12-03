@@ -36,13 +36,15 @@ class EqualRowPropertyFilterTest {
 
   private static List<TableCell> rowValues(String... propertyValues) {
     return stream(propertyValues)
-        .map(prop ->
-            TableCell.builder()
-                .combineItem(CombineItem.builder()
-                    .property(PROPERTY_NAME, prop)
-                    .value(prop + "value")
+        .map(
+            prop ->
+                TableCell.builder()
+                    .combineItem(
+                        CombineItem.builder()
+                            .property(PROPERTY_NAME, prop)
+                            .value(prop + "value")
+                            .build())
                     .build())
-                .build())
         .collect(toList());
   }
 
@@ -52,8 +54,7 @@ class EqualRowPropertyFilterTest {
         arguments(false, rowValues("foo", "bar")),
         arguments(false, rowValues("foo", "bar", "baz")),
         arguments(true, rowValues("foo", "foo")),
-        arguments(false, rowValues("foo", "bar", "foo", "bar"))
-    );
+        arguments(false, rowValues("foo", "bar", "foo", "bar")));
   }
 
   @ParameterizedTest

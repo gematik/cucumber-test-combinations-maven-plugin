@@ -21,9 +21,7 @@ import de.gematik.combine.model.properties.Version;
 import de.gematik.combine.util.CompareOperator;
 import lombok.EqualsAndHashCode;
 
-/**
- * A {@link VersionFilter} implementing the {@link ProjectCellFilter} interface.
- */
+/** A {@link VersionFilter} implementing the {@link ProjectCellFilter} interface. */
 @EqualsAndHashCode(callSuper = true)
 public class ProjectVersionFilter extends VersionFilter implements ProjectCellFilter {
 

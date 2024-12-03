@@ -40,19 +40,14 @@ public class DefaultTagsTest extends AbstractCombineMojoTest {
 
   public static Stream<Arguments> invalidTags() {
     return Stream.of(
-        arguments("Huhu"),
-        arguments("@@Huhu"),
-        arguments("@Hu hu"),
-        arguments("@Huhu@Duda")
-    );
+        arguments("Huhu"), arguments("@@Huhu"), arguments("@Hu hu"), arguments("@Huhu@Duda"));
   }
 
   public static Stream<Arguments> configTags() {
     return Stream.of(
         arguments("@AllowDoubleLineup"),
         arguments("@AllowSelfCombine"),
-        arguments("@MinimalTable")
-    );
+        arguments("@MinimalTable"));
   }
 
   @BeforeEach
@@ -72,12 +67,14 @@ public class DefaultTagsTest extends AbstractCombineMojoTest {
 
     // assert
     String strippedStr = readFile(DEFAULT_CONFIG_FILE);
-    assertThat(strippedStr).endsWith(
-        format("@%s:MaxRows(1)@%s:Blub\n"
-                + "Beispiele:\n"
-                + "|HEADER_1|HEADER_2|\n"
-                + "|Api1|Api2|\n",
-            pluginTagCategory, pluginTagCategory));
+    assertThat(strippedStr)
+        .endsWith(
+            format(
+                "@%s:MaxRows(1)@%s:Blub\n"
+                    + "Beispiele:\n"
+                    + "|HEADER_1|HEADER_2|\n"
+                    + "|Api1|Api2|\n",
+                pluginTagCategory, pluginTagCategory));
   }
 
   @ParameterizedTest
@@ -103,8 +100,10 @@ public class DefaultTagsTest extends AbstractCombineMojoTest {
     assertThatThrownBy(combineMojo::execute)
         // assert
         .isInstanceOf(MojoExecutionException.class)
-        .hasMessageContaining("Default tag '" + configTag
-            + "' is not allowed to contain configuration tags! [AllowDoubleLineup, AllowSelfCombine, MinimalTable]");
+        .hasMessageContaining(
+            "Default tag '"
+                + configTag
+                + "' is not allowed to contain configuration tags! [AllowDoubleLineup, AllowSelfCombine, MinimalTable]");
   }
 
   @Override

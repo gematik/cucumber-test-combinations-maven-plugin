@@ -31,10 +31,8 @@ class OverrideConfigurationTest extends AbstractCombineMojoTest {
   @BeforeEach
   public void setup() {
     combineMojo.setEnding(CONFIG_TAGS_FILE_ENDING);
-    combineMojo.setFilterConfiguration(FilterConfiguration.builder()
-        .allowSelfCombine(true)
-        .allowDoubleLineup(true)
-        .build());
+    combineMojo.setFilterConfiguration(
+        FilterConfiguration.builder().allowSelfCombine(true).allowDoubleLineup(true).build());
   }
 
   @Test
@@ -44,13 +42,14 @@ class OverrideConfigurationTest extends AbstractCombineMojoTest {
     combineMojo.execute();
     // assert
     String strippedStr = readFile(CONFIG_TAGS_FILE);
-    assertThat(strippedStr).contains(
-        "@Plugin:AllowDoubleLineup(false)\n"
-            + "Beispiele:\n"
-            + "|HEADER_1|HEADER_2|\n"
-            + "|Api1|Api1|\n"
-            + "|Api1|Api2|\n"
-            + "|Api2|Api2|");
+    assertThat(strippedStr)
+        .contains(
+            "@Plugin:AllowDoubleLineup(false)\n"
+                + "Beispiele:\n"
+                + "|HEADER_1|HEADER_2|\n"
+                + "|Api1|Api1|\n"
+                + "|Api1|Api2|\n"
+                + "|Api2|Api2|");
   }
 
   @Test
@@ -60,12 +59,13 @@ class OverrideConfigurationTest extends AbstractCombineMojoTest {
     combineMojo.execute();
     // assert
     String strippedStr = readFile(CONFIG_TAGS_FILE);
-    assertThat(strippedStr).contains(
-        "@Plugin:AllowSelfCombine(false)\n"
-            + "Beispiele:\n"
-            + "|HEADER_1|HEADER_2|\n"
-            + "|Api1|Api2|\n"
-            + "|Api2|Api1|");
+    assertThat(strippedStr)
+        .contains(
+            "@Plugin:AllowSelfCombine(false)\n"
+                + "Beispiele:\n"
+                + "|HEADER_1|HEADER_2|\n"
+                + "|Api1|Api2|\n"
+                + "|Api2|Api1|");
   }
 
   @Test
@@ -75,11 +75,12 @@ class OverrideConfigurationTest extends AbstractCombineMojoTest {
     combineMojo.execute();
     // assert
     String strippedStr = readFile(CONFIG_TAGS_FILE);
-    assertThat(strippedStr).contains(
-        "@Plugin:AllowDoubleLineup(false)@Plugin:AllowSelfCombine(false)\n"
-            + "Beispiele:\n"
-            + "|HEADER_1|HEADER_2|\n"
-            + "|Api1|Api2|");
+    assertThat(strippedStr)
+        .contains(
+            "@Plugin:AllowDoubleLineup(false)@Plugin:AllowSelfCombine(false)\n"
+                + "Beispiele:\n"
+                + "|HEADER_1|HEADER_2|\n"
+                + "|Api1|Api2|");
   }
 
   @Test
@@ -89,11 +90,9 @@ class OverrideConfigurationTest extends AbstractCombineMojoTest {
     combineMojo.execute();
     // assert
     String strippedStr = readFile(CONFIG_TAGS_FILE);
-    assertThat(strippedStr).contains(
-        "@Plugin:MaxRows(1)\n"
-            + "Beispiele:\n"
-            + "|HEADER_1|HEADER_2|\n"
-            + "|Api1|Api1|");
+    assertThat(strippedStr)
+        .contains(
+            "@Plugin:MaxRows(1)\n" + "Beispiele:\n" + "|HEADER_1|HEADER_2|\n" + "|Api1|Api1|");
   }
 
   @Override

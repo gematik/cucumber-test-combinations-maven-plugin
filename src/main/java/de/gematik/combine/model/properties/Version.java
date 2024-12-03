@@ -41,8 +41,9 @@ public class Version implements Comparable<Version> {
         versionParts.add(Integer.parseInt(versionPartString));
       }
     } catch (NumberFormatException ignored) {
-      throw new MalformedParametersException(format(
-          "Version may only contain numbers and dots(.), does not match: %s", versionString));
+      throw new MalformedParametersException(
+          format(
+              "Version may only contain numbers and dots(.), does not match: %s", versionString));
     }
     if (versionParts.isEmpty()) {
       throw new MalformedParametersException("Version may not be empty");
@@ -67,9 +68,6 @@ public class Version implements Comparable<Version> {
 
   @Override
   public String toString() {
-    return versionParts.stream()
-        .map(Object::toString)
-        .collect(Collectors.joining("."));
+    return versionParts.stream().map(Object::toString).collect(Collectors.joining("."));
   }
-
 }

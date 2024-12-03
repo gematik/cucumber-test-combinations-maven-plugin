@@ -29,7 +29,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 public class CombineConfiguration {
 
-  private String templateDir;
+  private List<String> templateSources;
   private String outputDir;
   private String combineItemFile;
   @Builder.Default private String templateFileEnding = ".cute";

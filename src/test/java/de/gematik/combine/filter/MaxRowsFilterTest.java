@@ -39,14 +39,18 @@ class MaxRowsFilterTest {
 
   private List<List<TableCell>> singleColumn(String... values) {
     return stream(values)
-        .map(value -> List.of(TableCell.builder()
-            .header("A")
-            .combineItem(CombineItem.builder()
-                .value(value)
-                .property("prop", value)
-                .tag(value)
-                .build())
-            .build()))
+        .map(
+            value ->
+                List.of(
+                    TableCell.builder()
+                        .header("A")
+                        .combineItem(
+                            CombineItem.builder()
+                                .value(value)
+                                .property("prop", value)
+                                .tag(value)
+                                .build())
+                        .build()))
         .collect(toList());
   }
 
@@ -59,8 +63,7 @@ class MaxRowsFilterTest {
         arguments("rowCount-2", 2),
         arguments("columnCount*2", 2),
         arguments("A.tags.count(\"foo\")", 2),
-        arguments("A.properties[\"prop\"].distinct().size()", 3)
-    );
+        arguments("A.properties[\"prop\"].distinct().size()", 3));
   }
 
   @ParameterizedTest

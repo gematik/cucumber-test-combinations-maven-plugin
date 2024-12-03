@@ -36,16 +36,13 @@ class CaseSensitiveExactStrategyTest {
         arguments(List.of("testGroup"), Set.of("testGroup"), MATCHING),
         arguments(List.of(), Set.of("testgrOup"), NOT_MATCHING),
         arguments(List.of(), Set.of("testGroup"), NOT_MATCHING),
-        arguments(List.of(), Set.of("testGroup"), NOT_MATCHING)
-    );
+        arguments(List.of(), Set.of("testGroup"), NOT_MATCHING));
   }
 
   @MethodSource
   @ParameterizedTest
-  void testCaseInsensitiveExact(List<String> groups, Set<String> itemGroups,
-      String result) {
+  void testCaseInsensitiveExact(List<String> groups, Set<String> itemGroups, String result) {
     CaseSensitiveExactStrategy underTest = new CaseSensitiveExactStrategy(groups);
     assertThat(underTest.match(itemGroups)).isEqualTo(result);
   }
-
 }

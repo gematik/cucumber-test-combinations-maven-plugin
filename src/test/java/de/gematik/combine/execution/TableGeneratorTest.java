@@ -60,27 +60,26 @@ class TableGeneratorTest {
   @Nested
   class FullTable {
 
-    List<CombineItem> items = List.of(
-        CombineItem.builder().value("Api1").build(),
-        CombineItem.builder().value("Api2").build(),
-        CombineItem.builder().value("Api3").build()
-    );
+    List<CombineItem> items =
+        List.of(
+            CombineItem.builder().value("Api1").build(),
+            CombineItem.builder().value("Api2").build(),
+            CombineItem.builder().value("Api3").build());
     List<String> headers = List.of("HEADER_1", "HEADER_2");
 
     @Test
     void shouldCreateCartesianProduct() {
       // arrange
-      ConfiguredFilters configuredFilters = new ConfiguredFilters(
-          FilterConfiguration.builder().build(),
-          headers, Filters.builder().build());
+      ConfiguredFilters configuredFilters =
+          new ConfiguredFilters(
+              FilterConfiguration.builder().build(), headers, Filters.builder().build());
       // act
       List<List<TableCell>> table = tableGenerator.generateTable(items, configuredFilters);
       // assert
       assertThat(table)
-          .extracting(row -> row.stream()
-              .map(TableCell::getValue)
-              .collect(joining(",")))
-          .containsExactly("Api1,Api1",
+          .extracting(row -> row.stream().map(TableCell::getValue).collect(joining(",")))
+          .containsExactly(
+              "Api1,Api1",
               "Api1,Api2",
               "Api1,Api3",
               "Api2,Api1",
@@ -94,22 +93,19 @@ class TableGeneratorTest {
     @Test
     void shouldEvaluatePrepareColumnFilter() {
       // arrange
-      Map<String, List<CellFilter>> preparedColumnFilters = preparedColumnFilters("HEADER_1",
-          "HEADER_1.value.equals(\"Api1\")");
-      ConfiguredFilters configuredFilters = new ConfiguredFilters(
-          FilterConfiguration.builder().build(), headers, Filters.builder()
-          .cellFilters(preparedColumnFilters)
-          .build());
+      Map<String, List<CellFilter>> preparedColumnFilters =
+          preparedColumnFilters("HEADER_1", "HEADER_1.value.equals(\"Api1\")");
+      ConfiguredFilters configuredFilters =
+          new ConfiguredFilters(
+              FilterConfiguration.builder().build(),
+              headers,
+              Filters.builder().cellFilters(preparedColumnFilters).build());
       // act
       List<List<TableCell>> table = tableGenerator.generateTable(items, configuredFilters);
       // assert
       assertThat(table)
-          .extracting(row -> row.stream()
-              .map(TableCell::getValue)
-              .collect(joining(",")))
-          .containsExactly("Api1,Api1",
-              "Api1,Api2",
-              "Api1,Api3");
+          .extracting(row -> row.stream().map(TableCell::getValue).collect(joining(",")))
+          .containsExactly("Api1,Api1", "Api1,Api2", "Api1,Api3");
     }
   }
 
@@ -118,64 +114,62 @@ class TableGeneratorTest {
 
     FilterConfiguration config = FilterConfiguration.builder().minimalTable(true).build();
     List<String> headers = List.of("HEADER_1", "HEADER_2", "HEADER_3");
-    List<CombineItem> items = List.of(
-        CombineItem.builder().value("Api_A1").property("prop", "A").build(),
-        CombineItem.builder().value("Api_A2").property("prop", "A").build(),
-        CombineItem.builder().value("Api_B1").property("prop", "B").build(),
-        CombineItem.builder().value("Api_B2").property("prop", "B").build(),
-        CombineItem.builder().value("Api_C1").property("prop", "C").build()
-    );
+    List<CombineItem> items =
+        List.of(
+            CombineItem.builder().value("Api_A1").property("prop", "A").build(),
+            CombineItem.builder().value("Api_A2").property("prop", "A").build(),
+            CombineItem.builder().value("Api_B1").property("prop", "B").build(),
+            CombineItem.builder().value("Api_B2").property("prop", "B").build(),
+            CombineItem.builder().value("Api_C1").property("prop", "C").build());
 
     @Test
-    void shouldEvaluateFilterAccessingNotAdjacentColumns(){
-      //arrange
-      ConfiguredFilters configuredFilters = new ConfiguredFilters(config, headers,
-          Filters.builder()
-              .tableRowFilters(List.of(
-                  new JexlRowFilter(
-                      "HEADER_1.properties[\"prop\"].equals(HEADER_3.properties[\"prop\"])")))
-              .build());
+    void shouldEvaluateFilterAccessingNotAdjacentColumns() {
+      // arrange
+      ConfiguredFilters configuredFilters =
+          new ConfiguredFilters(
+              config,
+              headers,
+              Filters.builder()
+                  .tableRowFilters(
+                      List.of(
+                          new JexlRowFilter(
+                              "HEADER_1.properties[\"prop\"].equals(HEADER_3.properties[\"prop\"])")))
+                  .build());
       // act
       List<List<TableCell>> table = tableGenerator.generateTable(items, configuredFilters);
       // assert
       assertThat(table)
-          .extracting(row -> row.stream()
-              .map(TableCell::getValue)
-              .collect(joining(",")))
+          .extracting(row -> row.stream().map(TableCell::getValue).collect(joining(",")))
           .containsExactly("Api_A1,Api_A2,Api_A1", "Api_B1,Api_B2,Api_B1", "Api_C1,Api_A1,Api_C1");
     }
 
     @Test
     void shouldCreateMinimalTable() {
       // arrange
-      ConfiguredFilters configuredFilters = new ConfiguredFilters(config, headers,
-          Filters.builder().build());
+      ConfiguredFilters configuredFilters =
+          new ConfiguredFilters(config, headers, Filters.builder().build());
       // act
       List<List<TableCell>> table = tableGenerator.generateTable(items, configuredFilters);
       // assert
       assertThat(table)
-          .extracting(row -> row.stream()
-              .map(TableCell::getValue)
-              .collect(joining(",")))
+          .extracting(row -> row.stream().map(TableCell::getValue).collect(joining(",")))
           .containsExactly("Api_A1,Api_A2,Api_B1", "Api_B2,Api_C1,Api_A1");
     }
 
     @Test
     void shouldEvaluatePrepareColumnFilter() {
       // arrange
-      Map<String, List<CellFilter>> preparedColumnFilters = preparedColumnFilters("HEADER_1",
-          "HEADER_1.value.equals(\"Api_A1\")");
+      Map<String, List<CellFilter>> preparedColumnFilters =
+          preparedColumnFilters("HEADER_1", "HEADER_1.value.equals(\"Api_A1\")");
 
-      ConfiguredFilters configuredFilters = new ConfiguredFilters(config, headers, Filters.builder()
-          .cellFilters(preparedColumnFilters)
-          .build());
+      ConfiguredFilters configuredFilters =
+          new ConfiguredFilters(
+              config, headers, Filters.builder().cellFilters(preparedColumnFilters).build());
       // act
       List<List<TableCell>> table = tableGenerator.generateTable(items, configuredFilters);
       // assert
       assertThat(table)
-          .extracting(row -> row.stream()
-              .map(TableCell::getValue)
-              .collect(joining(",")))
+          .extracting(row -> row.stream().map(TableCell::getValue).collect(joining(",")))
           .containsExactly("Api_A1,Api_A2,Api_B1", "Api_A1,Api_B2,Api_C1");
     }
 
@@ -183,71 +177,73 @@ class TableGeneratorTest {
     void shouldEvaluateRowFilter() {
       // arrange
       List<TableRowFilter> rowFilters = List.of(new DistinctRowPropertyFilter("prop"));
-      ConfiguredFilters configuredFilters = new ConfiguredFilters(config, headers, Filters.builder()
-          .tableRowFilters(rowFilters)
-          .build());
+      ConfiguredFilters configuredFilters =
+          new ConfiguredFilters(
+              config, headers, Filters.builder().tableRowFilters(rowFilters).build());
       // act
       List<List<TableCell>> table = tableGenerator.generateTable(items, configuredFilters);
       // assert
       assertThat(table)
-          .extracting(row -> row.stream()
-              .map(TableCell::getValue)
-              .collect(joining(",")))
+          .extracting(row -> row.stream().map(TableCell::getValue).collect(joining(",")))
           .containsExactly("Api_A1,Api_B1,Api_C1", "Api_A2,Api_B2,Api_C1");
     }
 
     @Test
     void shouldEvaluatePrepareColumnAndRowFilter() {
       // arrange
-      Map<String, List<CellFilter>> preparedColumnFilters = preparedColumnFilters("HEADER_2",
-          "HEADER_2.value.equals(\"Api_C1\")");
+      Map<String, List<CellFilter>> preparedColumnFilters =
+          preparedColumnFilters("HEADER_2", "HEADER_2.value.equals(\"Api_C1\")");
       List<TableRowFilter> rowFilters = List.of(new DistinctRowPropertyFilter("prop"));
 
-      ConfiguredFilters configuredFilters = new ConfiguredFilters(config, headers, Filters.builder()
-          .cellFilters(preparedColumnFilters)
-          .tableRowFilters(rowFilters)
-          .build());
+      ConfiguredFilters configuredFilters =
+          new ConfiguredFilters(
+              config,
+              headers,
+              Filters.builder()
+                  .cellFilters(preparedColumnFilters)
+                  .tableRowFilters(rowFilters)
+                  .build());
       // act
       List<List<TableCell>> table = tableGenerator.generateTable(items, configuredFilters);
       // assert
       assertThat(table)
-          .extracting(row -> row.stream()
-              .map(TableCell::getValue)
-              .collect(joining(",")))
+          .extracting(row -> row.stream().map(TableCell::getValue).collect(joining(",")))
           .containsExactly("Api_A1,Api_C1,Api_B1", "Api_A2,Api_C1,Api_B2");
     }
 
     @Test
     void shouldEvaluatePrepareColumnAndRowFilter2() {
       // arrange
-      List<CombineItem> items = List.of(
-          CombineItem.builder().value("Api_A1").property("prop", "A").build(),
-          CombineItem.builder().value("Api_A2").tag("orgAdmin").property("prop", "A").build(),
-          CombineItem.builder().value("Api_B1").property("prop", "B").build(),
-          CombineItem.builder().value("Api_B2").tag("orgAdmin").property("prop", "B").build(),
-          CombineItem.builder().value("Api_C1").property("prop", "C").build()
-      );
-      Map<String, List<CellFilter>> preparedColumnFilters = preparedColumnFilters("HEADER_1",
-          "HEADER_1.hasTag(\"orgAdmin\")");
+      List<CombineItem> items =
+          List.of(
+              CombineItem.builder().value("Api_A1").property("prop", "A").build(),
+              CombineItem.builder().value("Api_A2").tag("orgAdmin").property("prop", "A").build(),
+              CombineItem.builder().value("Api_B1").property("prop", "B").build(),
+              CombineItem.builder().value("Api_B2").tag("orgAdmin").property("prop", "B").build(),
+              CombineItem.builder().value("Api_C1").property("prop", "C").build());
+      Map<String, List<CellFilter>> preparedColumnFilters =
+          preparedColumnFilters("HEADER_1", "HEADER_1.hasTag(\"orgAdmin\")");
       List<TableRowFilter> rowFilters = List.of(new EqualRowPropertyFilter("prop"));
 
-      ConfiguredFilters configuredFilters = new ConfiguredFilters(config, headers, Filters.builder()
-          .cellFilters(preparedColumnFilters)
-          .tableRowFilters(rowFilters)
-          .build());
+      ConfiguredFilters configuredFilters =
+          new ConfiguredFilters(
+              config,
+              headers,
+              Filters.builder()
+                  .cellFilters(preparedColumnFilters)
+                  .tableRowFilters(rowFilters)
+                  .build());
       // act
       List<List<TableCell>> table = tableGenerator.generateTable(items, configuredFilters);
       // assert
       assertThat(table)
-          .extracting(row -> row.stream()
-              .map(TableCell::getValue)
-              .collect(joining(",")))
+          .extracting(row -> row.stream().map(TableCell::getValue).collect(joining(",")))
           .containsExactly("Api_A2,Api_A1,Api_A1", "Api_B2,Api_B1,Api_B1");
     }
   }
 
-  private Map<String, List<CellFilter>> preparedColumnFilters(String column,
-      String filterExpression) {
+  private Map<String, List<CellFilter>> preparedColumnFilters(
+      String column, String filterExpression) {
     return Map.of(column, List.of(new JexlCellFilter(column, filterExpression)));
   }
 }

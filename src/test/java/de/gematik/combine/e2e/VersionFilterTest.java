@@ -46,8 +46,8 @@ class VersionFilterTest extends AbstractCombineMojoTest {
   public static final int PROPERTY_REQUESTS_IN_FILE = 3;
   public static final List<String> ITEMS = List.of("Api0", "Api1", "Api2", "Api3", "Api4");
   public static final String VERSION_FILTER_STRING = ">=1.0.11";
-  public static final ProjectFilters PROJECT_FILTERS_WITH_VERSION = ProjectFilters.builder()
-      .version(VERSION_FILTER_STRING).build();
+  public static final ProjectFilters PROJECT_FILTERS_WITH_VERSION =
+      ProjectFilters.builder().version(VERSION_FILTER_STRING).build();
   public static final String VERSION_FILTER_TAG_CATEGORY = "WHITE_LOTUS";
   public static final String FILE_NAME = "version";
 
@@ -58,12 +58,12 @@ class VersionFilterTest extends AbstractCombineMojoTest {
         arguments(LT, List.of("Api0", "Api1"), 2),
         arguments(LE, List.of("Api0", "Api1", "Api2"), 5),
         arguments(GT, List.of("Api3", "Api4"), 2),
-        arguments(GE, List.of("Api2", "Api3", "Api4"), 5)
-    );
+        arguments(GE, List.of("Api2", "Api3", "Api4"), 5));
   }
 
   private static String getRandOperatorString(CompareOperator operator) {
-    return format("%s1.0.11",
+    return format(
+        "%s1.0.11",
         Math.random() > 0.5d ? format("--%s--", operator.name()) : operator.getLiteral());
   }
 
@@ -89,7 +89,6 @@ class VersionFilterTest extends AbstractCombineMojoTest {
 
     // assert
     assertThat(CombineMojo.getPropertyErrorLog()).hasSize(PROPERTY_REQUESTS_IN_FILE);
-
   }
 
   @ParameterizedTest
@@ -129,8 +128,8 @@ class VersionFilterTest extends AbstractCombineMojoTest {
 
   @ParameterizedTest
   @MethodSource("testOperators")
-  void shouldFilterAccordingToSetVersionFilters(CompareOperator operator,
-      List<String> filteredItems) {
+  void shouldFilterAccordingToSetVersionFilters(
+      CompareOperator operator, List<String> filteredItems) {
     // arrange
     combineMojo.setEnding(format(".%s", operator.name()));
     combineMojo.setCombineItemsFile("src/test/resources/input/versions/set.json");
@@ -141,22 +140,21 @@ class VersionFilterTest extends AbstractCombineMojoTest {
     // assert
     assertThat(readFile(FILE_NAME))
         .contains(filteredItems)
-        .doesNotContain(ITEMS.stream()
-            .filter(item -> !filteredItems.contains(item))
-            .collect(Collectors.toList())
-        );
+        .doesNotContain(
+            ITEMS.stream()
+                .filter(item -> !filteredItems.contains(item))
+                .collect(Collectors.toList()));
   }
 
   @ParameterizedTest
   @MethodSource("testOperators")
-  void shouldFilterAccordingToSetPluginVersionFilter(CompareOperator operator,
-      List<String> filteredItems) {
+  void shouldFilterAccordingToSetPluginVersionFilter(
+      CompareOperator operator, List<String> filteredItems) {
     // arrange
     combineMojo.setEnding(".overall");
     combineMojo.setCombineItemsFile("src/test/resources/input/versions/set.json");
-    combineMojo.setProjectFilters(ProjectFilters.builder()
-        .version(getRandOperatorString(operator))
-        .build());
+    combineMojo.setProjectFilters(
+        ProjectFilters.builder().version(getRandOperatorString(operator)).build());
 
     // act
     combineMojo.execute();
@@ -164,10 +162,10 @@ class VersionFilterTest extends AbstractCombineMojoTest {
     // assert
     assertThat(readFile(FILE_NAME))
         .contains(filteredItems)
-        .doesNotContain(ITEMS.stream()
-            .filter(item -> !filteredItems.contains(item))
-            .collect(Collectors.toList())
-        );
+        .doesNotContain(
+            ITEMS.stream()
+                .filter(item -> !filteredItems.contains(item))
+                .collect(Collectors.toList()));
   }
 
   @Test
@@ -182,8 +180,9 @@ class VersionFilterTest extends AbstractCombineMojoTest {
     combineMojo.execute();
 
     // assert
-    assertThat(readFile(FILE_NAME)).containsOnlyOnce(
-        format("@%s:Version(ApiName1A%s)", VERSION_FILTER_TAG_CATEGORY, VERSION_FILTER_STRING));
+    assertThat(readFile(FILE_NAME))
+        .containsOnlyOnce(
+            format("@%s:Version(ApiName1A%s)", VERSION_FILTER_TAG_CATEGORY, VERSION_FILTER_STRING));
   }
 
   @Test
@@ -202,15 +201,15 @@ class VersionFilterTest extends AbstractCombineMojoTest {
 
   @ParameterizedTest
   @MethodSource("testOperators")
-  void shouldFilterAccordingToOverrideVersionFilter(CompareOperator operator,
-      List<String> ignored, Integer i) {
+  void shouldFilterAccordingToOverrideVersionFilter(
+      CompareOperator operator, List<String> ignored, Integer i) {
     // arrange
     combineMojo.setEnding(".override");
     combineMojo.setCombineItemsFile("src/test/resources/input/versions/set.json");
     combineMojo.setFilterConfiguration(
         FilterConfiguration.builder().allowSelfCombine(true).build());
-    combineMojo.setProjectFilters(ProjectFilters.builder()
-        .version(getRandOperatorString(operator)).build());
+    combineMojo.setProjectFilters(
+        ProjectFilters.builder().version(getRandOperatorString(operator)).build());
 
     // act
     combineMojo.execute();

@@ -44,12 +44,7 @@ class MaxSameColumnPropertyTagParserTest {
 
   public static Stream<Arguments> invalidValues() {
     return Stream.of(
-        arguments(""),
-        arguments("A"),
-        arguments("A,b"),
-        arguments("A,b,"),
-        arguments("A,b,c,d")
-    );
+        arguments(""), arguments("A"), arguments("A,b"), arguments("A,b,"), arguments("A,b,c,d"));
   }
 
   @ParameterizedTest

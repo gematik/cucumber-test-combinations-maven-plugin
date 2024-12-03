@@ -24,9 +24,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-/**
- * This filter removes rows in which a distinct value appears more than once.
- */
+/** This filter removes rows in which a distinct value appears more than once. */
 @ToString
 @RequiredArgsConstructor
 public class SelfCombineFilter extends TableRowFilter {
@@ -38,10 +36,7 @@ public class SelfCombineFilter extends TableRowFilter {
     if (allow) {
       return true;
     }
-    Set<String> rowValues = tableRow.stream()
-        .map(TableCell::getValue)
-        .collect(toSet());
+    Set<String> rowValues = tableRow.stream().map(TableCell::getValue).collect(toSet());
     return rowValues.size() == tableRow.size();
   }
-
 }

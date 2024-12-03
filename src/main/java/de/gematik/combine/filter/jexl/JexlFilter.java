@@ -43,16 +43,12 @@ import org.apache.maven.plugin.MojoExecutionException;
 @EqualsAndHashCode
 public class JexlFilter {
 
-  public static final JexlEngine JEXL_ENGINE = new JexlBuilder()
-      .strict(true)
-      .silent(false)
-      .safe(false)
-      .create();
+  public static final JexlEngine JEXL_ENGINE =
+      new JexlBuilder().strict(true).silent(false).safe(false).create();
 
   private final JexlExpression expression;
 
-  @EqualsAndHashCode.Exclude
-  private final JexlContext context = new MapContext();
+  @EqualsAndHashCode.Exclude private final JexlContext context = new MapContext();
 
   public JexlFilter(String filterExpression) {
     this.expression = JEXL_ENGINE.createExpression(filterExpression);
@@ -76,10 +72,11 @@ public class JexlFilter {
 
   public void addToContext(List<TableCell> tableRow) {
     tableRow.forEach(this::addToContext);
-    tableRow.forEach(cell -> {
-      addTags(cell.getTags());
-      addProperties(cell.getProperties());
-    });
+    tableRow.forEach(
+        cell -> {
+          addTags(cell.getTags());
+          addProperties(cell.getProperties());
+        });
     addToContext(COLUMN_COUNT.key, tableRow.size());
   }
 
@@ -114,18 +111,18 @@ public class JexlFilter {
       context.set(ALL_PROPERTIES.key, allProps);
     }
     final Map<String, Set<String>> finalAllProps = allProps;
-    properties.forEach((key, value) -> {
-      if (!finalAllProps.containsKey(key)) {
-        finalAllProps.put(key, new HashSet<>());
-      }
-      finalAllProps.get(key).add(value);
-    });
+    properties.forEach(
+        (key, value) -> {
+          if (!finalAllProps.containsKey(key)) {
+            finalAllProps.put(key, new HashSet<>());
+          }
+          finalAllProps.get(key).add(value);
+        });
   }
 
   private List<JexlFilterColumn> toColumns(List<List<TableCell>> table) {
-    Map<String, List<TableCell>> columns = table.stream()
-        .flatMap(Collection::stream)
-        .collect(groupingBy(TableCell::getHeader));
+    Map<String, List<TableCell>> columns =
+        table.stream().flatMap(Collection::stream).collect(groupingBy(TableCell::getHeader));
 
     return columns.entrySet().stream()
         .map(kv -> new JexlFilterColumn(kv.getKey(), kv.getValue()))
@@ -139,8 +136,9 @@ public class JexlFilter {
       return (T) this.expression.evaluate(context);
     } catch (Exception e) {
       throw new MojoExecutionException(
-          format("Could not evaluate expression '%s': %s", expression.getSourceText(),
-              e.getMessage()), e);
+          format(
+              "Could not evaluate expression '%s': %s", expression.getSourceText(), e.getMessage()),
+          e);
     }
   }
 

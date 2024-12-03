@@ -21,9 +21,7 @@ import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
-/**
- * This filter removes rows where not all entries have different values for a given property.
- */
+/** This filter removes rows where not all entries have different values for a given property. */
 @EqualsAndHashCode(callSuper = false)
 @RequiredArgsConstructor
 public class DistinctRowPropertyFilter extends TableRowFilter {
@@ -32,10 +30,11 @@ public class DistinctRowPropertyFilter extends TableRowFilter {
 
   @Override
   public boolean test(List<TableCell> tableCells) {
-    long distinctProperties = tableCells.stream()
-        .map(cell -> cell.getCombineItem().getProperties().get(property))
-        .distinct()
-        .count();
+    long distinctProperties =
+        tableCells.stream()
+            .map(cell -> cell.getCombineItem().getProperties().get(property))
+            .distinct()
+            .count();
     return distinctProperties == tableCells.size();
   }
 }

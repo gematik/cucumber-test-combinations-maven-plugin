@@ -32,14 +32,14 @@ class FilterOrderTest {
   @SneakyThrows
   void enumShouldBeOrdered() {
     // arrange
-    List<FilterOrder> sortedByOrdinal = Stream.of(FilterOrder.values())
-        .sorted(comparingInt(Enum::ordinal))
-        .collect(toList());
+    List<FilterOrder> sortedByOrdinal =
+        Stream.of(FilterOrder.values()).sorted(comparingInt(Enum::ordinal)).collect(toList());
 
     // act
-    List<FilterOrder> sortedByOrderKey = Stream.of(FilterOrder.values())
-        .sorted(comparingInt(FilterOrder::getOrderKey))
-        .collect(toList());
+    List<FilterOrder> sortedByOrderKey =
+        Stream.of(FilterOrder.values())
+            .sorted(comparingInt(FilterOrder::getOrderKey))
+            .collect(toList());
 
     // assert
     assertThat(sortedByOrderKey)

@@ -32,18 +32,16 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class DistinctRowPropertyFilterTest {
 
-
   public static final String PROPERTY_NAME = "homeserver";
 
   private static List<TableCell> rowValues(String... propertyValues) {
     return stream(propertyValues)
-        .map(prop ->
-            TableCell.builder()
-                .combineItem(CombineItem.builder()
-                    .property(PROPERTY_NAME, prop)
-                    .value(prop)
+        .map(
+            prop ->
+                TableCell.builder()
+                    .combineItem(
+                        CombineItem.builder().property(PROPERTY_NAME, prop).value(prop).build())
                     .build())
-                .build())
         .collect(toList());
   }
 
@@ -53,8 +51,7 @@ class DistinctRowPropertyFilterTest {
         arguments(true, rowValues("foo", "bar")),
         arguments(true, rowValues("foo", "bar", "baz")),
         arguments(false, rowValues("foo", "bar", "foo")),
-        arguments(false, rowValues("foo", "bar", "foo", "bar"))
-    );
+        arguments(false, rowValues("foo", "bar", "foo", "bar")));
   }
 
   @ParameterizedTest
@@ -68,5 +65,4 @@ class DistinctRowPropertyFilterTest {
     // assert
     assertThat(filtered).isEqualTo(expectedFiltered);
   }
-
 }

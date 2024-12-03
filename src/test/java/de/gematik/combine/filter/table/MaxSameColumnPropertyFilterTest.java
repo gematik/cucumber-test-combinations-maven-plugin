@@ -39,33 +39,28 @@ class MaxSameColumnPropertyFilterTest {
             combineItem("C", PROPERTY_NAME, "other"),
             combineItem("D", PROPERTY_NAME, "value"),
             combineItem("E", PROPERTY_NAME, "value"),
-            combineItem("F", PROPERTY_NAME, "other")
-        )
+            combineItem("F", PROPERTY_NAME, "other"))
         .map(ci -> new TableCell(COLUMN_NAME, ci))
         .map(List::of)
         .collect(toList());
   }
 
   private CombineItem combineItem(String value, String propertyName, String propValue) {
-    return CombineItem.builder()
-        .value(value)
-        .property(propertyName, propValue)
-        .build();
+    return CombineItem.builder().value(value).property(propertyName, propValue).build();
   }
 
   @Test
   @SneakyThrows
   void shouldRemoveSecond() {
     // arrange
-    MaxSameColumnPropertyFilter filter = new MaxSameColumnPropertyFilter(COLUMN_NAME, PROPERTY_NAME, 1);
+    MaxSameColumnPropertyFilter filter =
+        new MaxSameColumnPropertyFilter(COLUMN_NAME, PROPERTY_NAME, 1);
     // act
     List<List<TableCell>> result = withMockedPluginLog(() -> filter.apply(table()));
 
     // assert
     assertThat(result)
-        .flatExtracting(row -> row.stream()
-            .map(TableCell::getValue)
-            .collect(toList()))
+        .flatExtracting(row -> row.stream().map(TableCell::getValue).collect(toList()))
         .containsExactly("A", "B", "C");
   }
 
@@ -73,16 +68,14 @@ class MaxSameColumnPropertyFilterTest {
   @SneakyThrows
   void shouldRemoveThird() {
     // arrange
-    MaxSameColumnPropertyFilter filter = new MaxSameColumnPropertyFilter(COLUMN_NAME, PROPERTY_NAME, 2);
+    MaxSameColumnPropertyFilter filter =
+        new MaxSameColumnPropertyFilter(COLUMN_NAME, PROPERTY_NAME, 2);
     // act
     List<List<TableCell>> result = withMockedPluginLog(() -> filter.apply(table()));
 
     // assert
     assertThat(result)
-        .flatExtracting(row -> row.stream()
-            .map(TableCell::getValue)
-            .collect(toList()))
+        .flatExtracting(row -> row.stream().map(TableCell::getValue).collect(toList()))
         .containsExactly("A", "B", "C", "D", "F");
   }
-
 }

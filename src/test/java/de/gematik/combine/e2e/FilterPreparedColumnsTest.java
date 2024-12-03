@@ -32,9 +32,8 @@ class FilterPreparedColumnsTest extends AbstractCombineMojoTest {
   @Test
   void shouldNotExperienceOutOfMemoryError() {
     // arrange
-    combineMojo.setFilterConfiguration(FilterConfiguration.builder()
-        .allowSelfCombine(true)
-        .build());
+    combineMojo.setFilterConfiguration(
+        FilterConfiguration.builder().allowSelfCombine(true).build());
     // act
     assertThatNoException().isThrownBy(() -> combineMojo.execute());
     // assert

@@ -22,9 +22,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-/**
- * This filter removes rows where none of the entries have a certain given tag.
- */
+/** This filter removes rows where none of the entries have a certain given tag. */
 @ToString
 @EqualsAndHashCode(callSuper = false)
 @RequiredArgsConstructor

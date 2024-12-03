@@ -37,13 +37,11 @@ class RequireTagRowFilterTest {
   private static List<TableCell> rowValues(String... values) {
 
     return stream(values)
-        .map(value ->
-            TableCell.builder()
-                .combineItem(CombineItem.builder()
-                    .value(value)
-                    .tag(value)
+        .map(
+            value ->
+                TableCell.builder()
+                    .combineItem(CombineItem.builder().value(value).tag(value).build())
                     .build())
-                .build())
         .collect(toList());
   }
 
@@ -53,8 +51,7 @@ class RequireTagRowFilterTest {
         arguments(true, rowValues("bar")),
         arguments(false, rowValues("foo", "blub", "lalilu")),
         arguments(true, rowValues("foo", "bar", "baz")),
-        arguments(true, rowValues("foo", "bar", "foo", "bar"))
-    );
+        arguments(true, rowValues("foo", "bar", "foo", "bar")));
   }
 
   @ParameterizedTest

@@ -53,5 +53,4 @@ class UtilsTest {
     List<CombineItem> combines = getItemsToCombine(f, mojo, false);
     combines.forEach(c -> assertThat(c.getValue()).startsWith("API-"));
   }
-
 }

@@ -30,7 +30,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class CaseInsensitiveStrategyTest {
 
-
   private static Stream<Arguments> testCaseInsensitiveExact() {
     return Stream.of(
         arguments(List.of("TEstGroup"), Set.of("testgrOup"), MATCHING),
@@ -39,16 +38,13 @@ class CaseInsensitiveStrategyTest {
         arguments(List.of("stGr"), Set.of("testGroup"), MATCHING),
         arguments(List.of("Test"), Set.of("testGroup"), MATCHING),
         arguments(List.of(), Set.of("testGroup"), NOT_MATCHING),
-        arguments(List.of(), Set.of("testGroup"), NOT_MATCHING)
-    );
+        arguments(List.of(), Set.of("testGroup"), NOT_MATCHING));
   }
 
   @MethodSource
   @ParameterizedTest
-  void testCaseInsensitiveExact(List<String> groups, Set<String> itemGroups,
-      String result) {
+  void testCaseInsensitiveExact(List<String> groups, Set<String> itemGroups, String result) {
     CaseInsensitiveStrategy underTest = new CaseInsensitiveStrategy(groups);
     assertThat(underTest.match(itemGroups)).isEqualTo(result);
   }
-
 }

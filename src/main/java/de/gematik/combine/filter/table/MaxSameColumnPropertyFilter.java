@@ -47,17 +47,13 @@ public class MaxSameColumnPropertyFilter extends AbstractTableFilter {
   public List<List<TableCell>> apply(List<List<TableCell>> table) {
     getPluginLog().debug(format("applying %s on %d rows", this, table.size()));
     Map<String, AtomicInteger> propCounts = new HashMap<>();
-    return table.stream()
-        .filter(row -> checkRow(row, propCounts))
-        .collect(toList());
+    return table.stream().filter(row -> checkRow(row, propCounts)).collect(toList());
   }
 
   private boolean checkRow(List<TableCell> row, Map<String, AtomicInteger> propCounts) {
-    Optional<TableCell> cell = row.stream()
-        .filter(tv -> tv.getHeader().equals(columnName))
-        .findAny();
-    Optional<String> propValue = cell
-        .map(tv -> tv.getProperties().get(property));
+    Optional<TableCell> cell =
+        row.stream().filter(tv -> tv.getHeader().equals(columnName)).findAny();
+    Optional<String> propValue = cell.map(tv -> tv.getProperties().get(property));
 
     if (propValue.isPresent() && !propCounts.containsKey(propValue.get())) {
       propCounts.put(propValue.get(), new AtomicInteger());

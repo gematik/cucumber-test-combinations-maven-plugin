@@ -45,7 +45,9 @@ public class VersionFilter extends AbstractCellFilter {
     String versionProperty = CombineMojo.getInstance().getVersionProperty();
     if (!tableCell.hasProperty(versionProperty)) {
       CombineMojo.appendError(
-          format("version property is missing for -> value: %s%s", tableCell.getValue(),
+          format(
+              "version property is missing for -> value: %s%s",
+              tableCell.getValue(),
               nonNull(tableCell.getUrl()) ? format(" url: %s", tableCell.getUrl()) : ""),
           CombineMojo.ErrorType.PROPERTY);
       return false;
@@ -59,5 +61,4 @@ public class VersionFilter extends AbstractCellFilter {
   public String toString() {
     return format("%s%s", operator.getLiteral(), filterVersion);
   }
-
 }

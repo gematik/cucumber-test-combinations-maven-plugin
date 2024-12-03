@@ -41,16 +41,13 @@ class WildcardStrategyTest {
         arguments(List.of(), Set.of("testGroup"), NOT_MATCHING),
         arguments(List.of(), Set.of("testGroup"), NOT_MATCHING),
         arguments(List.of(), Set.of("testgrOup"), NOT_MATCHING),
-        arguments(List.of(), Set.of("testGroup"), NOT_MATCHING)
-    );
+        arguments(List.of(), Set.of("testGroup"), NOT_MATCHING));
   }
 
   @MethodSource
   @ParameterizedTest
-  void testWildcard(List<String> groups, Set<String> itemGroups,
-      String result) {
+  void testWildcard(List<String> groups, Set<String> itemGroups, String result) {
     WildcardStrategy underTest = new WildcardStrategy(groups);
     assertThat(underTest.match(itemGroups)).isEqualTo(result);
   }
-
 }

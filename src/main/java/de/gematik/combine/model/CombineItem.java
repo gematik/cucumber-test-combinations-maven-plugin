@@ -45,23 +45,15 @@ public class CombineItem implements Comparable<CombineItem> {
   private String value;
   private String url;
 
-  @Singular
-  @EqualsAndHashCode.Exclude
-  private Set<String> tags = new HashSet<>();
+  @Singular @EqualsAndHashCode.Exclude private Set<String> tags = new HashSet<>();
 
-  @Singular
-  @EqualsAndHashCode.Exclude
-  private Map<String, String> properties = new HashMap<>();
+  @Singular @EqualsAndHashCode.Exclude private Map<String, String> properties = new HashMap<>();
 
-  @Singular
-  @EqualsAndHashCode.Exclude
-  private Set<String> groups = new HashSet<>();
+  @Singular @EqualsAndHashCode.Exclude private Set<String> groups = new HashSet<>();
 
-  @EqualsAndHashCode.Exclude
-  private String checkExpression;
+  @EqualsAndHashCode.Exclude private String checkExpression;
 
-  @EqualsAndHashCode.Exclude
-  private String checkExpressionId;
+  @EqualsAndHashCode.Exclude private String checkExpressionId;
 
   public String toString() {
     return value;
@@ -87,8 +79,7 @@ public class CombineItem implements Comparable<CombineItem> {
   }
 
   private String getDefaultPropertyAndLog(String key) {
-    CombineMojo.getPluginLog().info(
-        String.format("item %s does not have property %s", value, key));
+    CombineMojo.getPluginLog().info(String.format("item %s does not have property %s", value, key));
     return DEFAULT_PROPERTY;
   }
 

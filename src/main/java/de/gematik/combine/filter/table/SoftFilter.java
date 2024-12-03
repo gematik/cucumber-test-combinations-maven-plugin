@@ -17,9 +17,9 @@
 package de.gematik.combine.filter.table;
 
 /**
- * This interface is used to set {@link de.gematik.combine.filter.table.TableFilter} and
- * {@link de.gematik.combine.filter.table.cell.CellFilter} as SoftFilter. SoftFilter should be deleted if not enough
- * rows for an example could be generated
+ * This interface is used to set {@link de.gematik.combine.filter.table.TableFilter} and {@link
+ * de.gematik.combine.filter.table.cell.CellFilter} as SoftFilter. SoftFilter should be deleted if
+ * not enough rows for an example could be generated
  */
 public interface SoftFilter {
 
@@ -30,5 +30,4 @@ public interface SoftFilter {
   default SoftFilter setSoft(boolean soft) {
     return this;
   }
-
 }

@@ -21,12 +21,12 @@ public enum GroupMatchStrategyType {
   // tag::matchingStrategies[]
   REGEX, // All entries will be compiled as regex
   WILDCARD, // "*" can be used as Wildcard e.g. My*Group* would match everything that starts with
-            // "My" and contains "Group" somewhere. Is Everytime CASE insensitive
+  // "My" and contains "Group" somewhere. Is Everytime CASE insensitive
   CASE_SENSITIVE, // Proof if the named group is a substring of a group in item (case sensitive)
   CASE_INSENSITIVE, // Proof if the named group is a substring of a group in item (case insensitive)
   CASE_SENSITIVE_EXACT, // Proof if the named group have a exact match with a group in item (case
-                        // sensitive)
+  // sensitive)
   CASE_INSENSITIVE_EXACT // Proof if the named group have a exact match with a group in item (case
-                         // insensitive)
+  // insensitive)
   // end::matchingStrategies[]
 }

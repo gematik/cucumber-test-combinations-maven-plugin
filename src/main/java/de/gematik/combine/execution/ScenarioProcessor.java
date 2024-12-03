@@ -43,32 +43,36 @@ public class ScenarioProcessor {
 
   private final ExamplesProcessor examplesProcessor;
 
-  public void process(Scenario scenario, CombineConfiguration config,
-      List<CombineItem> combineItems) {
+  public void process(
+      Scenario scenario, CombineConfiguration config, List<CombineItem> combineItems) {
     CurrentScenario.setCurrentScenarioName(scenario.getName());
 
-    List<Examples> examples = scenario.getExamples().stream()
-        .filter(example -> examplesWithoutSkipTag(example, config.getSkipTags()))
-        .collect(toList());
+    List<Examples> examples =
+        scenario.getExamples().stream()
+            .filter(example -> examplesWithoutSkipTag(example, config.getSkipTags()))
+            .collect(toList());
 
     getPluginLog().debug(format("processing %d examples: ", examples.size()));
-    examples.forEach(table -> processExamplesTable(table, combineItems, config, scenario.getName()));
+    examples.forEach(
+        table -> processExamplesTable(table, combineItems, config, scenario.getName()));
 
     addEmptyExamplesTags(scenario, config.getEmptyExamplesTags());
     checkTableSize(scenario, config.getMinTableSize());
   }
 
-  private void processExamplesTable(Examples examples, List<CombineItem> combineItems,
-      CombineConfiguration configuration, String scenarioName) {
+  private void processExamplesTable(
+      Examples examples,
+      List<CombineItem> combineItems,
+      CombineConfiguration configuration,
+      String scenarioName) {
     getPluginLog().debug("processing single examples table" + examples.getName());
 
-    examplesProcessor
-        .process(examples, configuration, combineItems, scenarioName);
+    examplesProcessor.process(examples, configuration, combineItems, scenarioName);
   }
 
   private void addEmptyExamplesTags(Scenario scenario, List<String> tags) {
-    boolean allExamplesEmpty = scenario.getExamples().stream()
-        .allMatch(example -> example.getTableBody().isEmpty());
+    boolean allExamplesEmpty =
+        scenario.getExamples().stream().allMatch(example -> example.getTableBody().isEmpty());
     if (allExamplesEmpty) {
       addTagsToScenario(scenario, tags);
     }
@@ -78,9 +82,8 @@ public class ScenarioProcessor {
   @SuppressWarnings("java:S3011")
   private void addTagsToScenario(Scenario scenario, List<String> additionalTags) {
     List<Tag> tags = new ArrayList<>(scenario.getTags());
-    List<Tag> mappedAdditionalTags = additionalTags.stream()
-        .map(tag -> new Tag(LOCATION, tag, ""))
-        .collect(toList());
+    List<Tag> mappedAdditionalTags =
+        additionalTags.stream().map(tag -> new Tag(LOCATION, tag, "")).collect(toList());
 
     tags.addAll(mappedAdditionalTags);
 
@@ -96,17 +99,20 @@ public class ScenarioProcessor {
   }
 
   private void checkTableSize(Scenario scenario, int minTableSize) {
-    List<Integer> tableSizes = scenario.getExamples().stream()
-        .map(e -> e.getTableBody().size())
-        .filter(e -> e < minTableSize)
-        .collect(toList());
+    List<Integer> tableSizes =
+        scenario.getExamples().stream()
+            .map(e -> e.getTableBody().size())
+            .filter(e -> e < minTableSize)
+            .collect(toList());
     if (tableSizes.isEmpty()) {
       return;
     }
-    appendError(format(
+    appendError(
+        format(
             "The table of scenario \"%s\" has a table with size %s which is less than the minimal size of %s",
-            scenario.getName(), tableSizes.stream().min(Integer::compareTo).orElse(-1), minTableSize),
+            scenario.getName(),
+            tableSizes.stream().min(Integer::compareTo).orElse(-1),
+            minTableSize),
         SIZE);
   }
-
 }

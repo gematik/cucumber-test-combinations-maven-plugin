@@ -19,10 +19,8 @@ package de.gematik.combine.filter.project;
 import de.gematik.combine.filter.table.cell.CellFilter;
 
 /**
- * A {@link ProjectCellFilter} is a filter that will be used on every
- * {@link io.cucumber.messages.types.Examples} in the project unless it is overridden there
- * specifically with its corresponding {@link CellFilter}
+ * A {@link ProjectCellFilter} is a filter that will be used on every {@link
+ * io.cucumber.messages.types.Examples} in the project unless it is overridden there specifically
+ * with its corresponding {@link CellFilter}
  */
-public interface ProjectCellFilter extends CellFilter {
-
-}
+public interface ProjectCellFilter extends CellFilter {}

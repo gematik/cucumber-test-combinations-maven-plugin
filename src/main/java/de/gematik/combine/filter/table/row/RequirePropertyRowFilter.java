@@ -23,7 +23,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 /**
- * This filter removes rows where none of the entries have a certain given property with a certain given value.
+ * This filter removes rows where none of the entries have a certain given property with a certain
+ * given value.
  */
 @ToString
 @EqualsAndHashCode(callSuper = false)
@@ -35,7 +36,6 @@ public class RequirePropertyRowFilter extends TableRowFilter {
 
   @Override
   public boolean test(List<TableCell> row) {
-    return row.stream()
-        .anyMatch(cell -> propertyValue.equals(cell.getProperties().get(property)));
+    return row.stream().anyMatch(cell -> propertyValue.equals(cell.getProperties().get(property)));
   }
 }

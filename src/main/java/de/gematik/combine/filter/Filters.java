@@ -39,14 +39,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Filters {
 
-  @Default
-  private final List<TableFilter> tableFilters = new ArrayList<>();
+  @Default private final List<TableFilter> tableFilters = new ArrayList<>();
 
-  @Default
-  private final List<TableRowFilter> tableRowFilters = new ArrayList<>();
+  @Default private final List<TableRowFilter> tableRowFilters = new ArrayList<>();
 
-  @Default
-  private final Map<String, List<CellFilter>> cellFilters = new HashMap<>();
+  @Default private final Map<String, List<CellFilter>> cellFilters = new HashMap<>();
 
   public void addTableFilter(TableFilter tableFilter) {
     tableFilters.add(tableFilter);
@@ -65,9 +62,12 @@ public class Filters {
     }
   }
 
-  public void addCellFilter(String header, List<CellFilter> newCellFilter,boolean softFilterShouldApply ) {
+  public void addCellFilter(
+      String header, List<CellFilter> newCellFilter, boolean softFilterShouldApply) {
 
-    newCellFilter.stream().filter(f -> !(f.isSoft() && !softFilterShouldApply)).forEach(cellFilter -> addCellFilter(header, cellFilter));
+    newCellFilter.stream()
+        .filter(f -> !(f.isSoft() && !softFilterShouldApply))
+        .forEach(cellFilter -> addCellFilter(header, cellFilter));
   }
 
   public List<TableFilter> getTableFilters() {
@@ -79,21 +79,22 @@ public class Filters {
   }
 
   public Map<String, List<CellFilter>> getCellFilters() {
-    return unmodifiableMap(cellFilters.entrySet().stream()
-        .map(e -> Map.entry(e.getKey(), unmodifiableList(e.getValue())))
-        .collect(toMap(Entry::getKey, Entry::getValue)));
+    return unmodifiableMap(
+        cellFilters.entrySet().stream()
+            .map(e -> Map.entry(e.getKey(), unmodifiableList(e.getValue())))
+            .collect(toMap(Entry::getKey, Entry::getValue)));
   }
 
   public RowFilter combineAllRowFilters() {
-    return getTableRowFilters().stream()
-        .reduce(x -> true, RowFilter::and, RowFilter::and);
+    return getTableRowFilters().stream().reduce(x -> true, RowFilter::and, RowFilter::and);
   }
 
   public Map<String, CellFilter> combineCellFilters() {
-    return unmodifiableMap(cellFilters.entrySet().stream()
-        .map(e -> Map.entry(e.getKey(), e.getValue().stream()
-            .reduce(x -> true, CellFilter::and)))
-        .collect(toMap(Entry::getKey, Entry::getValue)));
+    return unmodifiableMap(
+        cellFilters.entrySet().stream()
+            .map(
+                e ->
+                    Map.entry(e.getKey(), e.getValue().stream().reduce(x -> true, CellFilter::and)))
+            .collect(toMap(Entry::getKey, Entry::getValue)));
   }
-
 }

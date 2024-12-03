@@ -40,7 +40,8 @@ class GherkinProcessorTest {
 
   private Log log;
   private ScenarioProcessor sp;
-  CombineConfiguration config = CombineConfiguration.builder()
+  CombineConfiguration config =
+      CombineConfiguration.builder()
           .skipTags(List.of("@wip"))
           .breakIfTableToSmall(false)
           .minTableSize(1)
@@ -62,7 +63,9 @@ class GherkinProcessorTest {
   @SneakyThrows
   void shouldNotCallMethodProcessIfSkipAnnotationOnFile() {
     // arrange
-    File f = new File("./src/test/resources/combine/execution/FileProcessorTest/WithAnnotationAboveFile.feature.cute");
+    File f =
+        new File(
+            "./src/test/resources/combine/execution/FileProcessorTest/WithAnnotationAboveFile.feature.cute");
     GherkinDocument gd = parseGherkinString(FileUtils.readFileToString(f, StandardCharsets.UTF_8));
     GherkinProcessor gp = new GherkinProcessor(sp);
     // act
@@ -75,7 +78,9 @@ class GherkinProcessorTest {
   @SneakyThrows
   void shouldCallMethodProcessIfSkipAnnotationOnlyAboveOneSzenario() {
     // arrange
-    File f = new File("./src/test/resources/combine/execution/FileProcessorTest/WithAnnotationAboveSzenario.feature.cute");
+    File f =
+        new File(
+            "./src/test/resources/combine/execution/FileProcessorTest/WithAnnotationAboveSzenario.feature.cute");
     GherkinDocument gd = parseGherkinString(FileUtils.readFileToString(f, StandardCharsets.UTF_8));
     GherkinProcessor gp = new GherkinProcessor(sp);
     // act

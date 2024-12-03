@@ -28,18 +28,12 @@ class FilterOrderTest extends AbstractCombineMojoTest {
   @Test
   void shouldApplyFiltersInOrder() {
     // arrange
-    combineMojo.setFilterConfiguration(FilterConfiguration.builder()
-        .allowSelfCombine(true)
-        .allowDoubleLineup(true)
-        .build());
+    combineMojo.setFilterConfiguration(
+        FilterConfiguration.builder().allowSelfCombine(true).allowDoubleLineup(true).build());
     // act
     combineMojo.execute();
     // assert
     String strippedStr = readFile(FILTER_ORDER_FILE);
-    assertThat(strippedStr).endsWith(
-        "|HEADER_1|HEADER_2|\n"
-            + "|Api1|Api2|\n"
-            + "|Api4|Api2|\n");
+    assertThat(strippedStr).endsWith("|HEADER_1|HEADER_2|\n" + "|Api1|Api2|\n" + "|Api4|Api2|\n");
   }
-
 }

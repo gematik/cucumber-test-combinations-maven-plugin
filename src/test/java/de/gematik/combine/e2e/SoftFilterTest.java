@@ -48,7 +48,6 @@ public class SoftFilterTest extends AbstractCombineMojoTest {
   private static final String SOFT_FILTER_FILE = "softFilter";
   private boolean haveToRun = true;
 
-
   @BeforeEach
   void init() {
     if (haveToRun) {
@@ -62,8 +61,7 @@ public class SoftFilterTest extends AbstractCombineMojoTest {
     return Stream.of(
         Arguments.of(REMOVE_TEST_NAME, 2),
         Arguments.of(APPLY_TEST_NAME, 1),
-        Arguments.of(PROPERTY_TEST_NAME, 5)
-    );
+        Arguments.of(PROPERTY_TEST_NAME, 5));
   }
 
   @ParameterizedTest
@@ -76,18 +74,14 @@ public class SoftFilterTest extends AbstractCombineMojoTest {
   @Test
   void testDefaultFromSoftFilter() {
     // arrange
-    SoftFilter softFilter = new SoftFilter() {
-    };
+    SoftFilter softFilter = new SoftFilter() {};
     // assert
     assertThat(softFilter.isSoft()).isFalse();
     assertThat(softFilter.setSoft(true)).isEqualTo(softFilter);
   }
 
-
   private List<TableRow> getTableRows(String gherkinString, String methodName) {
-    return parseGherkinString(gherkinString).getFeature().orElseThrow()
-        .getChildren()
-        .stream()
+    return parseGherkinString(gherkinString).getFeature().orElseThrow().getChildren().stream()
         .map(FeatureChild::getScenario)
         .filter(Optional::isPresent)
         .map(Optional::get)
@@ -100,26 +94,26 @@ public class SoftFilterTest extends AbstractCombineMojoTest {
   }
 
   private static GherkinDocument parseGherkinString(String gherkin) {
-    final GherkinParser parser = GherkinParser.builder()
-        .includeSource(false)
-        .includePickles(false)
-        .includeGherkinDocument(true)
-        .build();
+    final GherkinParser parser =
+        GherkinParser.builder()
+            .includeSource(false)
+            .includePickles(false)
+            .includeGherkinDocument(true)
+            .build();
 
     final Source source = new Source("not needed", gherkin, TEXT_X_CUCUMBER_GHERKIN_PLAIN);
     final Envelope envelope = Envelope.of(source);
 
-    return parser.parse(envelope)
+    return parser
+        .parse(envelope)
         .map(Envelope::getGherkinDocument)
         .flatMap(Optional::stream)
         .findAny()
-        .orElseThrow(
-            () -> new IllegalArgumentException("Could not parse invalid gherkin."));
+        .orElseThrow(() -> new IllegalArgumentException("Could not parse invalid gherkin."));
   }
 
   @Override
   protected String combineItemsFile() {
     return "./src/test/resources/input/SoftFilter.json";
   }
-
 }

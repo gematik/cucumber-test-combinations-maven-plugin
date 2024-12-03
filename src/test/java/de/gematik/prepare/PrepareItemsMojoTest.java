@@ -56,7 +56,6 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
   public static final String URL_VALUE_JSON = "src/test/resources/input/inputValueAndUrl.json";
   public static final String POOL_TEST = "src/test/resources/input/poolTest.json";
 
-
   @Test
   @SneakyThrows
   void shouldCreateNewCombineItemsFileAndGiveItToCombineMojo() {
@@ -66,13 +65,17 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
     File outputDir = new File(GENERATED_COMBINE_ITEMS_DIR);
     FileUtils.deleteDirectory(new File(GENERATED_COMBINE_ITEMS_DIR));
     outputDir.mkdirs();
-    long filesBefore = stream(requireNonNull(outputDir.listFiles()))
-        .filter(e -> e.getName().endsWith(".json")).count();
+    long filesBefore =
+        stream(requireNonNull(outputDir.listFiles()))
+            .filter(e -> e.getName().endsWith(".json"))
+            .count();
     // act
     mojo.run();
     // assert
-    long filesAfter = stream(requireNonNull(outputDir.listFiles()))
-        .filter(e -> e.getName().endsWith(".json")).count();
+    long filesAfter =
+        stream(requireNonNull(outputDir.listFiles()))
+            .filter(e -> e.getName().endsWith(".json"))
+            .count();
     assertThat(filesBefore + 1).isEqualTo(filesAfter);
   }
 
@@ -102,7 +105,6 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
     verify(apiRequester, times(3)).getApiResponse(startsWith("API-"));
   }
 
-
   @Test
   @SneakyThrows
   void shouldNotThrowButDeleteNotReachableApi() {
@@ -112,17 +114,19 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
     mojo.setItems(items);
     mojo.setCombineItemsFile(ONLY_VALUE_JSON);
     mojo.setBreakOnFailedRequest(false);
-    doThrow(new MojoExecutionException("Could not reach")).when(apiRequester)
+    doThrow(new MojoExecutionException("Could not reach"))
+        .when(apiRequester)
         .getApiResponse(items.get(1).getValue());
     // assert
     assertThatNoException().isThrownBy(mojo::run);
     String fileName = new File(ONLY_VALUE_JSON).getName();
-    File generatedFile = stream(requireNonNull(new File(GENERATED_COMBINE_ITEMS_DIR).listFiles()))
-        .filter(e -> e.getName().endsWith(fileName))
-        .max(comparing(File::getName))
-        .orElseThrow();
-    List<CombineItem> itemsToCombine = getItemsToCombine(new File(generatedFile.getAbsolutePath()),
-        mojo, false);
+    File generatedFile =
+        stream(requireNonNull(new File(GENERATED_COMBINE_ITEMS_DIR).listFiles()))
+            .filter(e -> e.getName().endsWith(fileName))
+            .max(comparing(File::getName))
+            .orElseThrow();
+    List<CombineItem> itemsToCombine =
+        getItemsToCombine(new File(generatedFile.getAbsolutePath()), mojo, false);
     assertThat(itemsToCombine).hasSize(amountBefore - 1);
   }
 
@@ -137,8 +141,8 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
   @ParameterizedTest
   @SneakyThrows
   @MethodSource("getWrong")
-  void shouldThrowExceptionIfValueIsMissingInExpression(String missingType,
-      List<PropertyExpression> properties, List<TagExpression> tags) {
+  void shouldThrowExceptionIfValueIsMissingInExpression(
+      String missingType, List<PropertyExpression> properties, List<TagExpression> tags) {
     // arrange
 
     mojo.setTagExpressions(tags);
@@ -146,10 +150,9 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
     // assert
     assertThatThrownBy(() -> mojo.checkExpressionSetCorrectly())
         .isInstanceOf(MojoExecutionException.class)
-        .message().startsWith(
-            "Erroneous configuration: missing " + missingType + " in ");
+        .message()
+        .startsWith("Erroneous configuration: missing " + missingType + " in ");
   }
-
 
   @Test
   @SneakyThrows
@@ -159,7 +162,8 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
     mojo.setBreakOnContextError(true);
     assertThatThrownBy(() -> mojo.run())
         .isInstanceOf(MojoExecutionException.class)
-        .message().startsWith("Different tags or properties where found");
+        .message()
+        .startsWith("Different tags or properties where found");
   }
 
   @Test
@@ -194,9 +198,7 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
         () -> assertThat(usedItems).hasSize(2),
         () -> assertThat(poolGroups).hasSize(1),
         () -> assertThat(usedGroups).hasSize(2),
-        () -> assertThat(usedGroups).containsExactlyInAnyOrder("API-1", "API-2")
-    );
-
+        () -> assertThat(usedGroups).containsExactlyInAnyOrder("API-1", "API-2"));
   }
 
   @Test
@@ -222,8 +224,6 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
         () -> assertThat(usedItems).as("1").hasSize(3),
         () -> assertThat(poolGroups).as("2").hasSize(2),
         () -> assertThat(usedGroups).containsKey("C"),
-        () -> assertThat(usedGroups.keySet()).hasSize(2)
-    );
-
+        () -> assertThat(usedGroups.keySet()).hasSize(2));
   }
 }

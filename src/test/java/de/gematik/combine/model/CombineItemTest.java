@@ -31,14 +31,12 @@ class CombineItemTest {
   private static final String VALUE = "ITEM";
   private final CombineItem noPropertiesItem =
       CombineItem.builder().value(VALUE).properties(Map.of()).build();
-  private final CombineItem secondItem =
-      CombineItem.builder().value(VALUE).build();
+  private final CombineItem secondItem = CombineItem.builder().value(VALUE).build();
 
   @Test
   void gettingNonExistingPropertyShouldNotThrowException() {
-    assertThatNoException().isThrownBy(
-        () -> withMockedPluginLog(
-            () -> noPropertiesItem.getProperties().get(KEY)));
+    assertThatNoException()
+        .isThrownBy(() -> withMockedPluginLog(() -> noPropertiesItem.getProperties().get(KEY)));
     verify(MockPluginLog.getMock())
         .info(String.format("item %s does not have property %s", VALUE, KEY));
   }

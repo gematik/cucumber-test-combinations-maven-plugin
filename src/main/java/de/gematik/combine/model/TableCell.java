@@ -28,6 +28,5 @@ public class TableCell {
 
   private final String header;
 
-  @Delegate
-  private final CombineItem combineItem;
+  @Delegate private final CombineItem combineItem;
 }

@@ -26,9 +26,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-/**
- * This filter shuffles the order of rows and does not remove rows.
- */
+/** This filter shuffles the order of rows and does not remove rows. */
 @ToString
 @RequiredArgsConstructor
 public class ShuffleTableFilter extends AbstractTableFilter {

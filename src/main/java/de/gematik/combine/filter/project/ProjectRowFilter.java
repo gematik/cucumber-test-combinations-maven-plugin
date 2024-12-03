@@ -19,10 +19,8 @@ package de.gematik.combine.filter.project;
 import de.gematik.combine.filter.table.row.TableRowFilter;
 
 /**
- * A {@link ProjectRowFilter} is a filter that will be used on every
- * {@link io.cucumber.messages.types.Examples} in the project unless it is overridden there
- * specifically with its corresponding {@link TableRowFilter}
+ * A {@link ProjectRowFilter} is a filter that will be used on every {@link
+ * io.cucumber.messages.types.Examples} in the project unless it is overridden there specifically
+ * with its corresponding {@link TableRowFilter}
  */
-public abstract class ProjectRowFilter extends TableRowFilter {
-
-}
+public abstract class ProjectRowFilter extends TableRowFilter {}

@@ -38,13 +38,12 @@ class RequirePropertyRowFilterTest {
   private static List<TableCell> rowValues(String... values) {
 
     return stream(values)
-        .map(value ->
-            TableCell.builder()
-                .combineItem(CombineItem.builder()
-                    .value(value)
-                    .property(PROPERTY_NAME, value)
+        .map(
+            value ->
+                TableCell.builder()
+                    .combineItem(
+                        CombineItem.builder().value(value).property(PROPERTY_NAME, value).build())
                     .build())
-                .build())
         .collect(toList());
   }
 
@@ -54,8 +53,7 @@ class RequirePropertyRowFilterTest {
         arguments(true, rowValues("bar")),
         arguments(false, rowValues("foo", "blub", "lalilu")),
         arguments(true, rowValues("foo", "bar", "baz")),
-        arguments(true, rowValues("foo", "bar", "foo", "bar"))
-    );
+        arguments(true, rowValues("foo", "bar", "foo", "bar")));
   }
 
   @ParameterizedTest

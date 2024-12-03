@@ -24,8 +24,7 @@ import lombok.experimental.Delegate;
 
 public class JexlFilterList<T> {
 
-  @Delegate
-  private final List<T> list;
+  @Delegate private final List<T> list;
 
   public JexlFilterList() {
     list = new ArrayList<>();
@@ -37,9 +36,7 @@ public class JexlFilterList<T> {
 
   // method is used in JEXL expressions
   public JexlFilterList<T> distinct() {
-    return new JexlFilterList<>(list.stream()
-        .distinct()
-        .collect(toList()));
+    return new JexlFilterList<>(list.stream().distinct().collect(toList()));
   }
 
   // method is used in JEXL expressions
@@ -49,8 +46,6 @@ public class JexlFilterList<T> {
 
   // method is used in JEXL expressions
   public int count(T element) {
-    return (int) list.stream()
-        .filter(x -> x.equals(element))
-        .count();
+    return (int) list.stream().filter(x -> x.equals(element)).count();
   }
 }

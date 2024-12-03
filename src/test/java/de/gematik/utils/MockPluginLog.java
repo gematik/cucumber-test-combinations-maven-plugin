@@ -27,8 +27,7 @@ import org.mockito.MockedStatic;
 
 public class MockPluginLog {
 
-  @Getter
-  private static Log mock;
+  @Getter private static Log mock;
 
   public static <T> T withMockedPluginLog(Supplier<T> test) {
     mock = mock(Log.class);
@@ -41,5 +40,4 @@ public class MockPluginLog {
       return test.get();
     }
   }
-
 }

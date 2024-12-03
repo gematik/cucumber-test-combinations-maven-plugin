@@ -16,58 +16,57 @@
 
 package de.gematik.combine.execution;
 
+import static de.gematik.combine.CombineMojo.getPluginLog;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
+
 import de.gematik.combine.CombineConfiguration;
 import de.gematik.combine.model.CombineItem;
 import io.cucumber.messages.types.GherkinDocument;
 import io.cucumber.messages.types.Scenario;
-import lombok.RequiredArgsConstructor;
-
-import javax.inject.Inject;
 import java.util.List;
-
-import static de.gematik.combine.CombineMojo.getPluginLog;
-import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
+import javax.inject.Inject;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class GherkinProcessor {
 
   private final ScenarioProcessor scenarioProcessor;
 
-  public void process(GherkinDocument gherkinDocument,
-                      CombineConfiguration config, List<CombineItem> combineItems) {
+  public void process(
+      GherkinDocument gherkinDocument,
+      CombineConfiguration config,
+      List<CombineItem> combineItems) {
     if (fileShouldBeSkipped(gherkinDocument, config.getSkipTags())) {
       return;
     }
     List<Scenario> scenarios = allScenariosInDocument(gherkinDocument, config);
 
     getPluginLog().debug(format("processing %d scenarios: ", scenarios.size()));
-    scenarios.forEach(
-            scenario -> scenarioProcessor.process(scenario, config, combineItems));
+    scenarios.forEach(scenario -> scenarioProcessor.process(scenario, config, combineItems));
   }
 
   private boolean fileShouldBeSkipped(GherkinDocument gherkinDocument, List<String> skipTags) {
     if (gherkinDocument.getFeature().isPresent()) {
       return !gherkinDocument.getFeature().orElseThrow().getTags().stream()
-              .map(tag -> tag.getName().toLowerCase())
-              .noneMatch(skipTags::contains);
+          .map(tag -> tag.getName().toLowerCase())
+          .noneMatch(skipTags::contains);
     }
     return false;
   }
 
-  private static List<Scenario> allScenariosInDocument(GherkinDocument document,
-                                                       CombineConfiguration config) {
+  private static List<Scenario> allScenariosInDocument(
+      GherkinDocument document, CombineConfiguration config) {
     return document.getFeature().stream()
-            .flatMap(feature -> feature.getChildren().stream())
-            .flatMap(child -> child.getScenario().stream())
-            .filter(scenario -> scenarioWithoutSkipTag(scenario, config.getSkipTags()))
-            .collect(toList());
+        .flatMap(feature -> feature.getChildren().stream())
+        .flatMap(child -> child.getScenario().stream())
+        .filter(scenario -> scenarioWithoutSkipTag(scenario, config.getSkipTags()))
+        .collect(toList());
   }
 
   private static boolean scenarioWithoutSkipTag(Scenario scenario, List<String> skipTags) {
     return scenario.getTags().stream()
-            .map(tag -> tag.getName().toLowerCase())
-            .noneMatch(skipTags::contains);
+        .map(tag -> tag.getName().toLowerCase())
+        .noneMatch(skipTags::contains);
   }
-
 }

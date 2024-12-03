@@ -17,7 +17,6 @@
 package de.gematik.combine.count;
 
 import java.util.Set;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

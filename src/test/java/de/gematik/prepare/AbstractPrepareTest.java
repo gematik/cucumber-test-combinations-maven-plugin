@@ -31,17 +31,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 public abstract class AbstractPrepareTest {
 
+  @Mock ItemsCreator itemsCreator;
 
-  @Mock
-  ItemsCreator itemsCreator;
-
-  @Mock
-  ApiRequester apiRequester;
+  @Mock ApiRequester apiRequester;
 
   PrepareItemsMojo mojo;
 
-  @Mock
-  Log log;
+  @Mock Log log;
 
   @BeforeEach
   @SneakyThrows

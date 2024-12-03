@@ -67,21 +67,21 @@ public class FileProcessor {
   }
 
   public static GherkinDocument parseGherkinString(String gherkin) {
-    final GherkinParser parser = GherkinParser.builder()
-        .includeSource(false)
-        .includePickles(false)
-        .includeGherkinDocument(true)
-        .build();
+    final GherkinParser parser =
+        GherkinParser.builder()
+            .includeSource(false)
+            .includePickles(false)
+            .includeGherkinDocument(true)
+            .build();
 
     final Source source = new Source("not needed", gherkin, TEXT_X_CUCUMBER_GHERKIN_PLAIN);
     final Envelope envelope = Envelope.of(source);
 
-    return parser.parse(envelope)
+    return parser
+        .parse(envelope)
         .map(Envelope::getGherkinDocument)
         .flatMap(Optional::stream)
         .findAny()
-        .orElseThrow(
-            () -> new IllegalArgumentException("Could not parse invalid gherkin."));
+        .orElseThrow(() -> new IllegalArgumentException("Could not parse invalid gherkin."));
   }
-
 }

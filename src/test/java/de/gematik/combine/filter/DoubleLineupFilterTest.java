@@ -45,21 +45,11 @@ class DoubleLineupFilterTest {
   private List<List<TableCell>> table() {
     return List.of(
         List.of(
-            TableCell.builder()
-                .combineItem(CombineItem.builder().value("A").build())
-                .build(),
-            TableCell.builder()
-                .combineItem(CombineItem.builder().value("B").build())
-                .build()
-        ),
+            TableCell.builder().combineItem(CombineItem.builder().value("A").build()).build(),
+            TableCell.builder().combineItem(CombineItem.builder().value("B").build()).build()),
         List.of(
-            TableCell.builder()
-                .combineItem(CombineItem.builder().value("B").build())
-                .build(),
-            TableCell.builder()
-                .combineItem(CombineItem.builder().value("A").build())
-                .build()
-        ));
+            TableCell.builder().combineItem(CombineItem.builder().value("B").build()).build(),
+            TableCell.builder().combineItem(CombineItem.builder().value("A").build()).build()));
   }
 
   @Test

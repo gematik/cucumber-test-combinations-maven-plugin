@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -49,6 +50,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import org.apache.commons.io.filefilter.FalseFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -82,8 +84,8 @@ public class CombineMojo extends BaseMojo {
   String outputDir;
 
   /** Path to the directory of the templates */
-  @Parameter(property = "templateDir", defaultValue = TEST_RESOURCES_DIR + "templates")
-  String templateDir;
+  @Parameter(property = "templateSources", defaultValue = TEST_RESOURCES_DIR + "templates")
+  List<String> templateSources;
 
   /** The specific ending of the templates */
   @Parameter(property = "ending", defaultValue = ".cute")
@@ -186,7 +188,7 @@ public class CombineMojo extends BaseMojo {
     List<CombineItem> itemsToCombine =
         getItemsToCombine(new File(config.getCombineItemFile()), this, true);
 
-    copyFiles(config.getTemplateDir(), outDir, fileEnding);
+    copyTemplateFiles(config.getTemplateSources(), outDir, fileEnding);
 
     Collection<File> files = allFiles(outDir, fileEnding);
     if (files.isEmpty()) {
@@ -219,14 +221,16 @@ public class CombineMojo extends BaseMojo {
 
   @SneakyThrows
   private void doChecks() {
-    File templateDirFile = new File(templateDir);
-    if (!templateDirFile.exists()) {
-      throw new MojoExecutionException(
-          "Template directory does not exist: " + templateDirFile.getAbsolutePath());
+    for (String dir : templateSources) {
+      File templateSource = new File(dir);
+      if (!templateSource.exists()) {
+        throw new MojoExecutionException(
+            "Template directory does not exist: " + templateSource.getAbsolutePath());
+      }
     }
-    File file = new File(getCombineItemsFile());
-    if (!file.exists() || !file.isFile()) {
-      throw new MojoExecutionException("Combine items file not found: " + file.getAbsolutePath());
+    File combineItemsFile = new File(getCombineItemsFile());
+    if (!combineItemsFile.exists() || !combineItemsFile.isFile()) {
+      throw new MojoExecutionException("Combine items file not found: " + combineItemsFile.getAbsolutePath());
     }
     defaultExamplesTags.forEach(this::checkDefaultTag);
   }
@@ -277,7 +281,7 @@ public class CombineMojo extends BaseMojo {
     }
 
     return CombineConfiguration.builder()
-        .templateDir(templateDir)
+        .templateSources(templateSources)
         .templateFileEnding(ending)
         .outputDir(outputDir)
         .combineItemFile(getCombineItemsFile())
@@ -298,16 +302,27 @@ public class CombineMojo extends BaseMojo {
   }
 
   @SneakyThrows
-  public static void copyFiles(String from, String to, String ending) {
-    File sourceDirectory = new File(from);
+  private static void copyTemplateFiles(List<String> from, String to, String ending) {
     File destinationDirectory = new File(to);
-
     IOFileFilter fileFilter = suffixFileFilter(ending).or(DIRECTORY);
-    try {
-      copyDirectory(sourceDirectory, destinationDirectory, fileFilter);
-    } catch (FileNotFoundException e) {
-      getPluginLog().error(e);
-      throw new MojoExecutionException(e);
+
+    var foundFiles = new HashMap<String, File>();
+    for (String source : from) {
+      File sourceDirectory = new File(source);
+      Collection<File> files = listFiles(sourceDirectory, fileFilter, FalseFileFilter.FALSE);
+      for (File file : files) {
+        String fileName = file.getName();
+        if (foundFiles.containsKey(fileName)) {
+          throw new MojoExecutionException("Template file "+file+" has the same name as "+foundFiles.get(fileName));
+        }
+        foundFiles.put(fileName, file);
+      }
+      try {
+        copyDirectory(sourceDirectory, destinationDirectory, fileFilter);
+      } catch (FileNotFoundException e) {
+        getPluginLog().error(e);
+        throw new MojoExecutionException(e);
+      }
     }
   }
 

@@ -58,5 +58,4 @@ class VersionFilterParserTest {
     assertThat(versionFilter.getFilterVersion()).isEqualTo(VERSION);
     assertThat(versionFilter.getOperator()).isEqualTo(operator);
   }
-
 }

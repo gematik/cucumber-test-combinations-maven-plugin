@@ -16,13 +16,12 @@
 
 package de.gematik.combine.count;
 
+import java.util.Map;
+import java.util.TreeMap;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Map;
-import java.util.TreeMap;
 
 @Getter
 @EqualsAndHashCode

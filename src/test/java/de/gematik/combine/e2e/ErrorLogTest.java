@@ -92,5 +92,4 @@ class ErrorLogTest extends AbstractCombineMojoTest {
   protected String combineItemsFile() {
     return "./src/test/resources/input/errorLogTest.json";
   }
-
 }

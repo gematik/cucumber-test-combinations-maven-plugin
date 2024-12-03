@@ -72,8 +72,7 @@ class TagParserTest {
         arguments("@" + ALLOW_SELF_COMBINE_TAG + "(false)"),
         arguments("@" + ALLOW_DOUBLE_LINEUP_TAG),
         arguments("@" + ALLOW_DOUBLE_LINEUP_TAG + "(true)"),
-        arguments("@" + ALLOW_DOUBLE_LINEUP_TAG + "(false)")
-    );
+        arguments("@" + ALLOW_DOUBLE_LINEUP_TAG + "(false)"));
   }
 
   @ParameterizedTest
@@ -90,15 +89,14 @@ class TagParserTest {
 
   public static Stream<Arguments> tableFilterTags() {
     return Stream.of(
-        arguments("@" + DISTINCT_COLUMN_TAG + "(A)",
-            new DistinctColumnFilter("A")),
-        arguments("@" + DISTINCT_COLUMN_PROPERTY_TAG + "(A,prop1)",
+        arguments("@" + DISTINCT_COLUMN_TAG + "(A)", new DistinctColumnFilter("A")),
+        arguments(
+            "@" + DISTINCT_COLUMN_PROPERTY_TAG + "(A,prop1)",
             new MaxSameColumnPropertyFilter("A", "prop1", 1)),
-        arguments("@" + MAX_ROWS_TAG + "(columnCount/2)",
-            new MaxRowsFilter("columnCount/2")),
-        arguments("@" + MAX_SAME_COLUMN_PROPERTY_TAG + "(A,prop1,2)",
-            new MaxSameColumnPropertyFilter("A", "prop1", 2))
-    );
+        arguments("@" + MAX_ROWS_TAG + "(columnCount/2)", new MaxRowsFilter("columnCount/2")),
+        arguments(
+            "@" + MAX_SAME_COLUMN_PROPERTY_TAG + "(A,prop1,2)",
+            new MaxSameColumnPropertyFilter("A", "prop1", 2)));
   }
 
   @ParameterizedTest
@@ -112,17 +110,16 @@ class TagParserTest {
 
   public static Stream<Arguments> tableRowFilterTags() {
     return Stream.of(
-        arguments("@" + REQUIRE_TAG_TAG + "(tag1)",
-            new RequireTagRowFilter("tag1")),
-        arguments("@" + REQUIRE_PROPERTY_TAG + "(prop1,val)",
+        arguments("@" + REQUIRE_TAG_TAG + "(tag1)", new RequireTagRowFilter("tag1")),
+        arguments(
+            "@" + REQUIRE_PROPERTY_TAG + "(prop1,val)",
             new RequirePropertyRowFilter("prop1", "val")),
-        arguments("@" + DISTINCT_ROW_PROPERTY_TAG + "(prop1)",
-            new DistinctRowPropertyFilter("prop1")),
-        arguments("@" + EQUAL_ROW_PROPERTY_TAG + "(prop1)",
-            new EqualRowPropertyFilter("prop1")),
-        arguments("@" + JEXL_ROW_FILTER_TAG + "(A.hasTag(\"orgAdmin\")&&B.hasTag(\"orgAdmin\"))",
-            new JexlRowFilter("A.hasTag(\"orgAdmin\")&&B.hasTag(\"orgAdmin\")"))
-    );
+        arguments(
+            "@" + DISTINCT_ROW_PROPERTY_TAG + "(prop1)", new DistinctRowPropertyFilter("prop1")),
+        arguments("@" + EQUAL_ROW_PROPERTY_TAG + "(prop1)", new EqualRowPropertyFilter("prop1")),
+        arguments(
+            "@" + JEXL_ROW_FILTER_TAG + "(A.hasTag(\"orgAdmin\")&&B.hasTag(\"orgAdmin\"))",
+            new JexlRowFilter("A.hasTag(\"orgAdmin\")&&B.hasTag(\"orgAdmin\")")));
   }
 
   @ParameterizedTest
@@ -136,21 +133,19 @@ class TagParserTest {
 
   public static Stream<Arguments> cellFilterTags() {
     return Stream.of(
-        arguments("@" + JEXL_ROW_FILTER_TAG + "(A.hasTag(\"orgAdmin\"))", "A",
-            new JexlCellFilter("A", "A.hasTag(\"orgAdmin\")"))
-    );
+        arguments(
+            "@" + JEXL_ROW_FILTER_TAG + "(A.hasTag(\"orgAdmin\"))",
+            "A",
+            new JexlCellFilter("A", "A.hasTag(\"orgAdmin\")")));
   }
 
   @ParameterizedTest
   @MethodSource("cellFilterTags")
-  void shouldParseCellFilterTags(String tagString, String expectedColumn,
-      CellFilter expectedTag) {
+  void shouldParseCellFilterTags(String tagString, String expectedColumn, CellFilter expectedTag) {
     // act
     ParsedTags tagCollector = tagParser.parseTags(List.of(tagString), columns);
     // assert
     assertThat(tagCollector.getCellFilters())
         .isEqualTo(Map.of(expectedColumn, List.of(expectedTag)));
   }
-
-
 }

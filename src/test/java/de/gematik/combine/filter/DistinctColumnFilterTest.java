@@ -48,12 +48,13 @@ class DistinctColumnFilterTest {
 
   private List<List<TableCell>> singleColumn(String... values) {
     return stream(values)
-        .map(value -> List.of(TableCell.builder()
-            .header(COLUMN_NAME)
-            .combineItem(CombineItem.builder()
-                .value(value)
-                .build())
-            .build()))
+        .map(
+            value ->
+                List.of(
+                    TableCell.builder()
+                        .header(COLUMN_NAME)
+                        .combineItem(CombineItem.builder().value(value).build())
+                        .build()))
         .collect(toList());
   }
 
@@ -68,7 +69,8 @@ class DistinctColumnFilterTest {
     List<List<TableCell>> filtered = filter.apply(column);
 
     // assert
-    assertThat(filtered).extracting(row -> row.get(0).getValue())
+    assertThat(filtered)
+        .extracting(row -> row.get(0).getValue())
         .containsExactlyInAnyOrder("foo", "bar");
   }
 
@@ -83,7 +85,8 @@ class DistinctColumnFilterTest {
     List<List<TableCell>> filtered = filter.apply(column);
 
     // assert
-    assertThat(filtered).extracting(row -> row.get(0).getValue())
+    assertThat(filtered)
+        .extracting(row -> row.get(0).getValue())
         .containsExactlyInAnyOrder("foo", "bar");
   }
 }

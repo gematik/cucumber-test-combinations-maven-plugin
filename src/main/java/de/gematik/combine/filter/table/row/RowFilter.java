@@ -23,15 +23,17 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * A {@link RowFilter} is a Filter that operates on a whole row of values and therefore cannot be applied before the creation of the table.
- * Only after the rows have been combined using the cartesian product may rows be filtered with a RowFilter. A
- *  * CellFilter can override a {@link ProjectRowFilter}
+ * A {@link RowFilter} is a Filter that operates on a whole row of values and therefore cannot be
+ * applied before the creation of the table. Only after the rows have been combined using the
+ * cartesian product may rows be filtered with a RowFilter. A * CellFilter can override a {@link
+ * ProjectRowFilter}
  */
 public interface RowFilter extends Predicate<List<TableCell>> {
 
-  default List<String> getRequiredColumns(List<String> headers){
+  default List<String> getRequiredColumns(List<String> headers) {
     return Collections.emptyList();
   }
+
   default RowFilter and(RowFilter other) {
     return row -> Predicate.super.and(other).test(row);
   }

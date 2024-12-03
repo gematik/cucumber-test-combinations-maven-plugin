@@ -27,8 +27,8 @@ import lombok.ToString;
 
 /**
  * This filter executes a <a
- * href="https://commons.apache.org/proper/commons-jexl/reference/syntax.html">JEXL-Expression</a>-{@link java.util.function.Predicate Predicate}
- * for each row and filters accordingly.
+ * href="https://commons.apache.org/proper/commons-jexl/reference/syntax.html">JEXL-Expression</a>-{@link
+ * java.util.function.Predicate Predicate} for each row and filters accordingly.
  */
 @ToString
 @EqualsAndHashCode(callSuper = false)

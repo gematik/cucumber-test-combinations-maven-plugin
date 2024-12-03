@@ -33,28 +33,30 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class JexlRowFilterTest {
 
-  List<TableCell> tableCells = List.of(
-      TableCell.builder()
-          .header("A")
-          .combineItem(CombineItem.builder()
-              .tag("orgAdmin")
-              .tag("new")
-              .property("homeserver", "X")
-              .property("priority", "1")
-              .value("orgAdminX")
-              .build())
-          .build(),
-      TableCell.builder()
-          .header("B")
-          .combineItem(CombineItem.builder()
-              .tag("client")
-              .tag("new")
-              .property("homeserver", "X")
-              .property("priority", "2")
-              .value("clientY")
-              .build())
-          .build()
-  );
+  List<TableCell> tableCells =
+      List.of(
+          TableCell.builder()
+              .header("A")
+              .combineItem(
+                  CombineItem.builder()
+                      .tag("orgAdmin")
+                      .tag("new")
+                      .property("homeserver", "X")
+                      .property("priority", "1")
+                      .value("orgAdminX")
+                      .build())
+              .build(),
+          TableCell.builder()
+              .header("B")
+              .combineItem(
+                  CombineItem.builder()
+                      .tag("client")
+                      .tag("new")
+                      .property("homeserver", "X")
+                      .property("priority", "2")
+                      .value("clientY")
+                      .build())
+              .build());
 
   static Stream<Arguments> expressionTests() {
     return Stream.of(
@@ -72,8 +74,7 @@ class JexlRowFilterTest {
         arguments(true, "A.properties[\"homeserver\"].equals(\"X\")"),
         arguments(true, "A.properties[\"homeserver\"].equals(B.properties[\"homeserver\"])"),
         arguments(false, "A.properties[\"homeserver\"].equals(\"foo\")"),
-        arguments(true, "allProperties[\"homeserver\"].contains(\"X\")")
-    );
+        arguments(true, "allProperties[\"homeserver\"].contains(\"X\")"));
   }
 
   @ParameterizedTest
@@ -97,8 +98,7 @@ class JexlRowFilterTest {
     assertThatThrownBy(() -> filter.test(tableCells))
         // assert
         .isInstanceOf(MojoExecutionException.class)
-        .hasMessageContainingAll("Could not evaluate expression 'expression'",
-            "variable 'expression' is undefined");
+        .hasMessageContainingAll(
+            "Could not evaluate expression 'expression'", "variable 'expression' is undefined");
   }
-
 }

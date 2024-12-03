@@ -29,8 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This is an adapter class for TableFilters that operate only on single rows. It implements the iteration over table
- * rows with chunking for tables greater {@link TableRowFilter#CHUNK_SIZE CHUNK_SIZE}.
+ * This is an adapter class for TableFilters that operate only on single rows. It implements the
+ * iteration over table rows with chunking for tables greater {@link TableRowFilter#CHUNK_SIZE
+ * CHUNK_SIZE}.
  */
 public abstract class TableRowFilter extends AbstractTableFilter implements RowFilter {
 
@@ -44,9 +45,7 @@ public abstract class TableRowFilter extends AbstractTableFilter implements RowF
     int chunkCount = tableRows.size() / CHUNK_SIZE + 1;
     for (int i = 0; i < tableRows.size(); i += CHUNK_SIZE) {
       List<List<TableCell>> chunk = tableRows.subList(i, min(i + CHUNK_SIZE, tableRows.size()));
-      List<List<TableCell>> filteredChunk = chunk.stream()
-          .filter(this)
-          .collect(toList());
+      List<List<TableCell>> filteredChunk = chunk.stream().filter(this).collect(toList());
       result.addAll(filteredChunk);
       if (chunkCount > 1) {
         getPluginLog().debug(format("processing chunk %d of %d", i / CHUNK_SIZE + 1, chunkCount));

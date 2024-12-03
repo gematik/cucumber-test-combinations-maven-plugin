@@ -31,15 +31,15 @@ class ShuffleTest extends AbstractCombineMojoTest {
   @Test
   void shouldShuffle() {
     // arrange
-    combineMojo.setFilterConfiguration(FilterConfiguration.builder()
-        .allowDoubleLineup(true)
-        .build());
+    combineMojo.setFilterConfiguration(
+        FilterConfiguration.builder().allowDoubleLineup(true).build());
     // act
     combineMojo.execute();
     // assert
     String strippedStr = readFile(SHUFFLE_FILE);
     assertThat(strippedStr)
-        .contains("|Api1|Api2|\n",
+        .contains(
+            "|Api1|Api2|\n",
             "|Api1|Api3|\n",
             "|Api1|Api4|\n",
             "|Api2|Api1|\n",
@@ -51,24 +51,23 @@ class ShuffleTest extends AbstractCombineMojoTest {
             "|Api4|Api1|\n",
             "|Api4|Api2|\n",
             "|Api4|Api3|\n")
-        .doesNotContain("|Api1|Api2|\n"
-            + "|Api1|Api3|\n"
-            + "|Api1|Api4|\n"
-            + "|Api2|Api1|\n"
-            + "|Api2|Api3|\n"
-            + "|Api2|Api4|\n"
-            + "|Api3|Api1|\n"
-            + "|Api3|Api2|\n"
-            + "|Api3|Api4|\n"
-            + "|Api4|Api1|\n"
-            + "|Api4|Api2|\n"
-            + "|Api4|Api3|\n");
-
+        .doesNotContain(
+            "|Api1|Api2|\n"
+                + "|Api1|Api3|\n"
+                + "|Api1|Api4|\n"
+                + "|Api2|Api1|\n"
+                + "|Api2|Api3|\n"
+                + "|Api2|Api4|\n"
+                + "|Api3|Api1|\n"
+                + "|Api3|Api2|\n"
+                + "|Api3|Api4|\n"
+                + "|Api4|Api1|\n"
+                + "|Api4|Api2|\n"
+                + "|Api4|Api3|\n");
   }
 
   @Override
   protected String combineItemsFile() {
     return "./src/test/resources/input/input3.json";
   }
-
 }

@@ -78,8 +78,9 @@ class PoolGroupParserTest {
   @Test
   @SneakyThrows
   void multipleGroupsWithMultiplePatternsAndAmounts() {
-    List<PoolGroup> res = underTest.transformStringToGroups(
-        "oneGroup|twoGroup|thirdGroup,4,WILDCARD;oneGroup|twoGroup,2,CASE_SENSITIVE;oneGroup,3,REGEX");
+    List<PoolGroup> res =
+        underTest.transformStringToGroups(
+            "oneGroup|twoGroup|thirdGroup,4,WILDCARD;oneGroup|twoGroup,2,CASE_SENSITIVE;oneGroup,3,REGEX");
     assertThat(res).hasSize(3);
     assertThat(res.get(0).getGroupPattern()).hasSize(3);
     assertThat(res.get(1).getGroupPattern()).hasSize(2);

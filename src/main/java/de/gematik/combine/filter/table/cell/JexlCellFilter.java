@@ -23,8 +23,8 @@ import lombok.SneakyThrows;
 
 /**
  * This filter executes a <a
- * href="https://commons.apache.org/proper/commons-jexl/reference/syntax.html">JEXL-Expression</a>-{@link java.util.function.Predicate Predicate}
- * for a single cell value and filters accordingly.
+ * href="https://commons.apache.org/proper/commons-jexl/reference/syntax.html">JEXL-Expression</a>-{@link
+ * java.util.function.Predicate Predicate} for a single cell value and filters accordingly.
  */
 @EqualsAndHashCode
 public class JexlCellFilter extends AbstractCellFilter {

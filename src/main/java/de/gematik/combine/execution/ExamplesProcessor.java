@@ -55,8 +55,11 @@ public class ExamplesProcessor {
   private final TagParser tagParser;
   private final TableGenerator tableGenerator;
 
-  public void process(Examples gherkinExample, CombineConfiguration config,
-      List<CombineItem> combineItems, String scenarioName) {
+  public void process(
+      Examples gherkinExample,
+      CombineConfiguration config,
+      List<CombineItem> combineItems,
+      String scenarioName) {
 
     if (!config.getDefaultExamplesTags().isEmpty()) {
       addDefaultTags(gherkinExample, config.getDefaultExamplesTags());
@@ -70,38 +73,44 @@ public class ExamplesProcessor {
     boolean tableToSmall = gherkinExample.getTableBody().size() < config.getMinTableSize();
     if (tableToSmall && !config.isSoftFilterToHardFilter() && parsedTags.containSoftFilter()) {
       appendError(
-          format("For scenario \"%s\" no table could be generated. Going to retry without SoftFilter", scenarioName),
+          format(
+              "For scenario \"%s\" no table could be generated. Going to retry without SoftFilter",
+              scenarioName),
           WARNING);
       generateTable(gherkinExample, config, combineItems, parsedTags, false);
     }
     addPluginTagPrefixes(gherkinExample, config);
   }
 
-  private void generateTable(Examples gherkinExample, CombineConfiguration config, List<CombineItem> combineItems,
-      ParsedTags parsedTags, boolean softFilterShouldApply) {
+  private void generateTable(
+      Examples gherkinExample,
+      CombineConfiguration config,
+      List<CombineItem> combineItems,
+      ParsedTags parsedTags,
+      boolean softFilterShouldApply) {
 
     ConfiguredFilters filters = parsedTags.configureFilters(config, softFilterShouldApply);
 
     List<List<TableCell>> filteredTable = generateTable(combineItems, filters);
 
     getPluginLog().debug("converting table to gherkin format");
-    List<TableRow> gherkinTable = filteredTable.stream()
-        .map(ExamplesProcessor::toTableRow)
-        .collect(toList());
+    List<TableRow> gherkinTable =
+        filteredTable.stream().map(ExamplesProcessor::toTableRow).collect(toList());
 
     setTableBody(gherkinExample, gherkinTable);
     addAppliedProjectFilters(gherkinExample, filters);
   }
 
-  private List<List<TableCell>> generateTable(List<CombineItem> combineItems,
-      ConfiguredFilters filters) {
+  private List<List<TableCell>> generateTable(
+      List<CombineItem> combineItems, ConfiguredFilters filters) {
 
     List<List<TableCell>> baseTable = generateBaseTable(combineItems, filters);
 
     return filterTable(baseTable, filters);
   }
 
-  private List<List<TableCell>> filterTable(List<List<TableCell>> baseTable, ConfiguredFilters filters) {
+  private List<List<TableCell>> filterTable(
+      List<List<TableCell>> baseTable, ConfiguredFilters filters) {
     List<TableFilter> tableFilters = new ArrayList<>(filters.getTableFilters());
     tableFilters.addAll(filters.getTableRowFilters());
 
@@ -110,8 +119,8 @@ public class ExamplesProcessor {
     return filters.combineAllFilters().apply(baseTable);
   }
 
-  private List<List<TableCell>> generateBaseTable(List<CombineItem> combineItems,
-      ConfiguredFilters filters) {
+  private List<List<TableCell>> generateBaseTable(
+      List<CombineItem> combineItems, ConfiguredFilters filters) {
     return tableGenerator.generateTable(combineItems, filters);
   }
 
@@ -125,9 +134,8 @@ public class ExamplesProcessor {
 
   private static void addDefaultTags(Examples examples, List<String> defaultTags) {
     ArrayList<Tag> tags = new ArrayList<>(examples.getTags());
-    tags.addAll(defaultTags.stream()
-        .map(tagStr -> new Tag(LOCATION, tagStr, tagStr))
-        .collect(toList()));
+    tags.addAll(
+        defaultTags.stream().map(tagStr -> new Tag(LOCATION, tagStr, tagStr)).collect(toList()));
     setTags(examples, tags);
   }
 
@@ -141,11 +149,16 @@ public class ExamplesProcessor {
   @SneakyThrows
   @SuppressWarnings("java:S3011")
   private static void addPluginTagPrefixes(Examples examples, CombineConfiguration config) {
-    List<Tag> changedTags = examples.getTags().stream()
-        .map(tag -> addPrefixToTag(tag,
-            tag.getName().substring(1).startsWith(getTagName(VersionFilter.class), 0) ?
-                config.getVersionFilterTagCategory() : config.getPluginTagCategory()))
-        .collect(toList());
+    List<Tag> changedTags =
+        examples.getTags().stream()
+            .map(
+                tag ->
+                    addPrefixToTag(
+                        tag,
+                        tag.getName().substring(1).startsWith(getTagName(VersionFilter.class), 0)
+                            ? config.getVersionFilterTagCategory()
+                            : config.getPluginTagCategory()))
+            .collect(toList());
     setTags(examples, changedTags);
   }
 
@@ -158,24 +171,22 @@ public class ExamplesProcessor {
   }
 
   private static TableRow toTableRow(List<TableCell> row) {
-    final List<io.cucumber.messages.types.TableCell> cells = row.stream()
-        .map(value -> new io.cucumber.messages.types.TableCell(LOCATION, value.getValue()))
-        .collect(toList());
+    final List<io.cucumber.messages.types.TableCell> cells =
+        row.stream()
+            .map(value -> new io.cucumber.messages.types.TableCell(LOCATION, value.getValue()))
+            .collect(toList());
 
     return new TableRow(LOCATION, cells, randomUUID().toString());
   }
 
   private static List<String> extractHeaders(Examples examples) {
-    return examples.getTableHeader().orElseThrow()
-        .getCells().stream()
+    return examples.getTableHeader().orElseThrow().getCells().stream()
         .map(io.cucumber.messages.types.TableCell::getValue)
         .collect(toList());
   }
 
   private static List<String> extractTagStrings(Examples examples) {
-    return examples.getTags().stream()
-        .map(Tag::getName)
-        .collect(toList());
+    return examples.getTags().stream().map(Tag::getName).collect(toList());
   }
 
   private static List<Tag> getAppliedProjectTableRowFilters(ConfiguredFilters filters) {
@@ -187,10 +198,17 @@ public class ExamplesProcessor {
 
   private static List<Tag> getAppliedProjectCellFilters(ConfiguredFilters filters) {
     return filters.getCellFilters().entrySet().stream()
-        .map(column -> new SimpleEntry<>(column.getKey(), column.getValue().stream()
-            .filter(ProjectCellFilter.class::isInstance)
-            .map(filter -> getProjectCellFilterTag(column.getKey(), (ProjectCellFilter) filter))
-            .collect(toList())))
+        .map(
+            column ->
+                new SimpleEntry<>(
+                    column.getKey(),
+                    column.getValue().stream()
+                        .filter(ProjectCellFilter.class::isInstance)
+                        .map(
+                            filter ->
+                                getProjectCellFilterTag(
+                                    column.getKey(), (ProjectCellFilter) filter))
+                        .collect(toList())))
         .flatMap(column -> column.getValue().stream())
         .collect(Collectors.toList());
   }

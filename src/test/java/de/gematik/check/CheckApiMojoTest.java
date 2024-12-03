@@ -16,7 +16,6 @@
 
 package de.gematik.check;
 
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,34 +51,36 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class CheckApiMojoTest {
 
   static final String FAIL = "fail";
-  static final File CHECK_JSON = new File(
-      "./src/test/resources/responses/jsonCheckResponse.json");
+  static final File CHECK_JSON = new File("./src/test/resources/responses/jsonCheckResponse.json");
 
-  static final List<CombineItem> okItems = List.of(
-      itemWith().value("UseExpressionOfItem")
-          .checkExpression("$.justATrueValue").build(),
-      itemWith().value("UseDefaultExpression").build(),
-      itemWith().value("ComplexPath")
-          .checkExpression("$.justAComplexPath.stillComplex.andFurther").build(),
-      itemWith().value("ListSizeCheck")
-          .checkExpression("$.justAList.size() <= 3").build(),
-      itemWith().value("UseItemInfo")
-          .checkExpression(
-              "ITEM.getTags().contains(\"hasTag\") ? $.justATrueValue : $.justAFalseValue")
-          .tags(List.of("hasTag")).build());
+  static final List<CombineItem> okItems =
+      List.of(
+          itemWith().value("UseExpressionOfItem").checkExpression("$.justATrueValue").build(),
+          itemWith().value("UseDefaultExpression").build(),
+          itemWith()
+              .value("ComplexPath")
+              .checkExpression("$.justAComplexPath.stillComplex.andFurther")
+              .build(),
+          itemWith().value("ListSizeCheck").checkExpression("$.justAList.size() <= 3").build(),
+          itemWith()
+              .value("UseItemInfo")
+              .checkExpression(
+                  "ITEM.getTags().contains(\"hasTag\") ? $.justATrueValue : $.justAFalseValue")
+              .tags(List.of("hasTag"))
+              .build());
 
-  static final List<CombineItem> failItems = List.of(
-      itemWith().value("falseButShouldBeTrue")
-          .checkExpression("$.justAFalseValue").build(),
-      itemWith().value("invalidExpression")
-          .checkExpression("invalid expression").build(),
-      itemWith().value("defaultExpression").build(),
-      itemWith().value("UseItemInfo")
-          .checkExpression(
-              "ITEM.getTags().contains(\"hasTags\") ? $.justATrueValue : $.justAFalseValue")
-          .tags(List.of("hasWrongTag")).build());
-  @Mock
-  ApiRequester apiRequester;
+  static final List<CombineItem> failItems =
+      List.of(
+          itemWith().value("falseButShouldBeTrue").checkExpression("$.justAFalseValue").build(),
+          itemWith().value("invalidExpression").checkExpression("invalid expression").build(),
+          itemWith().value("defaultExpression").build(),
+          itemWith()
+              .value("UseItemInfo")
+              .checkExpression(
+                  "ITEM.getTags().contains(\"hasTags\") ? $.justATrueValue : $.justAFalseValue")
+              .tags(List.of("hasWrongTag"))
+              .build());
+  @Mock ApiRequester apiRequester;
 
   static CheckMojo mojo;
 
@@ -88,14 +89,11 @@ class CheckApiMojoTest {
   }
 
   static void makeMockReturnItems(MockedStatic<Utils> mocked, List<CombineItem> value) {
-    mocked.when(() -> Utils.getItemsToCombine(any(), any(), anyBoolean()))
-        .thenReturn(value);
+    mocked.when(() -> Utils.getItemsToCombine(any(), any(), anyBoolean())).thenReturn(value);
   }
 
   static Stream<Arguments> runSuccessfully() {
-    return okItems.stream()
-        .map(List::of)
-        .map(Arguments::of);
+    return okItems.stream().map(List::of).map(Arguments::of);
   }
 
   static Stream<Arguments> runFailOnRequest() {
@@ -108,9 +106,7 @@ class CheckApiMojoTest {
   }
 
   static Stream<Arguments> runFailOnContext() {
-    return failItems.stream()
-        .map(List::of)
-        .map(Arguments::of);
+    return failItems.stream().map(List::of).map(Arguments::of);
   }
 
   static Stream<Arguments> runFailOnRequestDontBreak() {
@@ -129,9 +125,11 @@ class CheckApiMojoTest {
     mojo.setDefaultCheckExpressions("$.justATrueValue");
     mojo.setBreakOnFailedRequest(true);
     mojo.setBreakOnContextError(true);
-    lenient().when(apiRequester.getApiResponse(any()))
+    lenient()
+        .when(apiRequester.getApiResponse(any()))
         .thenReturn(readFileToString(CHECK_JSON, UTF_8));
-    lenient().when(apiRequester.getApiResponse(startsWith(FAIL)))
+    lenient()
+        .when(apiRequester.getApiResponse(startsWith(FAIL)))
         .thenThrow(new MojoExecutionException("request failed"));
   }
 
@@ -216,8 +214,7 @@ class CheckApiMojoTest {
     try (MockedStatic<Utils> mocked = mockStatic(Utils.class)) {
       makeMockReturnItems(mocked, List.of(new CombineItem()));
       mojo.getCheckExpressions()
-          .add(CheckExpression.builder().id("someId")
-              .expression("$.justATrueValue").build());
+          .add(CheckExpression.builder().id("someId").expression("$.justATrueValue").build());
       // act
       mojo.execute();
       // assert

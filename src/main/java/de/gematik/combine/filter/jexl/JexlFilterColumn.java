@@ -32,15 +32,15 @@ public class JexlFilterColumn {
 
   public static final JexlFilterList<String> DEFAULT_PROPERTY = new JexlFilterList<>();
 
-  @Getter
-  private final String header;
+  @Getter private final String header;
 
   private final List<TableCell> column;
 
   public Map<String, JexlFilterList<String>> getProperties() {
-    List<Entry<String, String>> entryList = column.stream()
-        .flatMap(tableCell -> tableCell.getProperties().entrySet().stream())
-        .collect(toList());
+    List<Entry<String, String>> entryList =
+        column.stream()
+            .flatMap(tableCell -> tableCell.getProperties().entrySet().stream())
+            .collect(toList());
 
     Map<String, JexlFilterList<String>> properties = new HashMap<>();
 
@@ -55,9 +55,7 @@ public class JexlFilterColumn {
   }
 
   public JexlFilterList<String> getTags() {
-    List<String> tags = column.stream()
-        .flatMap(tv -> tv.getTags().stream())
-        .collect(toList());
+    List<String> tags = column.stream().flatMap(tv -> tv.getTags().stream()).collect(toList());
     return new JexlFilterList<>(tags);
   }
 }

@@ -48,14 +48,12 @@ public class DoubleLineupFilter extends AbstractTableFilter {
     Set<String> combinationSet = new TreeSet<>();
 
     return table.stream()
-        .filter(row -> {
-          String sortedCellValues = row.stream()
-              .map(TableCell::getValue)
-              .sorted()
-              .collect(joining());
-          return combinationSet.add(sortedCellValues);
-        })
+        .filter(
+            row -> {
+              String sortedCellValues =
+                  row.stream().map(TableCell::getValue).sorted().collect(joining());
+              return combinationSet.add(sortedCellValues);
+            })
         .collect(toList());
   }
-
 }

@@ -408,7 +408,7 @@ To configure the combine goal the following options are available:
 [%header,cols="1,2,1"]
 |===
 |Option name|Description|Default
-|templateDir|Path to the directory of the templates|./src/test/resources/templates
+|templateSources|Comma separated paths to the directories of the templates|./src/test/resources/templates
 |outputDir|Path to the directory where the rendered templates got stored|./src/test/resources/features
 |
 [[combineItemsFile]]

@@ -27,6 +27,8 @@ import de.gematik.combine.FilterConfiguration;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.List;
+
 import lombok.SneakyThrows;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +49,7 @@ abstract class AbstractCombineMojoTest {
   public void initCombineMojo() {
     combineMojo = spy(new CombineMojo(FILE_PROCESSOR));
     combineMojo.setCombineItemsFile(combineItemsFile());
-    combineMojo.setTemplateDir(inputDir());
+    combineMojo.setTemplateSources(List.of(inputDir()));
     combineMojo.setOutputDir(outputDir());
     combineMojo.setDefaultExamplesTags(emptyList());
     combineMojo.setEmptyExamplesTags(emptyList());

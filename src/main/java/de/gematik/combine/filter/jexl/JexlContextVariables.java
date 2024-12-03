@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public enum JexlContextVariables {
-
   ROW_COUNT("rowCount"),
   COLUMN_COUNT("columnCount"),
   ALL_TAGS("allTags"),

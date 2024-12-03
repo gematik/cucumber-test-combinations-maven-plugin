@@ -45,7 +45,8 @@ class ExecutionCounterTest {
 
   private final String OUTPUT_DIR = "./src/test/resources/featureFiles/correct";
   private final String OUTPUT_DIR_WRONG = "./src/test/resources/featureFiles/sameName";
-  private final String OUTPUT_DIR_EMPTY_SCENARIOS = "./src/test/resources/featureFiles/emptyScenarios";
+  private final String OUTPUT_DIR_EMPTY_SCENARIOS =
+      "./src/test/resources/featureFiles/emptyScenarios";
 
   private ExecutionCounter underTest = new ExecutionCounter();
   private CombineConfiguration.CombineConfigurationBuilder configBuilder;
@@ -53,9 +54,14 @@ class ExecutionCounterTest {
   @BeforeEach
   void deleteOldFiles() {
     try {
-      Arrays.stream(Objects.requireNonNull(new File(GENERATED_COMBINE_ITEMS_DIR).listFiles())).forEach(File::delete);
-      configBuilder = CombineConfiguration.builder()
-          .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false);
+      Arrays.stream(Objects.requireNonNull(new File(GENERATED_COMBINE_ITEMS_DIR).listFiles()))
+          .forEach(File::delete);
+      configBuilder =
+          CombineConfiguration.builder()
+              .breakIfTableToSmall(false)
+              .minTableSize(1)
+              .breakIfMinimalTableError(true)
+              .softFilterToHardFilter(false);
     } catch (Exception ex) {
       System.err.println(ex);
     }
@@ -65,29 +71,38 @@ class ExecutionCounterTest {
   @SneakyThrows
   void textAndJsonFileShouldBeCreated() {
     // arrange
-    CombineConfiguration config = CombineConfiguration.builder()
-        .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false)
-        .countExecutionsFormat(List.of("txt", "json"))
-        .countExecutions(true)
-        .outputDir(OUTPUT_DIR)
-        .build();
+    CombineConfiguration config =
+        CombineConfiguration.builder()
+            .breakIfTableToSmall(false)
+            .minTableSize(1)
+            .breakIfMinimalTableError(true)
+            .softFilterToHardFilter(false)
+            .countExecutionsFormat(List.of("txt", "json"))
+            .countExecutions(true)
+            .outputDir(OUTPUT_DIR)
+            .build();
     // act
     underTest.count(config);
     // assert
-    assertThat(new File(GENERATED_COMBINE_ITEMS_DIR).list()).containsAll(
-        List.of(COUNT_EXECUTION_FILE_NAME + ".txt", COUNT_EXECUTION_FILE_NAME + ".json"));
+    assertThat(new File(GENERATED_COMBINE_ITEMS_DIR).list())
+        .containsAll(
+            List.of(COUNT_EXECUTION_FILE_NAME + ".txt", COUNT_EXECUTION_FILE_NAME + ".json"));
   }
 
   @Test
   @SneakyThrows
   void shouldNotCreateFilesIfCountExecutionsSetToFalse() {
     // arrange
-    CombineConfiguration config = CombineConfiguration.builder()
-        .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false)
-        .countExecutionsFormat(List.of("txt", "json"))
-        .countExecutions(false)
-        .outputDir(OUTPUT_DIR)
-        .build();
+    CombineConfiguration config =
+        CombineConfiguration.builder()
+            .breakIfTableToSmall(false)
+            .minTableSize(1)
+            .breakIfMinimalTableError(true)
+            .softFilterToHardFilter(false)
+            .countExecutionsFormat(List.of("txt", "json"))
+            .countExecutions(false)
+            .outputDir(OUTPUT_DIR)
+            .build();
     // act
     underTest.count(config);
     // assert
@@ -98,73 +113,102 @@ class ExecutionCounterTest {
   @SneakyThrows
   void onlyTextFileShouldBeCreated() {
     // arrange
-    CombineConfiguration config = CombineConfiguration.builder()
-        .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false)
-        .countExecutionsFormat(List.of("txt"))
-        .countExecutions(true)
-        .outputDir(OUTPUT_DIR)
-        .build();
+    CombineConfiguration config =
+        CombineConfiguration.builder()
+            .breakIfTableToSmall(false)
+            .minTableSize(1)
+            .breakIfMinimalTableError(true)
+            .softFilterToHardFilter(false)
+            .countExecutionsFormat(List.of("txt"))
+            .countExecutions(true)
+            .outputDir(OUTPUT_DIR)
+            .build();
     // act
     underTest.count(config);
     // assert
-    assertThat(new File(GENERATED_COMBINE_ITEMS_DIR).list()).contains(COUNT_EXECUTION_FILE_NAME + ".txt");
+    assertThat(new File(GENERATED_COMBINE_ITEMS_DIR).list())
+        .contains(COUNT_EXECUTION_FILE_NAME + ".txt");
   }
 
   @Test
   @SneakyThrows
   void shouldCountCorrectly() {
     // arrange
-    CombineConfiguration config = CombineConfiguration.builder()
-        .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false)
-        .countExecutionsFormat(List.of("json"))
-        .countExecutions(true)
-        .outputDir(OUTPUT_DIR)
-        .build();
+    CombineConfiguration config =
+        CombineConfiguration.builder()
+            .breakIfTableToSmall(false)
+            .minTableSize(1)
+            .breakIfMinimalTableError(true)
+            .softFilterToHardFilter(false)
+            .countExecutionsFormat(List.of("json"))
+            .countExecutions(true)
+            .outputDir(OUTPUT_DIR)
+            .build();
     // act
     underTest.count(config);
     // assert
-    JSONObject testJson = new JSONObject(Files.readString(
-        Path.of(GENERATED_COMBINE_ITEMS_DIR + "/" + COUNT_EXECUTION_FILE_NAME + ".json")));
+    JSONObject testJson =
+        new JSONObject(
+            Files.readString(
+                Path.of(GENERATED_COMBINE_ITEMS_DIR + "/" + COUNT_EXECUTION_FILE_NAME + ".json")));
     assertThat(testJson.get("total")).isEqualTo(33);
     assertThat(testJson.getJSONArray("features").getJSONObject(0).get("total")).isEqualTo(21);
     assertThat(testJson.getJSONArray("features").getJSONObject(1).get("total")).isEqualTo(12);
-
-
   }
 
   @Test
   @SneakyThrows
   void shouldThrowExceptionBecauseFileNamedTheSame() {
     // arrange
-    CombineConfiguration config = CombineConfiguration.builder()
-        .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false)
-        .countExecutionsFormat(List.of("json"))
-        .countExecutions(true)
-        .outputDir(OUTPUT_DIR_WRONG)
-        .build();
+    CombineConfiguration config =
+        CombineConfiguration.builder()
+            .breakIfTableToSmall(false)
+            .minTableSize(1)
+            .breakIfMinimalTableError(true)
+            .softFilterToHardFilter(false)
+            .countExecutionsFormat(List.of("json"))
+            .countExecutions(true)
+            .outputDir(OUTPUT_DIR_WRONG)
+            .build();
     // act
     assertThatThrownBy(() -> underTest.count(config))
         // assert
         .isInstanceOf(MojoExecutionException.class)
-        .hasMessage("Could not count features correctly because 2 feature files named the same: SameName");
+        .hasMessage(
+            "Could not count features correctly because 2 feature files named the same: SameName");
   }
 
   @Test
   @SneakyThrows
   void shouldNotCountEmptyScenarios() {
     // arrange
-    CombineConfiguration config = CombineConfiguration.builder()
-        .breakIfTableToSmall(false).minTableSize(1).breakIfMinimalTableError(true).softFilterToHardFilter(false)
-        .countExecutionsFormat(List.of("json","txt"))
-        .countExecutions(true)
-        .outputDir(OUTPUT_DIR_EMPTY_SCENARIOS)
-        .build();
+    CombineConfiguration config =
+        CombineConfiguration.builder()
+            .breakIfTableToSmall(false)
+            .minTableSize(1)
+            .breakIfMinimalTableError(true)
+            .softFilterToHardFilter(false)
+            .countExecutionsFormat(List.of("json", "txt"))
+            .countExecutions(true)
+            .outputDir(OUTPUT_DIR_EMPTY_SCENARIOS)
+            .build();
     // act
     underTest.count(config);
-    String counterString = FileUtils.readFileToString(new File(GENERATED_COMBINE_ITEMS_DIR + "/countExecution.json"), UTF_8);
-    TotalCounter tc = new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false).readValue(counterString, TotalCounter.class);
+    String counterString =
+        FileUtils.readFileToString(
+            new File(GENERATED_COMBINE_ITEMS_DIR + "/countExecution.json"), UTF_8);
+    TotalCounter tc =
+        new ObjectMapper()
+            .configure(FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .readValue(counterString, TotalCounter.class);
     // assert
     assertThat(tc.getTotalScenarioAmount()).isEqualTo(3);
-    assertThat(tc.getFeatures().stream().map(ExampleCounter::getScenarios).map(Map::values).mapToLong(Collection::size).sum()).isEqualTo(5);
+    assertThat(
+            tc.getFeatures().stream()
+                .map(ExampleCounter::getScenarios)
+                .map(Map::values)
+                .mapToLong(Collection::size)
+                .sum())
+        .isEqualTo(5);
   }
 }

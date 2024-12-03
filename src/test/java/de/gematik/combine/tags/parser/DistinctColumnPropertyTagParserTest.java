@@ -34,13 +34,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class DistinctColumnPropertyTagParserTest {
 
-  private final static DistinctColumnPropertyTagParser parser = new DistinctColumnPropertyTagParser();
+  private static final DistinctColumnPropertyTagParser parser =
+      new DistinctColumnPropertyTagParser();
 
-  @Mock
-  ParsedTags parsedTags;
+  @Mock ParsedTags parsedTags;
 
   @ParameterizedTest
-  @CsvSource(delimiter = '|', value = {"Header_1", "someValue,AnotherValue,additionalValue"})
+  @CsvSource(
+      delimiter = '|',
+      value = {"Header_1", "someValue,AnotherValue,additionalValue"})
   void shouldThrowIllegalArgumentExceptionIfNot2ArgumentsDelivered(String value) {
     // arrange
     PreParsedTag preParsedTag = new PreParsedTag(DISTINCT_COLUMN_PROPERTY_TAG, value);

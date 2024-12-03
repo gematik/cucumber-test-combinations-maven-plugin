@@ -29,9 +29,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-/**
- * This filter removes rows that have the same value in the given column as an earlier row.
- */
+/** This filter removes rows that have the same value in the given column as an earlier row. */
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor
@@ -44,9 +42,7 @@ public class DistinctColumnFilter extends AbstractTableFilter {
     getPluginLog().debug(format("applying %s on %d rows", this, table.size()));
     Set<String> combinationSet = new TreeSet<>();
 
-    return table.stream()
-        .filter(row -> combinationSet.add(columnValue(row)))
-        .collect(toList());
+    return table.stream().filter(row -> combinationSet.add(columnValue(row))).collect(toList());
   }
 
   private String columnValue(List<TableCell> row) {
@@ -54,5 +50,4 @@ public class DistinctColumnFilter extends AbstractTableFilter {
         .map(val -> val.getHeader().equals(columnName) ? val.getValue() : "")
         .collect(joining());
   }
-
 }

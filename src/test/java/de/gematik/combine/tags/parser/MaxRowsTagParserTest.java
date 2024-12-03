@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import de.gematik.combine.FilterConfiguration;
 import de.gematik.combine.tags.ConfigModifier;
 import de.gematik.combine.tags.ParsedTags;
-import de.gematik.combine.tags.TagParser;
 import de.gematik.combine.tags.TagParser.PreParsedTag;
 import java.util.List;
 import lombok.SneakyThrows;

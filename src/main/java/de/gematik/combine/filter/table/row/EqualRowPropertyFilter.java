@@ -22,9 +22,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
-/**
- * This filter removes rows where not all entries have the same value for a given property.
- */
+/** This filter removes rows where not all entries have the same value for a given property. */
 @ToString
 @EqualsAndHashCode(callSuper = false)
 @RequiredArgsConstructor
@@ -34,10 +32,11 @@ public class EqualRowPropertyFilter extends TableRowFilter {
 
   @Override
   public boolean test(List<TableCell> tableRow) {
-    long distinctValues = tableRow.stream()
-        .map(val -> val.getCombineItem().getProperties().get(property))
-        .distinct()
-        .count();
+    long distinctValues =
+        tableRow.stream()
+            .map(val -> val.getCombineItem().getProperties().get(property))
+            .distinct()
+            .count();
     return distinctValues == 1;
   }
 }

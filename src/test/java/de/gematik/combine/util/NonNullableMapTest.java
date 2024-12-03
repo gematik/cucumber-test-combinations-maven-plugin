@@ -29,23 +29,21 @@ class NonNullableMapTest {
   private static final int DEFAULT_VALUE = 42;
   private static final int NON_EXISTING_KEY = 99;
   private static final Map<Integer, Integer> INNER_MAP = Map.of(EXISTING_KEY, VALUE);
-  private final NonNullableMap<Integer, Integer> testSubject = nonNullableMap(INNER_MAP,
-      key -> DEFAULT_VALUE);
+  private final NonNullableMap<Integer, Integer> testSubject =
+      nonNullableMap(INNER_MAP, key -> DEFAULT_VALUE);
 
   @Test
   @SuppressWarnings("java:S5838")
   void getDefaultValue() {
     assertThat(testSubject).doesNotContainKey(NON_EXISTING_KEY);
-    assertThat(testSubject.get(NON_EXISTING_KEY))
-        .isEqualTo(DEFAULT_VALUE);
+    assertThat(testSubject.get(NON_EXISTING_KEY)).isEqualTo(DEFAULT_VALUE);
   }
 
   @Test
   @SuppressWarnings("java:S5838")
   void getExistingValue() {
     assertThat(testSubject).containsKey(EXISTING_KEY);
-    assertThat(testSubject.get(EXISTING_KEY))
-        .isEqualTo(VALUE);
+    assertThat(testSubject.get(EXISTING_KEY)).isEqualTo(VALUE);
   }
 
   @Test
@@ -55,37 +53,31 @@ class NonNullableMapTest {
 
   @Test
   void isEmpty() {
-    assertThat(testSubject.isEmpty())
-        .isEqualTo(INNER_MAP.isEmpty());
+    assertThat(testSubject.isEmpty()).isEqualTo(INNER_MAP.isEmpty());
   }
 
   @Test
   void containsKey() {
-    assertThat(testSubject.containsKey(1))
-        .isEqualTo(INNER_MAP.containsKey(1));
+    assertThat(testSubject.containsKey(1)).isEqualTo(INNER_MAP.containsKey(1));
   }
 
   @Test
   void containsValue() {
-    assertThat(testSubject.containsValue(1))
-        .isEqualTo(INNER_MAP.containsValue(1));
+    assertThat(testSubject.containsValue(1)).isEqualTo(INNER_MAP.containsValue(1));
   }
 
   @Test
   void keySet() {
-    assertThat(testSubject.keySet())
-        .isEqualTo(INNER_MAP.keySet());
+    assertThat(testSubject.keySet()).isEqualTo(INNER_MAP.keySet());
   }
 
   @Test
   void values() {
-    assertThat(testSubject.values())
-        .isEqualTo(INNER_MAP.values());
+    assertThat(testSubject.values()).isEqualTo(INNER_MAP.values());
   }
 
   @Test
   void entrySet() {
-    assertThat(testSubject.entrySet())
-        .isEqualTo(INNER_MAP.entrySet());
+    assertThat(testSubject.entrySet()).isEqualTo(INNER_MAP.entrySet());
   }
 }

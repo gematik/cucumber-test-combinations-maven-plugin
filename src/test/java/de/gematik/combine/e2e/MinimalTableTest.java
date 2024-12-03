@@ -16,16 +16,15 @@
 
 package de.gematik.combine.e2e;
 
-import de.gematik.combine.CombineMojo;
-import lombok.SneakyThrows;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.junit.jupiter.api.Test;
-
-import java.util.stream.IntStream;
-
 import static de.gematik.combine.CombineMojo.MINIMAL_TABLE_ERROR_HEADER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import de.gematik.combine.CombineMojo;
+import java.util.stream.IntStream;
+import lombok.SneakyThrows;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.junit.jupiter.api.Test;
 
 class MinimalTableTest extends AbstractCombineMojoTest {
 

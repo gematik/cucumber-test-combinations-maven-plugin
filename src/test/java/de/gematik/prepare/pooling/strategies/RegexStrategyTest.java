@@ -30,20 +30,18 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class RegexStrategyTest {
 
-
   private static Stream<Arguments> testAllRegex() {
     return Stream.of(
         arguments(List.of("^a.*"), Set.of("test", "accepted"), MATCHING),
         arguments(List.of("^a.*"), Set.of("best", "of", "the", "world"), NOT_MATCHING),
         arguments(List.of("exactMatch"), Set.of("exactMatch"), MATCHING),
-        arguments(List.of("ExactMatch"),  Set.of("exactMatch"), NOT_MATCHING),
-        arguments(List.of(), Set.of("bas"), NOT_MATCHING)
-    );
+        arguments(List.of("ExactMatch"), Set.of("exactMatch"), NOT_MATCHING),
+        arguments(List.of(), Set.of("bas"), NOT_MATCHING));
   }
 
   @MethodSource
   @ParameterizedTest
-  void testAllRegex(List<String> groups,  Set<String> itemGroups, String result) {
+  void testAllRegex(List<String> groups, Set<String> itemGroups, String result) {
     RegexStrategy underTest = new RegexStrategy(groups);
     assertThat(underTest.match(itemGroups)).isEqualTo(result);
   }

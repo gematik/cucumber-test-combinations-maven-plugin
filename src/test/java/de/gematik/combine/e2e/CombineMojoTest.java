@@ -16,6 +16,7 @@
 
 package de.gematik.combine.e2e;
 
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.quality.Strictness.LENIENT;
 
@@ -25,6 +26,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.junit.jupiter.MockitoSettings;
 
+import java.util.List;
+
 @MockitoSettings(strictness = LENIENT)
 class CombineMojoTest extends AbstractCombineMojoTest {
 
@@ -33,21 +36,39 @@ class CombineMojoTest extends AbstractCombineMojoTest {
   @BeforeEach
   public void setup() {
     combineMojo.setEnding(WITHOUT_FILTERS_FILE_ENDING);
-    combineMojo.setFilterConfiguration(FilterConfiguration.builder()
-        .allowSelfCombine(true)
-        .allowDoubleLineup(true)
-        .build());
+    combineMojo.setFilterConfiguration(
+        FilterConfiguration.builder().allowSelfCombine(true).allowDoubleLineup(true).build());
   }
 
   @Test
   void templatePathNotFound() {
     // arrange
-    combineMojo.setTemplateDir("NotExisting");
+    combineMojo.setTemplateSources(List.of("NotExisting"));
     // act
     assertThatThrownBy(() -> combineMojo.execute())
         // assert
         .isInstanceOf(MojoExecutionException.class)
         .hasMessageContaining("Template directory does not exist: ", "NotExisting");
+  }
+
+  @Test
+  void findFileWithSameNameTwice() {
+    // arrange
+    combineMojo.setTemplateSources(List.of(inputDir(), inputDir()));
+    // act
+    assertThatThrownBy(() -> combineMojo.execute())
+        // assert
+        .isInstanceOf(MojoExecutionException.class)
+        .hasMessageContaining("Template file "," has the same name as ");
+  }
+
+  @Test
+  void useMultipleTemplateDirs() {
+    // arrange
+    combineMojo.setEnding(".cute");
+    combineMojo.setTemplateSources(List.of(inputDir()+"/SoftFilterTest", inputDir()+"/ShuffleTest"));
+    // act
+    assertThatNoException().isThrownBy(combineMojo::execute);
   }
 
   @Test
@@ -81,5 +102,4 @@ class CombineMojoTest extends AbstractCombineMojoTest {
   protected String combineItemsFile() {
     return "./src/test/resources/input/input4.json";
   }
-
 }

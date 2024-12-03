@@ -2,6 +2,17 @@
 
 # Release notes
 
+## 2.10.1
+
+### Breaking Changes
+
+- The templateDir option has been renamed to templateSources
+
+### Feature
+
+- The templateSources option accepts a comma separated list of directories to search for templates. The directories are
+  processed in the order they are given. If a template file with the same name is found in multiple directories, an error is raised.
+
 ## 2.10.0
 
 ### Feature

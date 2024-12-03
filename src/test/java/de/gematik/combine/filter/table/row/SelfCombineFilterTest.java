@@ -37,7 +37,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class SelfCombineFilterTest {
 
-
   @RequiredArgsConstructor
   enum State {
     ALLOW_SELF_COMBINE(true),
@@ -54,12 +53,9 @@ class SelfCombineFilterTest {
 
   private static List<TableCell> rowValues(String... values) {
     return stream(values)
-        .map(value ->
-            TableCell.builder()
-                .combineItem(CombineItem.builder()
-                    .value(value)
-                    .build())
-                .build())
+        .map(
+            value ->
+                TableCell.builder().combineItem(CombineItem.builder().value(value).build()).build())
         .collect(toList());
   }
 
@@ -70,8 +66,7 @@ class SelfCombineFilterTest {
         arguments(KEEP, DISALLOW_SELF_COMBINE, rowValues("foo", "bar", "baz")),
         arguments(REMOVE, DISALLOW_SELF_COMBINE, rowValues("foo", "bar", "foo")),
         arguments(KEEP, ALLOW_SELF_COMBINE, rowValues("foo", "foo")),
-        arguments(REMOVE, DISALLOW_SELF_COMBINE, rowValues("foo", "bar", "foo", "bar"))
-    );
+        arguments(REMOVE, DISALLOW_SELF_COMBINE, rowValues("foo", "bar", "foo", "bar")));
   }
 
   @ParameterizedTest
@@ -85,5 +80,4 @@ class SelfCombineFilterTest {
     // assert
     assertThat(filtered).isEqualTo(testResult.value);
   }
-
 }

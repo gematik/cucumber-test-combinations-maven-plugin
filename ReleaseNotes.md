@@ -2,7 +2,11 @@
 
 # Release notes
 
-## 2.10.1
+## 2.11.1
+
+- Rollback to java version 11
+
+## 2.11.0
 
 ### Breaking Changes
 

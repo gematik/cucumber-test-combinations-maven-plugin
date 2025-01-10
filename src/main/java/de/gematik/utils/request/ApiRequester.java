@@ -26,6 +26,8 @@ import java.net.Proxy;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.net.ssl.SSLContext;
@@ -106,6 +108,18 @@ public class ApiRequester {
     } else if (sslParameters().allMatch(Objects::isNull)) {
       getLog().warn("Using no TLS");
     } else {
+      Map<String, String> variableMap = new HashMap<>();
+      variableMap.put("clientCertPath", clientCertPath);
+      variableMap.put("trustStorePath", trustStorePath);
+      variableMap.put("clientCertPassword", clientCertPassword);
+      variableMap.put("trustStorePassword", trustStorePassword);
+      for (Map.Entry<String, String> entry : variableMap.entrySet()) {
+        if(entry.getValue() == null || entry.getValue().isEmpty()){
+          getLog().warn(entry.getKey() + " is missing.");
+        }else{
+          getLog().info(entry.getKey() + " is set.");
+        }
+      }
       throw new MojoExecutionException(
           "You tried to set an mTLS context but at least one parameter is missing");
     }

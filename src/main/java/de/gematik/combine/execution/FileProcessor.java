@@ -19,6 +19,7 @@ package de.gematik.combine.execution;
 import static de.gematik.combine.CombineMojo.getPluginLog;
 import static io.cucumber.gherkin.utils.pretty.Pretty.prettyPrint;
 import static io.cucumber.messages.types.SourceMediaType.TEXT_X_CUCUMBER_GHERKIN_PLAIN;
+import static java.nio.file.Files.delete;
 import static java.nio.file.Files.readString;
 import static java.nio.file.Files.writeString;
 
@@ -57,11 +58,16 @@ public class FileProcessor {
       throw new MojoExecutionException(e.getMessage() + " " + file.getAbsolutePath());
     }
 
-    gherkinProcessor.process(gherkinDocument, config, combineItems);
+    var processedScenarios = gherkinProcessor.process(gherkinDocument, config, combineItems);
 
-    getPluginLog().debug("writing result to: " + file.getAbsolutePath());
-    final String newContent = prettyPrint(gherkinDocument, Syntax.gherkin);
-    writeString(file.toPath(), newContent);
+    if (processedScenarios > 0) {
+      getPluginLog().debug("writing result to: " + file.getAbsolutePath());
+      final String newContent = prettyPrint(gherkinDocument, Syntax.gherkin);
+      writeString(file.toPath(), newContent);
+    } else {
+      getPluginLog().warn("No scenarios to process in file: " + file.getName());
+      delete(file.toPath());
+    }
 
     getPluginLog().info("processed: " + file.getName());
   }

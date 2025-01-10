@@ -2,6 +2,12 @@
 
 # Release notes
 
+## 2.11.2
+
+## Features
+
+- Ignore feature files that are fully skipped by the generator
+
 ## 2.11.1
 
 - Rollback to java version 11

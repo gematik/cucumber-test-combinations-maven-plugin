@@ -33,17 +33,18 @@ public class GherkinProcessor {
 
   private final ScenarioProcessor scenarioProcessor;
 
-  public void process(
+  public int process(
       GherkinDocument gherkinDocument,
       CombineConfiguration config,
       List<CombineItem> combineItems) {
     if (fileShouldBeSkipped(gherkinDocument, config.getSkipTags())) {
-      return;
+      return 0;
     }
     List<Scenario> scenarios = allScenariosInDocument(gherkinDocument, config);
 
     getPluginLog().debug(format("processing %d scenarios: ", scenarios.size()));
     scenarios.forEach(scenario -> scenarioProcessor.process(scenario, config, combineItems));
+    return scenarios.size();
   }
 
   private boolean fileShouldBeSkipped(GherkinDocument gherkinDocument, List<String> skipTags) {

@@ -16,7 +16,6 @@
 
 package de.gematik.combine.tags;
 
-import static de.gematik.combine.DependencyInstances.ALL_PARSERS;
 import static de.gematik.combine.tags.parser.AllowDoubleLineupTagParser.ALLOW_DOUBLE_LINEUP_TAG;
 import static de.gematik.combine.tags.parser.AllowSelfCombineTagParser.ALLOW_SELF_COMBINE_TAG;
 import static de.gematik.combine.tags.parser.DistinctColumnPropertyTagParser.DISTINCT_COLUMN_PROPERTY_TAG;
@@ -56,7 +55,7 @@ class TagParserTest {
 
   List<String> columns = List.of("A", "B");
 
-  TagParser tagParser = new TagParser(ALL_PARSERS);
+  TagParser tagParser = new TagParser();
 
   public static Stream<Arguments> configurationTags() {
     return Stream.of(

@@ -22,18 +22,23 @@ import static java.util.Objects.requireNonNull;
 
 import de.gematik.combine.CombineConfiguration;
 import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.messages.types.Examples;
 import io.cucumber.messages.types.Feature;
 import io.cucumber.messages.types.FeatureChild;
 import io.cucumber.messages.types.GherkinDocument;
+import io.cucumber.messages.types.Scenario;
+
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -42,6 +47,10 @@ public class ExecutionCounter {
 
   public static final String COUNT_EXECUTION_FILE_NAME = "countExecution";
   private final Set<ExampleCounter> exampleCounter = new TreeSet<>();
+
+  public Set<ExampleCounter> getExampleCounter() {
+    return Collections.unmodifiableSet(exampleCounter);
+  }
 
   public void count(CombineConfiguration config) {
     if (!config.isCountExecutions()) {
@@ -76,11 +85,11 @@ public class ExecutionCounter {
         .map(GherkinDocument::getFeature)
         .filter(Optional::isPresent)
         .map(Optional::get)
-        .forEach(this::countExamples);
+        .forEach(this::countScenarios);
   }
 
   @SneakyThrows
-  private void countExamples(Feature feature) {
+  private void countScenarios(Feature feature) {
     ExampleCounter counter = new ExampleCounter(feature.getName());
     if (exampleCounter.contains(counter)) {
       throw new MojoExecutionException(
@@ -89,23 +98,25 @@ public class ExecutionCounter {
     }
     exampleCounter.add(counter);
     for (FeatureChild c : feature.getChildren()) {
-      c.getScenario()
-          .ifPresent(
-              s ->
-                  s.getExamples()
-                      .forEach(
-                          e ->
-                              counter.addScenario(
-                                  c.getScenario().get().getName(), e.getTableBody().size())));
+      c.getScenario().ifPresent(scenario -> counter.addScenario(scenario.getName(), countScenarios(scenario)));
+    }
+  }
+
+  public static int countScenarios(Scenario scenario) {
+    if (scenario.getExamples().isEmpty()) { // not a scenario outline
+       return 1;
+    }
+    else {
+      return scenario.getExamples().stream().map(Examples::getTableBody).mapToInt(List::size).sum();
     }
   }
 
   private void writeExecutionsToFile(CombineConfiguration config) {
     TotalCounter totalCounter = new TotalCounter(exampleCounter);
-    if (config.getCountExecutionsFormat().contains("json")) {
+    if (config.getCountExecutionsFormat().contains(Format.JSON)) {
       createJsonFile(totalCounter);
     }
-    if (config.getCountExecutionsFormat().contains("txt")) {
+    if (config.getCountExecutionsFormat().contains(Format.TXT)) {
       createTxtFile(totalCounter);
     }
   }
@@ -150,5 +161,19 @@ public class ExecutionCounter {
         s + "\n",
         StandardCharsets.UTF_8,
         !override);
+  }
+
+  public enum Format {
+    TXT,
+    JSON;
+
+    public static Format fromString(String format) {
+      return Format.valueOf(format.toUpperCase());
+    }
+
+    @Override
+    public String toString() {
+      return name().toLowerCase();
+    }
   }
 }

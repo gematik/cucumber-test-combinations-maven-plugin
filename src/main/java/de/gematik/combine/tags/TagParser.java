@@ -22,23 +22,40 @@ import static java.util.regex.Pattern.compile;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.inject.Inject;
+import java.util.stream.Collectors;
+
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.reflections.Reflections;
+
+import javax.inject.Named;
 
 /**
  * This TagParser parses tags in th format `@TagName` or `@TagName(tagValue)`. The parsing of
  * tagValues and the conversion to {@link de.gematik.combine.filter.table.TableFilter TableFilter}s
  * is delegated to {@link SingleTagParser}s.
  */
-@RequiredArgsConstructor(onConstructor_ = @Inject)
 public class TagParser {
 
   private static final Pattern tagPattern = compile("@([a-zA-Z0-9_-]+)(?:\\((.*)\\))?");
 
-  private final Map<String, SingleTagParser> tagParsers;
+  private final Map<String, SingleTagParser> tagParsers =
+      new Reflections(getClass().getPackageName())
+          .getSubTypesOf(SingleTagParser.class).stream()
+              .map(TagParser::createParser)
+              .collect(Collectors.toMap(TagParser::getParserName, UnaryOperator.identity()));
+
+  @SneakyThrows
+  private static SingleTagParser createParser(Class<? extends SingleTagParser> clazz) {
+    return clazz.getDeclaredConstructor().newInstance();
+  }
+
+  private static String getParserName(SingleTagParser parser) {
+    return parser.getClass().getAnnotation(Named.class).value();
+  }
 
   public ParsedTags parseTags(List<String> tags, List<String> columns) {
     ParsedTags tagCollector = new ParsedTags(columns);

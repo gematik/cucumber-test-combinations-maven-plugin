@@ -62,6 +62,7 @@ abstract class AbstractCombineMojoTest {
     combineMojo.setBreakIfTableToSmall(breakIfTableToSmall());
     combineMojo.setBreakIfMinimalTableError(breakIfMinimalTableError());
     combineMojo.setSoftFilterToHardFilter(true);
+    combineMojo.setCountExecutions(countExecutions());
 
     when(combineMojo.getLog()).thenReturn(log);
     CombineMojo.resetError();
@@ -99,6 +100,10 @@ abstract class AbstractCombineMojoTest {
   }
 
   protected boolean breakIfMinimalTableError() {
+    return false;
+  }
+
+  protected boolean countExecutions() {
     return false;
   }
 }

@@ -49,22 +49,23 @@ class ExecutionCounterTest {
       "./src/test/resources/featureFiles/emptyScenarios";
 
   private ExecutionCounter underTest = new ExecutionCounter();
-  private CombineConfiguration.CombineConfigurationBuilder configBuilder;
 
   @BeforeEach
   void deleteOldFiles() {
     try {
       Arrays.stream(Objects.requireNonNull(new File(GENERATED_COMBINE_ITEMS_DIR).listFiles()))
           .forEach(File::delete);
-      configBuilder =
-          CombineConfiguration.builder()
-              .breakIfTableToSmall(false)
-              .minTableSize(1)
-              .breakIfMinimalTableError(true)
-              .softFilterToHardFilter(false);
     } catch (Exception ex) {
       System.err.println(ex);
     }
+  }
+
+  private static CombineConfiguration.CombineConfigurationBuilder getBaseCombineConfigurationBuilder() {
+    return CombineConfiguration.builder()
+        .breakIfTableToSmall(false)
+        .minTableSize(1)
+        .breakIfMinimalTableError(true)
+        .softFilterToHardFilter(false);
   }
 
   @Test
@@ -72,12 +73,8 @@ class ExecutionCounterTest {
   void textAndJsonFileShouldBeCreated() {
     // arrange
     CombineConfiguration config =
-        CombineConfiguration.builder()
-            .breakIfTableToSmall(false)
-            .minTableSize(1)
-            .breakIfMinimalTableError(true)
-            .softFilterToHardFilter(false)
-            .countExecutionsFormat(List.of("txt", "json"))
+        getBaseCombineConfigurationBuilder()
+            .countExecutionsFormat(List.of(ExecutionCounter.Format.values()))
             .countExecutions(true)
             .outputDir(OUTPUT_DIR)
             .build();
@@ -94,12 +91,8 @@ class ExecutionCounterTest {
   void shouldNotCreateFilesIfCountExecutionsSetToFalse() {
     // arrange
     CombineConfiguration config =
-        CombineConfiguration.builder()
-            .breakIfTableToSmall(false)
-            .minTableSize(1)
-            .breakIfMinimalTableError(true)
-            .softFilterToHardFilter(false)
-            .countExecutionsFormat(List.of("txt", "json"))
+        getBaseCombineConfigurationBuilder()
+            .countExecutionsFormat(List.of(ExecutionCounter.Format.values()))
             .countExecutions(false)
             .outputDir(OUTPUT_DIR)
             .build();
@@ -114,12 +107,8 @@ class ExecutionCounterTest {
   void onlyTextFileShouldBeCreated() {
     // arrange
     CombineConfiguration config =
-        CombineConfiguration.builder()
-            .breakIfTableToSmall(false)
-            .minTableSize(1)
-            .breakIfMinimalTableError(true)
-            .softFilterToHardFilter(false)
-            .countExecutionsFormat(List.of("txt"))
+        getBaseCombineConfigurationBuilder()
+            .countExecutionsFormat(List.of(ExecutionCounter.Format.TXT))
             .countExecutions(true)
             .outputDir(OUTPUT_DIR)
             .build();
@@ -128,6 +117,8 @@ class ExecutionCounterTest {
     // assert
     assertThat(new File(GENERATED_COMBINE_ITEMS_DIR).list())
         .contains(COUNT_EXECUTION_FILE_NAME + ".txt");
+    assertThat(new File(GENERATED_COMBINE_ITEMS_DIR).list())
+        .doesNotContain(COUNT_EXECUTION_FILE_NAME + ".json");
   }
 
   @Test
@@ -135,12 +126,8 @@ class ExecutionCounterTest {
   void shouldCountCorrectly() {
     // arrange
     CombineConfiguration config =
-        CombineConfiguration.builder()
-            .breakIfTableToSmall(false)
-            .minTableSize(1)
-            .breakIfMinimalTableError(true)
-            .softFilterToHardFilter(false)
-            .countExecutionsFormat(List.of("json"))
+        getBaseCombineConfigurationBuilder()
+            .countExecutionsFormat(List.of(ExecutionCounter.Format.JSON))
             .countExecutions(true)
             .outputDir(OUTPUT_DIR)
             .build();
@@ -166,7 +153,7 @@ class ExecutionCounterTest {
             .minTableSize(1)
             .breakIfMinimalTableError(true)
             .softFilterToHardFilter(false)
-            .countExecutionsFormat(List.of("json"))
+            .countExecutionsFormat(List.of(ExecutionCounter.Format.JSON))
             .countExecutions(true)
             .outputDir(OUTPUT_DIR_WRONG)
             .build();
@@ -188,7 +175,7 @@ class ExecutionCounterTest {
             .minTableSize(1)
             .breakIfMinimalTableError(true)
             .softFilterToHardFilter(false)
-            .countExecutionsFormat(List.of("json", "txt"))
+            .countExecutionsFormat(List.of(ExecutionCounter.Format.values()))
             .countExecutions(true)
             .outputDir(OUTPUT_DIR_EMPTY_SCENARIOS)
             .build();
@@ -196,7 +183,7 @@ class ExecutionCounterTest {
     underTest.count(config);
     String counterString =
         FileUtils.readFileToString(
-            new File(GENERATED_COMBINE_ITEMS_DIR + "/countExecution.json"), UTF_8);
+            new File(GENERATED_COMBINE_ITEMS_DIR + "/" + COUNT_EXECUTION_FILE_NAME + ".json"), UTF_8);
     TotalCounter tc =
         new ObjectMapper()
             .configure(FAIL_ON_UNKNOWN_PROPERTIES, false)

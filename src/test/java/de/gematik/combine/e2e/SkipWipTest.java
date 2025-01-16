@@ -21,9 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
-class SkipWipTest extends AbstractCombineMojoTest {
+import java.io.File;
 
-  public static final String WIP_FILE = "wip";
+class SkipWipTest extends AbstractCombineMojoTest {
 
   @Test
   @SneakyThrows
@@ -31,8 +31,7 @@ class SkipWipTest extends AbstractCombineMojoTest {
     // act
     combineMojo.execute();
     // assert
-    String strippedStr = readFile(WIP_FILE);
-    assertThat(strippedStr).doesNotContain("Api1", "Api2");
+    assertThat(new File(outputDir())).isEmptyDirectory();
   }
 
   @Override

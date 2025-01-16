@@ -2,6 +2,11 @@
 
 # Release notes
 
+## 2.11.3
+
+- Upgrade to use Java 17
+- Respect system property cucumber.filter.tags for generation of examples
+
 ## 2.11.2
 
 ## Features

@@ -43,14 +43,14 @@ public class ScenarioProcessor {
 
   private final ExamplesProcessor examplesProcessor;
 
-  public void process(
+  public void generateExamples(
       Scenario scenario, CombineConfiguration config, List<CombineItem> combineItems) {
     CurrentScenario.setCurrentScenarioName(scenario.getName());
 
     List<Examples> examples =
         scenario.getExamples().stream()
             .filter(example -> examplesWithoutSkipTag(example, config.getSkipTags()))
-            .collect(toList());
+            .toList();
 
     getPluginLog().debug(format("processing %d examples: ", examples.size()));
     examples.forEach(
@@ -83,7 +83,7 @@ public class ScenarioProcessor {
   private void addTagsToScenario(Scenario scenario, List<String> additionalTags) {
     List<Tag> tags = new ArrayList<>(scenario.getTags());
     List<Tag> mappedAdditionalTags =
-        additionalTags.stream().map(tag -> new Tag(LOCATION, tag, "")).collect(toList());
+        additionalTags.stream().map(tag -> new Tag(LOCATION, tag, "")).toList();
 
     tags.addAll(mappedAdditionalTags);
 
@@ -103,7 +103,7 @@ public class ScenarioProcessor {
         scenario.getExamples().stream()
             .map(e -> e.getTableBody().size())
             .filter(e -> e < minTableSize)
-            .collect(toList());
+            .toList();
     if (tableSizes.isEmpty()) {
       return;
     }

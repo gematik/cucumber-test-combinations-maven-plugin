@@ -25,7 +25,8 @@
       "client"
     ],
     "properties": {
-      "homeserver": "B"
+      "homeserver": "B",
+      "version": "1.0"
     }
   },
   {

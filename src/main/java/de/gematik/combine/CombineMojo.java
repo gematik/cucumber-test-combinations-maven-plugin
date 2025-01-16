@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -169,6 +170,9 @@ public class CombineMojo extends BaseMojo {
   @Parameter(name = "countExecutionsFormat", defaultValue = "json")
   List<String> countExecutionsFormat;
 
+  @Getter
+  private ExecutionCounter executionCounter = null;
+
   @SneakyThrows
   public void execute() {
     if (this.isSkip() || skipComb) {
@@ -199,7 +203,10 @@ public class CombineMojo extends BaseMojo {
         .map(file -> stripEnding(file, fileEnding))
         .forEach(file -> replacer.process(file, config, itemsToCombine));
 
-    new ExecutionCounter().count(config);
+    if (config.isCountExecutions()) {
+      executionCounter = new ExecutionCounter();
+      executionCounter.count(config);
+    }
 
     writeErrors(
         getClass().getSimpleName(),
@@ -251,7 +258,7 @@ public class CombineMojo extends BaseMojo {
     }
   }
 
-  private CombineConfiguration getConfiguration() {
+  public CombineConfiguration getConfiguration() {
     if (emptyExamplesTags.isEmpty()) {
       emptyExamplesTags = List.of(EMPTY_EXAMPLES_TABLE_TAG, WIP_TAG);
     }
@@ -297,7 +304,8 @@ public class CombineMojo extends BaseMojo {
         .breakIfMinimalTableError(breakIfMinimalTableError)
         .softFilterToHardFilter(softFilterToHardFilter)
         .countExecutions(countExecutions)
-        .countExecutionsFormat(countExecutionsFormat)
+        .countExecutionsFormat(Optional.ofNullable(countExecutionsFormat).stream().flatMap(List::stream).map(ExecutionCounter.Format::fromString).toList())
+
         .build();
   }
 

@@ -18,6 +18,11 @@ package de.gematik.combine;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.gematik.combine.count.ExecutionCounter;
+import io.cucumber.core.options.CucumberProperties;
+import io.cucumber.core.options.CucumberPropertiesParser;
+import io.cucumber.tagexpressions.Expression;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -45,5 +50,10 @@ public class CombineConfiguration {
   private boolean breakIfMinimalTableError;
   private boolean softFilterToHardFilter;
   private boolean countExecutions;
-  private List<String> countExecutionsFormat;
+  private List<ExecutionCounter.Format> countExecutionsFormat;
+  private final List<Expression> filterTagExpressions = new CucumberPropertiesParser().parse(CucumberProperties.create()).build().getTagExpressions();
+
+  public boolean filterTagsMatch(List<String> tags) {
+    return filterTagExpressions.stream().allMatch(expression -> expression.evaluate(tags));
+  }
 }

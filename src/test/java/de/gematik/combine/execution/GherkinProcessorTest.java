@@ -69,9 +69,9 @@ class GherkinProcessorTest {
     GherkinDocument gd = parseGherkinString(FileUtils.readFileToString(f, StandardCharsets.UTF_8));
     GherkinProcessor gp = new GherkinProcessor(sp);
     // act
-    gp.process(gd, config, null);
+    gp.generateExamples(gd, config, null);
     // assert
-    verify(sp, times(0)).process(any(), any(), any());
+    verify(sp, times(0)).generateExamples(any(), any(), any());
   }
 
   @Test
@@ -84,8 +84,8 @@ class GherkinProcessorTest {
     GherkinDocument gd = parseGherkinString(FileUtils.readFileToString(f, StandardCharsets.UTF_8));
     GherkinProcessor gp = new GherkinProcessor(sp);
     // act
-    gp.process(gd, config, null);
+    gp.generateExamples(gd, config, null);
     // assert
-    verify(sp, times(1)).process(any(), any(), any());
+    verify(sp, times(1)).generateExamples(any(), any(), any());
   }
 }

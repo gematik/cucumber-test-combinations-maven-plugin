@@ -58,9 +58,9 @@ public class FileProcessor {
       throw new MojoExecutionException(e.getMessage() + " " + file.getAbsolutePath());
     }
 
-    var processedScenarios = gherkinProcessor.process(gherkinDocument, config, combineItems);
+    var numberOfScenarios = gherkinProcessor.generateExamples(gherkinDocument, config, combineItems);
 
-    if (processedScenarios > 0) {
+    if (numberOfScenarios > 0) {
       getPluginLog().debug("writing result to: " + file.getAbsolutePath());
       final String newContent = prettyPrint(gherkinDocument, Syntax.gherkin);
       writeString(file.toPath(), newContent);

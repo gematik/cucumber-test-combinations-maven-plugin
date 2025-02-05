@@ -16,10 +16,12 @@
 
 package de.gematik.combine.e2e;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.quality.Strictness.LENIENT;
 
+import de.gematik.combine.CombineMojo;
 import de.gematik.combine.FilterConfiguration;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,10 +89,21 @@ class CombineMojoTest extends AbstractCombineMojoTest {
     // arrange
     combineMojo.setEnding(INVALID_GHERKIN_FILE_ENDING);
     // act
-    assertThatThrownBy(() -> combineMojo.execute())
-        // assert
-        .isInstanceOf(MojoExecutionException.class)
-        .hasMessageContainingAll("Could not parse invalid gherkin", "invalidGherkin");
+    combineMojo.execute();
+    // assert
+    assertThat(CombineMojo.getWarningsLog().size()).isEqualTo(1);
+    assertThat(CombineMojo.getWarningsLog().get(0)).contains("Could not parse invalid gherkin", "invalidGherkin", "10:0", "unexpected end of file");
+  }
+
+  @Test
+  void invalidDescriptionBeforeFeature() {
+    // arrange
+    combineMojo.setEnding(INVALID_GHERKIN_FILE_ENDING+"2");
+    // act
+    combineMojo.execute();
+    // assert
+    assertThat(CombineMojo.getWarningsLog().size()).isEqualTo(1);
+    assertThat(CombineMojo.getWarningsLog().get(0)).contains("Could not parse invalid gherkin", "invalidGherkin", "2:1", "expected: #TagLine, #FeatureLine, #Comment, #Empty", "Beschreibung");
   }
 
   @Override

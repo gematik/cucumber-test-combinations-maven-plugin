@@ -66,7 +66,7 @@ class GherkinProcessorTest {
     File f =
         new File(
             "./src/test/resources/combine/execution/FileProcessorTest/WithAnnotationAboveFile.feature.cute");
-    GherkinDocument gd = parseGherkinString(FileUtils.readFileToString(f, StandardCharsets.UTF_8));
+    GherkinDocument gd = parseGherkinString(f.toURI().toString(), FileUtils.readFileToString(f, StandardCharsets.UTF_8));
     GherkinProcessor gp = new GherkinProcessor(sp);
     // act
     gp.generateExamples(gd, config, null);
@@ -81,7 +81,7 @@ class GherkinProcessorTest {
     File f =
         new File(
             "./src/test/resources/combine/execution/FileProcessorTest/WithAnnotationAboveSzenario.feature.cute");
-    GherkinDocument gd = parseGherkinString(FileUtils.readFileToString(f, StandardCharsets.UTF_8));
+    GherkinDocument gd = parseGherkinString(f.toURI().toString(), FileUtils.readFileToString(f, StandardCharsets.UTF_8));
     GherkinProcessor gp = new GherkinProcessor(sp);
     // act
     gp.generateExamples(gd, config, null);

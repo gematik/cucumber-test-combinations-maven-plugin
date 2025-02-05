@@ -77,7 +77,7 @@ public class ExecutionCounter {
 
   @SneakyThrows
   private GherkinDocument transformToGherkin(File f) {
-    return parseGherkinString(Files.readString(f.toPath()));
+    return parseGherkinString(f.toURI().toString(), Files.readString(f.toPath()));
   }
 
   private void countExecutions(List<GherkinDocument> features) {

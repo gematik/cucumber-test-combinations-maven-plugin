@@ -24,19 +24,21 @@ import static java.nio.file.Files.readString;
 import static java.nio.file.Files.writeString;
 
 import de.gematik.combine.CombineConfiguration;
+import de.gematik.combine.CombineMojo;
 import de.gematik.combine.model.CombineItem;
 import io.cucumber.gherkin.GherkinParser;
 import io.cucumber.gherkin.utils.pretty.Syntax;
 import io.cucumber.messages.types.Envelope;
 import io.cucumber.messages.types.GherkinDocument;
+import io.cucumber.messages.types.ParseError;
 import io.cucumber.messages.types.Source;
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Optional;
 import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.maven.plugin.MojoExecutionException;
 
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class FileProcessor {
@@ -50,16 +52,19 @@ public class FileProcessor {
 
     final String oldContent = readString(file.toPath());
 
-    final GherkinDocument gherkinDocument;
+    GherkinDocument gherkinDocument;
     try {
-      gherkinDocument = parseGherkinString(oldContent);
+      gherkinDocument = parseGherkinString(file.toURI().toString(), oldContent);
       getPluginLog().debug("parsed gherkin from: " + file.getAbsolutePath());
     } catch (IllegalArgumentException e) {
-      throw new MojoExecutionException(e.getMessage() + " " + file.getAbsolutePath());
+      CombineMojo.appendError(e.getMessage(), CombineMojo.ErrorType.WARNING);
+      gherkinDocument = null;
     }
 
-    var numberOfScenarios = gherkinProcessor.generateExamples(gherkinDocument, config, combineItems);
-
+    int numberOfScenarios = 0;
+    if (gherkinDocument != null) {
+      numberOfScenarios = gherkinProcessor.generateExamples(gherkinDocument, config, combineItems);
+    }
     if (numberOfScenarios > 0) {
       getPluginLog().debug("writing result to: " + file.getAbsolutePath());
       final String newContent = prettyPrint(gherkinDocument, Syntax.gherkin);
@@ -72,7 +77,7 @@ public class FileProcessor {
     getPluginLog().info("processed: " + file.getName());
   }
 
-  public static GherkinDocument parseGherkinString(String gherkin) {
+  public static GherkinDocument parseGherkinString(String uri, String gherkin) {
     final GherkinParser parser =
         GherkinParser.builder()
             .includeSource(false)
@@ -80,14 +85,44 @@ public class FileProcessor {
             .includeGherkinDocument(true)
             .build();
 
-    final Source source = new Source("not needed", gherkin, TEXT_X_CUCUMBER_GHERKIN_PLAIN);
+    final Source source = new Source(uri, gherkin, TEXT_X_CUCUMBER_GHERKIN_PLAIN);
     final Envelope envelope = Envelope.of(source);
 
     return parser
         .parse(envelope)
-        .map(Envelope::getGherkinDocument)
-        .flatMap(Optional::stream)
+        .map(FileProcessor::getGherkinDocument)
         .findAny()
         .orElseThrow(() -> new IllegalArgumentException("Could not parse invalid gherkin."));
+  }
+
+  private static GherkinDocument getGherkinDocument(Envelope envelope) {
+    return envelope
+        .getGherkinDocument()
+        .orElseThrow(
+            () ->
+                new IllegalArgumentException(
+                    "Could not parse invalid gherkin: " + getParseErrorMessage(envelope)));
+  }
+
+  private static String getParseErrorMessage(Envelope envelope) {
+    return envelope
+        .getParseError()
+        .map(error -> getSourcePrefix(error) + error.getMessage())
+        .orElse("unknown error");
+  }
+
+  private static String getSourcePrefix(ParseError error) {
+    return error
+        .getSource()
+        .getUri()
+        .map(
+            uri -> {
+              try {
+                return new URI(uri).getPath() + ": ";
+              } catch (URISyntaxException e) {
+                return "";
+              }
+            })
+        .orElse("");
   }
 }

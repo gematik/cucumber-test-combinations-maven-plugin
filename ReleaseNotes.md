@@ -2,6 +2,20 @@
 
 # Release notes
 
+## 2.11.5
+
+### Feature
+
+- updates gematik copyright statement
+- switches from nexus staging to central publishing for release
+
+## 2.11.4
+
+### Bugfix
+
+- Improves error message on invalid Gherkin file
+- fixes issue where comments in a Gherkin file led to errors during parsing
+
 ## 2.11.3
 
 - Upgrade to use Java 17
@@ -9,7 +23,7 @@
 
 ## 2.11.2
 
-## Features
+### Features
 
 - Ignore feature files that are fully skipped by the generator
 

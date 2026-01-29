@@ -2,6 +2,24 @@
 
 # Release notes
 
+## 2.11.8
+
+### Feature
+
+- updates dependencies
+
+## 2.11.7
+
+### Feature
+
+- updates dependencies
+
+## 2.11.6
+
+### Feature
+
+- updates dependencies
+
 ## 2.11.5
 
 ### Feature

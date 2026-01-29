@@ -28,6 +28,7 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
+import de.gematik.combine.model.CombineItem;
 import de.gematik.combine.model.TableCell;
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,13 +43,21 @@ import org.apache.commons.jexl3.JexlContext;
 import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
+import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.apache.maven.plugin.MojoExecutionException;
 
 @EqualsAndHashCode
 public class JexlFilter {
 
   public static final JexlEngine JEXL_ENGINE =
-      new JexlBuilder().strict(true).silent(false).safe(false).create();
+      new JexlBuilder()
+          .strict(true)
+          .silent(false)
+          .safe(false)
+          .permissions(
+              new JexlPermissions.ClassPermissions(
+                  CombineItem.class, JexlFilterColumn.class, JexlFilterList.class))
+          .create();
 
   private final JexlExpression expression;
 

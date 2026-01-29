@@ -7,7 +7,7 @@
   <!-- tag::maven-coordinates[] -->
   <groupId>de.gematik</groupId>
   <artifactId>cucumber-test-combinations-maven-plugin</artifactId>
-  <version>2.11.5</version>
+  <version>2.11.8</version>
   <!-- end::maven-coordinates[] -->
   <packaging>maven-plugin</packaging>
   <name>CuTest Combinations Maven Plugin</name>
@@ -58,20 +58,20 @@
     <sonar.coverage.jacoco.xmlReportPaths>
       ${project.build.directory}/site/jacoco-aggregate/jacoco.xml
     </sonar.coverage.jacoco.xmlReportPaths>
-    <jacoco.version>0.8.11</jacoco.version>
-    <jupiter.version>5.9.0</jupiter.version>
-    <lombok.version>1.18.26</lombok.version>
-    <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
-    <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
-    <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+    <jacoco.version>0.8.14</jacoco.version>
+    <jupiter.version>6.0.2</jupiter.version>
+    <lombok.version>1.18.42</lombok.version>
+    <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+    <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+    <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
     <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
-    <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+    <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
     <sisu-maven-plugin.version>0.3.5</sisu-maven-plugin.version>
-    <maven-plugin-plugin.version>3.6.4</maven-plugin-plugin.version>
-    <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
-    <central-publishing-maven-plugin.version>0.7.0</central-publishing-maven-plugin.version>
-    <mockito.version>4.8.0</mockito.version>
-    <maven.plugin.version>3.9.9</maven.plugin.version>
+    <maven-plugin-plugin.version>3.15.2</maven-plugin-plugin.version>
+    <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+    <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
+    <mockito.version>5.2.0</mockito.version>
+    <maven.plugin.version>3.9.12</maven.plugin.version>
   </properties>
 
   <dependencies>
@@ -109,6 +109,10 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
@@ -126,7 +130,7 @@
     </dependency>
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
-      <artifactId>okhttp</artifactId>
+      <artifactId>okhttp-jvm</artifactId>
     </dependency>
     <dependency>
       <groupId>com.jayway.jsonpath</groupId>
@@ -174,52 +178,52 @@
       <dependency>
         <groupId>io.cucumber</groupId>
         <artifactId>messages</artifactId>
-        <version>19.0.0</version>
+        <version>31.0.0</version>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.17.0</version>
+        <version>2.21.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
-        <version>3.12.0</version>
+        <version>3.20.0</version>
       </dependency>
       <dependency>
         <groupId>com.squareup.okhttp3</groupId>
-        <artifactId>okhttp</artifactId>
-        <version>5.0.0-alpha.11</version>
+        <artifactId>okhttp-jvm</artifactId>
+        <version>5.3.2</version>
       </dependency>
       <dependency>
         <groupId>com.squareup.okio</groupId>
         <artifactId>okio-jvm</artifactId>
-        <version>3.9.1</version>
+        <version>3.16.4</version>
       </dependency>
       <dependency>
         <groupId>org.json</groupId>
         <artifactId>json</artifactId>
-        <version>20231013</version>
+        <version>20251224</version>
       </dependency>
       <dependency>
         <groupId>com.jayway.jsonpath</groupId>
         <artifactId>json-path</artifactId>
-        <version>2.9.0</version>
+        <version>2.10.0</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>32.1.2-jre</version>
+        <version>33.5.0-jre</version>
       </dependency>
       <dependency>
         <groupId>io.cucumber</groupId>
         <artifactId>cucumber-java</artifactId>
-        <version>7.21.0</version>
+        <version>7.33.0</version>
       </dependency>
       <dependency>
         <groupId>io.cucumber</groupId>
         <artifactId>gherkin-utils</artifactId>
-        <version>9.2.0</version>
+        <version>10.0.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.maven</groupId>
@@ -234,7 +238,7 @@
       <dependency>
         <groupId>org.apache.maven.plugin-tools</groupId>
         <artifactId>maven-plugin-annotations</artifactId>
-        <version>3.7.0</version>
+        <version>3.15.2</version>
       </dependency>
       <dependency>
         <groupId>javax.inject</groupId>
@@ -244,12 +248,17 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-jexl3</artifactId>
-        <version>3.2.1</version>
+        <version>3.6.1</version>
       </dependency>
       <dependency>
         <groupId>org.reflections</groupId>
         <artifactId>reflections</artifactId>
         <version>0.10.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains</groupId>
+        <artifactId>annotations</artifactId>
+        <version>26.0.2-1</version>
       </dependency>
 
       <!--    Test Dependencies-->
@@ -276,7 +285,7 @@
       <dependency>
         <groupId>org.assertj</groupId>
         <artifactId>assertj-core</artifactId>
-        <version>3.23.1</version>
+        <version>3.27.7</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -380,7 +389,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>3.2.2</version>
+        <version>3.9.0</version>
       </plugin>
       <plugin>
         <groupId>org.eclipse.sisu</groupId>
@@ -415,7 +424,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.8.2</version>
+          <version>3.21.0</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -481,21 +490,6 @@
             <executions>
               <execution>
                 <id>attach-javadocs</id>
-                <phase>none</phase>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <version>${jacoco.version}</version>
-            <executions>
-              <execution>
-                <id>prepare-agent</id>
-                <phase>none</phase>
-              </execution>
-              <execution>
-                <id>report</id>
                 <phase>none</phase>
               </execution>
             </executions>

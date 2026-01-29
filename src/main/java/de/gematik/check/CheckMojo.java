@@ -51,6 +51,7 @@ import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.JexlExpression;
 import org.apache.commons.jexl3.MapContext;
+import org.apache.commons.jexl3.introspection.JexlPermissions;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -106,7 +107,12 @@ public class CheckMojo extends BaseMojo {
   }
 
   public static final JexlEngine JEXL_ENGINE =
-      new JexlBuilder().strict(true).silent(false).safe(false).create();
+      new JexlBuilder()
+          .strict(true)
+          .silent(false)
+          .safe(false)
+          .permissions(new JexlPermissions.ClassPermissions(CombineItem.class))
+          .create();
 
   @SneakyThrows
   private void run() {

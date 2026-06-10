@@ -28,11 +28,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Map;
 import java.util.HashMap;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 import javax.net.ssl.SSLContext;
 import lombok.Setter;
@@ -118,9 +117,9 @@ public class ApiRequester {
       variableMap.put("clientCertPassword", clientCertPassword);
       variableMap.put("trustStorePassword", trustStorePassword);
       for (Map.Entry<String, String> entry : variableMap.entrySet()) {
-        if(entry.getValue() == null || entry.getValue().isEmpty()){
+        if (entry.getValue() == null || entry.getValue().isEmpty()) {
           getLog().warn(entry.getKey() + " is missing.");
-        }else{
+        } else {
           getLog().info(entry.getKey() + " is set.");
         }
       }
@@ -143,8 +142,7 @@ public class ApiRequester {
   public void setAllowedResponses(String fam, String codes) throws MojoExecutionException {
     if (StringUtils.isNotBlank(codes)) {
       try {
-        List<Integer> namedCodes =
-            Arrays.stream(codes.split(",")).map(Integer::valueOf).collect(Collectors.toList());
+        List<Integer> namedCodes = Arrays.stream(codes.split(",")).map(Integer::valueOf).toList();
         if (namedCodes.stream().anyMatch(i -> i >= 600 || i < 100)) {
           throw new MojoExecutionException("Codes could only have a range of 100 - 599");
         }
@@ -154,10 +152,7 @@ public class ApiRequester {
       }
     } else {
       try {
-        allowedFam =
-            Arrays.asList(fam.split(",")).stream()
-                .map(StatusCodes::valueOf)
-                .collect(Collectors.toList());
+        allowedFam = Arrays.stream(fam.split(",")).map(StatusCodes::valueOf).toList();
       } catch (IllegalArgumentException ex) {
         throw new MojoExecutionException(
             "Unknown status code family found in \""

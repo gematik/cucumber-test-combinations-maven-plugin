@@ -2,7 +2,7 @@
 :toc-title: Table of Contents
 :toc:
 :toclevels: 4
-== BDD-Parameterizer-Maven-Plugin
+== Cucumber-Test-Combinations-Maven-Plugin
 
 include::Overview.adoc[]
 include::GettingStarted.adoc[]

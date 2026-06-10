@@ -21,14 +21,13 @@
 package de.gematik.prepare.pooling.strategies;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 
 public class WildcardStrategy extends MatchStrategy {
 
   public WildcardStrategy(List<String> groups) {
-    super(groups.stream().map(String::toLowerCase).collect(Collectors.toList()));
+    super(groups.stream().map(String::toLowerCase).toList());
   }
 
   @Override
@@ -39,7 +38,7 @@ public class WildcardStrategy extends MatchStrategy {
   private boolean match(String group, String itemGroup) {
     itemGroup = itemGroup.toLowerCase();
     List<String> parts =
-        Stream.of(group.split("\\*")).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        Stream.of(group.split("\\*")).filter(StringUtils::isNotBlank).toList();
     if (!group.startsWith("*") && !itemGroup.startsWith(parts.get(0))) {
       return false;
     }

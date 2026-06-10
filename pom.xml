@@ -7,7 +7,7 @@
   <!-- tag::maven-coordinates[] -->
   <groupId>de.gematik</groupId>
   <artifactId>cucumber-test-combinations-maven-plugin</artifactId>
-  <version>2.11.8</version>
+  <version>2.12.0</version>
   <!-- end::maven-coordinates[] -->
   <packaging>maven-plugin</packaging>
   <name>CuTest Combinations Maven Plugin</name>
@@ -52,26 +52,26 @@
   </developers>
 
   <properties>
-    <java.version>17</java.version>
+    <java.version>21</java.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <sonar.coverage.jacoco.xmlReportPaths>
       ${project.build.directory}/site/jacoco-aggregate/jacoco.xml
     </sonar.coverage.jacoco.xmlReportPaths>
-    <jacoco.version>0.8.14</jacoco.version>
-    <jupiter.version>6.0.2</jupiter.version>
-    <lombok.version>1.18.42</lombok.version>
+    <jacoco.version>0.8.15</jacoco.version>
+    <jupiter.version>6.1.0</jupiter.version>
+    <lombok.version>1.18.46</lombok.version>
     <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
-    <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+    <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
     <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
     <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
     <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
-    <sisu-maven-plugin.version>0.3.5</sisu-maven-plugin.version>
+    <sisu-maven-plugin.version>1.0.0</sisu-maven-plugin.version>
     <maven-plugin-plugin.version>3.15.2</maven-plugin-plugin.version>
     <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     <central-publishing-maven-plugin.version>0.10.0</central-publishing-maven-plugin.version>
     <mockito.version>5.2.0</mockito.version>
-    <maven.plugin.version>3.9.12</maven.plugin.version>
+    <maven.plugin.version>3.9.16</maven.plugin.version>
   </properties>
 
   <dependencies>
@@ -176,14 +176,9 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>io.cucumber</groupId>
-        <artifactId>messages</artifactId>
-        <version>31.0.0</version>
-      </dependency>
-      <dependency>
         <groupId>commons-io</groupId>
         <artifactId>commons-io</artifactId>
-        <version>2.21.0</version>
+        <version>2.22.0</version>
       </dependency>
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -193,32 +188,34 @@
       <dependency>
         <groupId>com.squareup.okhttp3</groupId>
         <artifactId>okhttp-jvm</artifactId>
-        <version>5.3.2</version>
+        <version>5.4.0</version>
       </dependency>
       <dependency>
         <groupId>com.squareup.okio</groupId>
         <artifactId>okio-jvm</artifactId>
-        <version>3.16.4</version>
+        <version>3.17.0</version>
       </dependency>
       <dependency>
         <groupId>org.json</groupId>
         <artifactId>json</artifactId>
-        <version>20251224</version>
+        <version>20260522</version>
       </dependency>
       <dependency>
         <groupId>com.jayway.jsonpath</groupId>
         <artifactId>json-path</artifactId>
-        <version>2.10.0</version>
+        <version>3.0.0</version>
       </dependency>
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>33.5.0-jre</version>
+        <version>33.6.0-jre</version>
       </dependency>
       <dependency>
         <groupId>io.cucumber</groupId>
-        <artifactId>cucumber-java</artifactId>
-        <version>7.33.0</version>
+        <artifactId>cucumber-bom</artifactId>
+        <version>7.34.3</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>io.cucumber</groupId>
@@ -248,7 +245,7 @@
       <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-jexl3</artifactId>
-        <version>3.6.1</version>
+        <version>3.6.2</version>
       </dependency>
       <dependency>
         <groupId>org.reflections</groupId>
@@ -258,7 +255,7 @@
       <dependency>
         <groupId>org.jetbrains</groupId>
         <artifactId>annotations</artifactId>
-        <version>26.0.2-1</version>
+        <version>26.1.0</version>
       </dependency>
 
       <!--    Test Dependencies-->
@@ -297,6 +294,13 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler-plugin.version}</version>
         <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
           <encoding>${project.build.sourceEncoding}</encoding>
           <source>${java.version}</source>
           <target>${java.version}</target>
@@ -424,7 +428,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.21.0</version>
+          <version>3.22.0</version>
         </plugin>
       </plugins>
     </pluginManagement>

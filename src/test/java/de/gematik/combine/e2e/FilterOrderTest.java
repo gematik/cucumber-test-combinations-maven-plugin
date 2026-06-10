@@ -38,6 +38,12 @@ class FilterOrderTest extends AbstractCombineMojoTest {
     combineMojo.execute();
     // assert
     String strippedStr = readFile(FILTER_ORDER_FILE);
-    assertThat(strippedStr).endsWith("|HEADER_1|HEADER_2|\n" + "|Api1|Api2|\n" + "|Api4|Api2|\n");
+    assertThat(strippedStr)
+        .endsWith(
+            """
+            |HEADER_1|HEADER_2|
+            |Api1|Api2|
+            |Api4|Api2|
+            """);
   }
 }

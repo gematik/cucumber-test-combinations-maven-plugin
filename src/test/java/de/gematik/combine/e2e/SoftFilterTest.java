@@ -35,7 +35,6 @@ import io.cucumber.messages.types.TableRow;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -94,7 +93,7 @@ public class SoftFilterTest extends AbstractCombineMojoTest {
         .flatMap(Collection::stream)
         .map(Examples::getTableBody)
         .flatMap(Collection::stream)
-        .collect(Collectors.toList());
+        .toList();
   }
 
   private static GherkinDocument parseGherkinString(String gherkin) {

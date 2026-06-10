@@ -20,10 +20,10 @@
 
 package de.gematik.combine.count;
 
+import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.Map;
 import java.util.TreeMap;
 
-import io.cucumber.core.internal.com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

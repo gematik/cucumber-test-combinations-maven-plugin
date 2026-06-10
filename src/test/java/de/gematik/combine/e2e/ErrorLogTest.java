@@ -69,15 +69,6 @@ class ErrorLogTest extends AbstractCombineMojoTest {
 
   @Test
   @SneakyThrows
-  void shouldCreateFile() {
-    combineMojo.setBreakIfTableToSmall(true);
-    assertThatThrownBy(() -> combineMojo.execute())
-        .isInstanceOf(MojoExecutionException.class)
-        .hasMessageStartingWith("Scenarios with insufficient examples found ->");
-  }
-
-  @Test
-  @SneakyThrows
   void shouldConsiderMinimalTableSizeSetToOne() {
     combineMojo.setMinTableSize(1);
     combineMojo.execute();

@@ -25,13 +25,12 @@ import static de.gematik.combine.execution.FileProcessor.parseGherkinString;
 import static java.util.Objects.requireNonNull;
 
 import de.gematik.combine.CombineConfiguration;
-import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.databind.ObjectMapper;
 import io.cucumber.messages.types.Examples;
 import io.cucumber.messages.types.Feature;
 import io.cucumber.messages.types.FeatureChild;
 import io.cucumber.messages.types.GherkinDocument;
 import io.cucumber.messages.types.Scenario;
-
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -41,8 +40,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
-
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -62,7 +59,7 @@ public class ExecutionCounter {
     }
     List<File> featureFiles = getFeatureFiles(new File(config.getOutputDir()));
     List<GherkinDocument> features =
-        featureFiles.stream().map(this::transformToGherkin).collect(Collectors.toList());
+        featureFiles.stream().map(this::transformToGherkin).toList();
     countExecutions(features);
     writeExecutionsToFile(config);
   }

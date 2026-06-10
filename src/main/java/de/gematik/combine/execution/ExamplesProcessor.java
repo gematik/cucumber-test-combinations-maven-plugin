@@ -47,7 +47,6 @@ import java.lang.reflect.Field;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -139,7 +138,7 @@ public class ExamplesProcessor {
   private static void addDefaultTags(Examples examples, List<String> defaultTags) {
     ArrayList<Tag> tags = new ArrayList<>(examples.getTags());
     tags.addAll(
-        defaultTags.stream().map(tagStr -> new Tag(LOCATION, tagStr, tagStr)).collect(toList()));
+        defaultTags.stream().map(tagStr -> new Tag(LOCATION, tagStr, tagStr)).toList());
     setTags(examples, tags);
   }
 
@@ -162,7 +161,7 @@ public class ExamplesProcessor {
                         tag.getName().substring(1).startsWith(getTagName(VersionFilter.class), 0)
                             ? config.getVersionFilterTagCategory()
                             : config.getPluginTagCategory()))
-            .collect(toList());
+            .toList();
     setTags(examples, changedTags);
   }
 
@@ -178,7 +177,7 @@ public class ExamplesProcessor {
     final List<io.cucumber.messages.types.TableCell> cells =
         row.stream()
             .map(value -> new io.cucumber.messages.types.TableCell(LOCATION, value.getValue()))
-            .collect(toList());
+            .toList();
 
     return new TableRow(LOCATION, cells, randomUUID().toString());
   }
@@ -186,18 +185,18 @@ public class ExamplesProcessor {
   private static List<String> extractHeaders(Examples examples) {
     return examples.getTableHeader().orElseThrow().getCells().stream()
         .map(io.cucumber.messages.types.TableCell::getValue)
-        .collect(toList());
+        .toList();
   }
 
   private static List<String> extractTagStrings(Examples examples) {
-    return examples.getTags().stream().map(Tag::getName).collect(toList());
+    return examples.getTags().stream().map(Tag::getName).toList();
   }
 
   private static List<Tag> getAppliedProjectTableRowFilters(ConfiguredFilters filters) {
     return filters.getTableRowFilters().stream()
         .filter(ProjectRowFilter.class::isInstance)
         .map(filter -> getProjectRowFilterTag((ProjectRowFilter) filter))
-        .collect(toList());
+        .toList();
   }
 
   private static List<Tag> getAppliedProjectCellFilters(ConfiguredFilters filters) {
@@ -212,9 +211,9 @@ public class ExamplesProcessor {
                             filter ->
                                 getProjectCellFilterTag(
                                     column.getKey(), (ProjectCellFilter) filter))
-                        .collect(toList())))
+                        .toList()))
         .flatMap(column -> column.getValue().stream())
-        .collect(Collectors.toList());
+            .toList();
   }
 
   private static Tag getProjectRowFilterTag(ProjectRowFilter filter) {

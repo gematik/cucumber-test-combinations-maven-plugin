@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 
 class MinimalTableTest extends AbstractCombineMojoTest {
 
-  private final int TESTCASES_IN_FILE = 2;
+  private static final int TESTCASES_IN_FILE = 2;
 
   @Test
   @SneakyThrows
@@ -57,5 +57,4 @@ class MinimalTableTest extends AbstractCombineMojoTest {
   protected String combineItemsFile() {
     return "./src/test/resources/input/minimalTable.json";
   }
-
 }

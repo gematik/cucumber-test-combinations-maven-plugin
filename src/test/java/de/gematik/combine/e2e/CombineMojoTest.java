@@ -40,7 +40,7 @@ class CombineMojoTest extends AbstractCombineMojoTest {
   public static final String INVALID_GHERKIN_FILE_ENDING = ".invalidGherkin";
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     combineMojo.setEnding(WITHOUT_FILTERS_FILE_ENDING);
     combineMojo.setFilterConfiguration(
         FilterConfiguration.builder().allowSelfCombine(true).allowDoubleLineup(true).build());

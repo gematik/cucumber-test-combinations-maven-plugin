@@ -52,7 +52,7 @@ class TableGeneratorTest {
   Log log;
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     CombineMojo mojo = mock(CombineMojo.class);
     log = mock(Log.class);
     when(mojo.getLog()).thenReturn(log);

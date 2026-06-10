@@ -55,7 +55,7 @@ public class DefaultTagsTest extends AbstractCombineMojoTest {
   }
 
   @BeforeEach
-  public void setup() {
+  void setup() {
     combineMojo.setEnding(WITHOUT_FILTERS_FILE_ENDING);
     combineMojo.setDefaultExamplesTags(List.of("@MaxRows(1)", "@Blub"));
   }
@@ -74,10 +74,12 @@ public class DefaultTagsTest extends AbstractCombineMojoTest {
     assertThat(strippedStr)
         .endsWith(
             format(
-                "@%s:MaxRows(1)@%s:Blub\n"
-                    + "Beispiele:\n"
-                    + "|HEADER_1|HEADER_2|\n"
-                    + "|Api1|Api2|\n",
+                """
+                    @%s:MaxRows(1)@%s:Blub
+                    Beispiele:
+                    |HEADER_1|HEADER_2|
+                    |Api1|Api2|
+                    """,
                 pluginTagCategory, pluginTagCategory));
   }
 

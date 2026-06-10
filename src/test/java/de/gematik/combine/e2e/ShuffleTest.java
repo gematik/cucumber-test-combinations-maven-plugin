@@ -56,18 +56,20 @@ class ShuffleTest extends AbstractCombineMojoTest {
             "|Api4|Api2|\n",
             "|Api4|Api3|\n")
         .doesNotContain(
-            "|Api1|Api2|\n"
-                + "|Api1|Api3|\n"
-                + "|Api1|Api4|\n"
-                + "|Api2|Api1|\n"
-                + "|Api2|Api3|\n"
-                + "|Api2|Api4|\n"
-                + "|Api3|Api1|\n"
-                + "|Api3|Api2|\n"
-                + "|Api3|Api4|\n"
-                + "|Api4|Api1|\n"
-                + "|Api4|Api2|\n"
-                + "|Api4|Api3|\n");
+            """
+                |Api1|Api2|
+                |Api1|Api3|
+                |Api1|Api4|
+                |Api2|Api1|
+                |Api2|Api3|
+                |Api2|Api4|
+                |Api3|Api1|
+                |Api3|Api2|
+                |Api3|Api4|
+                |Api4|Api1|
+                |Api4|Api2|
+                |Api4|Api3|
+                """);
   }
 
   @Override

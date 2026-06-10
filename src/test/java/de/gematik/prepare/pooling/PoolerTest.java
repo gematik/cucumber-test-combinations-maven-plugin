@@ -64,7 +64,7 @@ class PoolerTest extends AbstractPrepareTest {
   private final String baseInputPath =
       "./src/test/resources/input/groups/".replace("/", File.separator);
 
-  private Pooler pooler = new Pooler();
+  private final Pooler pooler = new Pooler();
   private PrepareItemsConfigBuilder configBuilder;
 
   @BeforeEach
@@ -123,24 +123,8 @@ class PoolerTest extends AbstractPrepareTest {
     assertThat(res).hasSize(groups.stream().map(sizeMap::get).reduce(0, Integer::sum));
   }
 
-  private static Stream<Arguments> returnRequestedAmountItemsHavingGroup() {
-    Map<String, Integer> map = Map.of("A", 4, "B", 3, "C", 2, "D", 1);
-    return Stream.of(
-        arguments(List.of("A"), map),
-        arguments(List.of("A", "B"), map),
-        arguments(List.of("A", "B", "C"), map),
-        arguments(List.of("A", "B", "D"), map),
-        arguments(List.of("A", "C", "D"), map),
-        arguments(List.of("A", "B", "C", "D"), map),
-        arguments(List.of("A", "C"), map),
-        arguments(List.of("A", "D"), map),
-        arguments(List.of("B", "C"), map),
-        arguments(List.of("B", "D"), map),
-        arguments(List.of("C", "D"), map));
-  }
-
   @SneakyThrows
-  @MethodSource
+  @MethodSource("returnAllItemsHavingGroup")
   @ParameterizedTest
   void returnRequestedAmountItemsHavingGroup(List<String> groups, Map<String, Integer> sizeMap) {
     PoolGroup poolGroup = PoolGroup.builder().groupPattern(groups).build();
@@ -244,7 +228,7 @@ class PoolerTest extends AbstractPrepareTest {
             .build();
     pooler.setConfig(config);
 
-    assertThatThrownBy(() -> pooler.pool())
+    assertThatThrownBy(pooler::pool)
         .isInstanceOf(MojoExecutionException.class)
         .hasMessage("PoolSize to high! Could not find sufficient item-groups to fulfill request");
   }
@@ -408,7 +392,7 @@ class PoolerTest extends AbstractPrepareTest {
             .build();
     pooler.setConfig(config);
 
-    assertThatThrownBy(() -> pooler.pool())
+    assertThatThrownBy(pooler::pool)
         .isInstanceOf(MojoExecutionException.class)
         .hasMessage(
             "Could not find at least one match for poolgroup: PoolGroup(groupPattern=[_*new], amount=1, strategy=REGEX)");
@@ -426,7 +410,7 @@ class PoolerTest extends AbstractPrepareTest {
             .build();
     pooler.setConfig(config);
 
-    assertThatThrownBy(() -> pooler.pool())
+    assertThatThrownBy(pooler::pool)
         .isInstanceOf(MojoExecutionException.class)
         .hasMessage(
             "Requested 3 for group(s) [.*_new] but only found 2 matching group(s) ([C_new, D_new]) with matching strategy REGEX");

@@ -21,7 +21,6 @@
 package de.gematik.combine.tags.parser;
 
 import static de.gematik.combine.tags.parser.FilterTagParser.JEXL_ROW_FILTER_TAG;
-import static java.util.stream.Collectors.toList;
 
 import de.gematik.combine.filter.table.cell.JexlCellFilter;
 import de.gematik.combine.filter.table.row.JexlRowFilter;
@@ -56,6 +55,6 @@ public class FilterTagParser implements SingleTagParser {
   }
 
   private List<String> countColumnReferences(String expression, List<String> columns) {
-    return columns.stream().filter(expression::contains).collect(toList());
+    return columns.stream().filter(expression::contains).toList();
   }
 }

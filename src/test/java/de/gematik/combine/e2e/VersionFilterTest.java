@@ -37,7 +37,6 @@ import de.gematik.combine.ProjectFilters;
 import de.gematik.combine.util.CompareOperator;
 import java.lang.reflect.MalformedParametersException;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -144,10 +143,7 @@ class VersionFilterTest extends AbstractCombineMojoTest {
     // assert
     assertThat(readFile(FILE_NAME))
         .contains(filteredItems)
-        .doesNotContain(
-            ITEMS.stream()
-                .filter(item -> !filteredItems.contains(item))
-                .collect(Collectors.toList()));
+        .doesNotContain(ITEMS.stream().filter(item -> !filteredItems.contains(item)).toList());
   }
 
   @ParameterizedTest
@@ -166,10 +162,7 @@ class VersionFilterTest extends AbstractCombineMojoTest {
     // assert
     assertThat(readFile(FILE_NAME))
         .contains(filteredItems)
-        .doesNotContain(
-            ITEMS.stream()
-                .filter(item -> !filteredItems.contains(item))
-                .collect(Collectors.toList()));
+        .doesNotContain(ITEMS.stream().filter(item -> !filteredItems.contains(item)).toList());
   }
 
   @Test

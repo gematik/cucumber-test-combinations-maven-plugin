@@ -22,13 +22,13 @@ package de.gematik.combine.count;
 
 import static de.gematik.BaseMojo.GENERATED_COMBINE_ITEMS_DIR;
 import static de.gematik.combine.count.ExecutionCounter.COUNT_EXECUTION_FILE_NAME;
-import static io.cucumber.core.internal.com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.gematik.combine.CombineConfiguration;
-import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -47,12 +47,12 @@ import java.util.Objects;
 
 class ExecutionCounterTest {
 
-  private final String OUTPUT_DIR = "./src/test/resources/featureFiles/correct";
-  private final String OUTPUT_DIR_WRONG = "./src/test/resources/featureFiles/sameName";
-  private final String OUTPUT_DIR_EMPTY_SCENARIOS =
+  private static final String OUTPUT_DIR = "./src/test/resources/featureFiles/correct";
+  private static final String OUTPUT_DIR_WRONG = "./src/test/resources/featureFiles/sameName";
+  private static final String OUTPUT_DIR_EMPTY_SCENARIOS =
       "./src/test/resources/featureFiles/emptyScenarios";
 
-  private ExecutionCounter underTest = new ExecutionCounter();
+  private final ExecutionCounter underTest = new ExecutionCounter();
 
   @BeforeEach
   void deleteOldFiles() {

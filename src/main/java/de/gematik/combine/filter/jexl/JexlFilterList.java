@@ -20,7 +20,6 @@
 
 package de.gematik.combine.filter.jexl;
 
-import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +39,7 @@ public class JexlFilterList<T> {
 
   // method is used in JEXL expressions
   public JexlFilterList<T> distinct() {
-    return new JexlFilterList<>(list.stream().distinct().collect(toList()));
+    return new JexlFilterList<>(list.stream().distinct().toList());
   }
 
   // method is used in JEXL expressions

@@ -32,14 +32,15 @@ class DefaultConfigurationTest extends AbstractCombineMojoTest {
 
   public static final String DEFAULT_CONFIG_FILE = "withoutFilters";
 
-  public static final FilterConfiguration defaultConfig = FilterConfiguration.builder()
-      .allowSelfCombine(true)
-      .allowDoubleLineup(true)
-      .maxTableRows(MAX_VALUE)
-      .build();
+  public static final FilterConfiguration defaultConfig =
+      FilterConfiguration.builder()
+          .allowSelfCombine(true)
+          .allowDoubleLineup(true)
+          .maxTableRows(MAX_VALUE)
+          .build();
 
   @BeforeEach
-  public void setup() {
+  void setup() {
 
     combineMojo.setEnding(".withoutFilters");
     combineMojo.setFilterConfiguration(defaultConfig);
@@ -53,103 +54,111 @@ class DefaultConfigurationTest extends AbstractCombineMojoTest {
     // assert
 
     String strippedStr = readFile(DEFAULT_CONFIG_FILE);
-    assertThat(strippedStr).endsWith(
-        "|HEADER_1|HEADER_2|\n"
-            + "|Api1|Api1|\n"
-            + "|Api1|Api2|\n"
-            + "|Api2|Api1|\n"
-            + "|Api2|Api2|\n");
+    assertThat(strippedStr)
+        .endsWith(
+            """
+            |HEADER_1|HEADER_2|
+            |Api1|Api1|
+            |Api1|Api2|
+            |Api2|Api1|
+            |Api2|Api2|
+            """);
   }
 
   @Test
   @SneakyThrows
   void onlyAllowDoubleLineup() {
     // arrange
-    combineMojo.setFilterConfiguration(defaultConfig.toBuilder()
-        .allowSelfCombine(false)
-        .allowDoubleLineup(true)
-        .build());
+    combineMojo.setFilterConfiguration(
+        defaultConfig.toBuilder().allowSelfCombine(false).allowDoubleLineup(true).build());
     // act
     combineMojo.execute();
     // assert
     String strippedStr = readFile(DEFAULT_CONFIG_FILE);
-    assertThat(strippedStr).endsWith(
-        "|HEADER_1|HEADER_2|\n"
-            + "|Api1|Api2|\n"
-            + "|Api2|Api1|\n");
+    assertThat(strippedStr)
+        .endsWith(
+            """
+            |HEADER_1|HEADER_2|
+            |Api1|Api2|
+            |Api2|Api1|
+            """);
   }
 
   @Test
   @SneakyThrows
   void onlyAllowSelfCombine() {
     // arrange
-    combineMojo.setFilterConfiguration(defaultConfig.toBuilder()
-        .allowSelfCombine(true)
-        .allowDoubleLineup(false)
-        .build());
+    combineMojo.setFilterConfiguration(
+        defaultConfig.toBuilder().allowSelfCombine(true).allowDoubleLineup(false).build());
     // act
     combineMojo.execute();
     // assert
     String strippedStr = readFile(DEFAULT_CONFIG_FILE);
-    assertThat(strippedStr).endsWith(
-        "|HEADER_1|HEADER_2|\n"
-            + "|Api1|Api1|\n"
-            + "|Api1|Api2|\n"
-            + "|Api2|Api2|\n");
+    assertThat(strippedStr)
+        .endsWith(
+            """
+            |HEADER_1|HEADER_2|
+            |Api1|Api1|
+            |Api1|Api2|
+            |Api2|Api2|
+            """);
   }
 
   @Test
   @SneakyThrows
   void denyAll() {
     // arrange
-    combineMojo.setFilterConfiguration(defaultConfig.toBuilder()
-        .allowSelfCombine(false)
-        .allowDoubleLineup(false)
-        .build());
+    combineMojo.setFilterConfiguration(
+        defaultConfig.toBuilder().allowSelfCombine(false).allowDoubleLineup(false).build());
     // act
     combineMojo.execute();
     // assert
     String strippedStr = readFile(DEFAULT_CONFIG_FILE);
-    assertThat(strippedStr).endsWith(
-        "|HEADER_1|HEADER_2|\n"
-            + "|Api1|Api2|\n");
+    assertThat(strippedStr)
+        .endsWith(
+            """
+            |HEADER_1|HEADER_2|
+            |Api1|Api2|
+            """);
   }
 
   @Test
   @SneakyThrows
   void setMaxRows() {
     // arrange
-    combineMojo.setFilterConfiguration(defaultConfig.toBuilder()
-        .allowSelfCombine(true)
-        .maxTableRows(1)
-        .build());
+    combineMojo.setFilterConfiguration(
+        defaultConfig.toBuilder().allowSelfCombine(true).maxTableRows(1).build());
     // act
     combineMojo.execute();
     // assert
 
     String strippedStr = readFile(DEFAULT_CONFIG_FILE);
-    assertThat(strippedStr).endsWith(
-        "|HEADER_1|HEADER_2|\n"
-            + "|Api1|Api1|\n");
+    assertThat(strippedStr)
+        .endsWith(
+            """
+            |HEADER_1|HEADER_2|
+            |Api1|Api1|
+            """);
   }
 
   @Test
   @SneakyThrows
   void shouldSetMaxRow() {
     // arrange
-    combineMojo.setFilterConfiguration(defaultConfig.toBuilder()
-        .allowSelfCombine(true)
-        .maxTableRows(2)
-        .build());
+    combineMojo.setFilterConfiguration(
+        defaultConfig.toBuilder().allowSelfCombine(true).maxTableRows(2).build());
     // act
     combineMojo.execute();
     // assert
 
     String strippedStr = readFile(DEFAULT_CONFIG_FILE);
-    assertThat(strippedStr).endsWith(
-        "|HEADER_1|HEADER_2|\n"
-            + "|Api1|Api1|\n"
-            + "|Api1|Api2|\n");
+    assertThat(strippedStr)
+        .endsWith(
+            """
+            |HEADER_1|HEADER_2|
+            |Api1|Api1|
+            |Api1|Api2|
+            """);
   }
 
   @Override

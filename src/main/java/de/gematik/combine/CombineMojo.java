@@ -48,7 +48,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import lombok.Getter;
@@ -174,8 +173,7 @@ public class CombineMojo extends BaseMojo {
   @Parameter(name = "countExecutionsFormat", defaultValue = "json")
   List<String> countExecutionsFormat;
 
-  @Getter
-  private ExecutionCounter executionCounter = null;
+  @Getter private ExecutionCounter executionCounter = null;
 
   @SneakyThrows
   public void execute() {
@@ -216,7 +214,7 @@ public class CombineMojo extends BaseMojo {
         getClass().getSimpleName(),
         Stream.of(minimalTableErrorLog, tableSizeErrorLog, propertyErrorLog, warningsLog)
             .flatMap(Collection::stream)
-            .collect(Collectors.toList()),
+            .toList(),
         WARN_MESSAGE,
         true);
     if (config.isBreakIfTableToSmall() && !tableSizeErrorLog.isEmpty()) {
@@ -241,7 +239,8 @@ public class CombineMojo extends BaseMojo {
     }
     File combineItemsFile = new File(getCombineItemsFile());
     if (!combineItemsFile.exists() || !combineItemsFile.isFile()) {
-      throw new MojoExecutionException("Combine items file not found: " + combineItemsFile.getAbsolutePath());
+      throw new MojoExecutionException(
+          "Combine items file not found: " + combineItemsFile.getAbsolutePath());
     }
     defaultExamplesTags.forEach(this::checkDefaultTag);
   }
@@ -300,7 +299,7 @@ public class CombineMojo extends BaseMojo {
         .versionFilterTagCategory(versionFilterTagCategory)
         .emptyExamplesTags(emptyExamplesTags)
         .defaultExamplesTags(defaultExamplesTags)
-        .skipTags(skipTags.stream().map(String::toLowerCase).collect(Collectors.toList()))
+        .skipTags(skipTags.stream().map(String::toLowerCase).toList())
         .filterConfiguration(filterConfiguration)
         .projectFilters(projectFilters)
         .breakIfTableToSmall(breakIfTableToSmall)
@@ -308,8 +307,11 @@ public class CombineMojo extends BaseMojo {
         .breakIfMinimalTableError(breakIfMinimalTableError)
         .softFilterToHardFilter(softFilterToHardFilter)
         .countExecutions(countExecutions)
-        .countExecutionsFormat(Optional.ofNullable(countExecutionsFormat).stream().flatMap(List::stream).map(ExecutionCounter.Format::fromString).toList())
-
+        .countExecutionsFormat(
+            Optional.ofNullable(countExecutionsFormat).stream()
+                .flatMap(List::stream)
+                .map(ExecutionCounter.Format::fromString)
+                .toList())
         .build();
   }
 
@@ -325,7 +327,8 @@ public class CombineMojo extends BaseMojo {
       for (File file : files) {
         String fileName = file.getName();
         if (foundFiles.containsKey(fileName)) {
-          throw new MojoExecutionException("Template file "+file+" has the same name as "+foundFiles.get(fileName));
+          throw new MojoExecutionException(
+              "Template file " + file + " has the same name as " + foundFiles.get(fileName));
         }
         foundFiles.put(fileName, file);
       }

@@ -2,6 +2,14 @@
 
 # Release notes
 
+## 2.12.0
+
+### Changes
+
+- upgraded from Java 17 to Java 21
+- fixes code smells and refactoring
+- updates dependencies
+
 ## 2.11.8
 
 ### Feature
@@ -58,7 +66,8 @@
 ### Feature
 
 - The templateSources option accepts a comma separated list of directories to search for templates. The directories are
-  processed in the order they are given. If a template file with the same name is found in multiple directories, an error is raised.
+  processed in the order they are given. If a template file with the same name is found in multiple directories, an
+  error is raised.
 
 ## 2.10.0
 

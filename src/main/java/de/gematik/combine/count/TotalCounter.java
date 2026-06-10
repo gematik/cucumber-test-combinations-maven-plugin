@@ -20,9 +20,9 @@
 
 package de.gematik.combine.count;
 
+import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.Set;
 
-import io.cucumber.core.internal.com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

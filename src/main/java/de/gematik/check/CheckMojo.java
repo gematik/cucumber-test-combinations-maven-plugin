@@ -31,6 +31,7 @@ import static java.util.Objects.nonNull;
 import de.gematik.BaseMojo;
 import de.gematik.combine.model.CombineItem;
 import de.gematik.utils.request.ApiRequester;
+import de.gematik.utils.request.RequesterClient;
 import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.core.JsonProcessingException;
 import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -38,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import lombok.Getter;
@@ -66,8 +66,9 @@ import org.apache.maven.plugins.annotations.Parameter;
 public class CheckMojo extends BaseMojo {
 
   @Setter @Getter private static CheckMojo instance;
-  private final ApiRequester apiRequester;
   private final List<String> errors = new ArrayList<>();
+  private final RequesterClient requesterClient;
+  private final ApiRequester apiRequester;
 
   /** Path that will be used for checking */
   @Parameter(property = "checkPath")
@@ -91,13 +92,15 @@ public class CheckMojo extends BaseMojo {
   @SneakyThrows
   public void execute() {
     if (this.isSkip() || skipCheck) {
-      getLog().warn("Check items got skipped due configuration");
+      getLog().warn("Check items got skipped due to configuration");
       return;
     }
     setInstance(this);
-    apiRequester.setupProxy(getProxyHost(), getProxyPort());
-    apiRequester.setupTls(
-        getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw());
+    requesterClient
+        .proxy(getProxyHost(), getProxyPort())
+        .noProxyHosts(getNoProxyHosts())
+        .tls(getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw())
+        .build();
     apiRequester.setAllowedResponses(getAcceptedResponseFamilies(), getAllowedResponseCodes());
     run();
   }
@@ -123,7 +126,7 @@ public class CheckMojo extends BaseMojo {
     boolean requestsOk = apiErrors.isEmpty() || !isBreakOnFailedRequest();
     boolean checksOk = errors.isEmpty() || !isBreakOnContextError();
     List<String> allErrors =
-        Stream.of(apiErrors, errors).flatMap(Collection::stream).collect(Collectors.toList());
+        Stream.of(apiErrors, errors).flatMap(Collection::stream).toList();
     if (requestsOk && checksOk) {
       String msg =
           allErrors.isEmpty()
@@ -200,7 +203,7 @@ public class CheckMojo extends BaseMojo {
       getLog().error(errorMsg);
       throw new MojoExecutionException(errorMsg);
     }
-    return checkExpressions.get(0).getExpression();
+    return checkExpressions.getFirst().getExpression();
   }
 
   private Map<?, ?> getJsonContextFromApi(String url)

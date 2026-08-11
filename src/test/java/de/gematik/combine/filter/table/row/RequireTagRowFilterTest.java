@@ -21,7 +21,6 @@
 package de.gematik.combine.filter.table.row;
 
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
@@ -46,7 +45,7 @@ class RequireTagRowFilterTest {
                 TableCell.builder()
                     .combineItem(CombineItem.builder().value(value).tag(value).build())
                     .build())
-        .collect(toList());
+        .toList();
   }
 
   public static Stream<Arguments> testParameter() {

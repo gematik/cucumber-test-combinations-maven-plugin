@@ -320,6 +320,30 @@ For using a proxy all 2 properties have to be set:
 
 The plugin uses no proxy as default.
 
+The usage of the property noProxyHosts is optional.
+This is a comma, semicolon or pipe separated list of hosts that should be excluded from the proxy.
+Matching is suffix-based, so `example.com` will also match `my.example.com`.
+By default, no hosts are excluded.
+
+.proxy parameters
+[%header,cols="1,2,1"]
+|===
+|Option name|Description|Default
+|proxyHost|Hostname of the proxy server|
+|proxyPort|Port of the proxy server|
+|noProxyHosts|Comma, semicolon or pipe separated list of hosts to bypass the proxy (suffix-based matching)|
+|===
+
+.Example proxy configuration
+[source,xml]
+----
+<configuration>
+  <proxyHost>proxy.example.com</proxyHost>
+  <proxyPort>8080</proxyPort>
+  <noProxyHosts>localhost,internal.example.com</noProxyHosts>
+</configuration>
+----
+
 == Check goal
 
 With this goal an endpoint json response could be validated.

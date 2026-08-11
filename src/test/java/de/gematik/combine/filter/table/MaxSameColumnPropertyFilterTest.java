@@ -21,7 +21,6 @@
 package de.gematik.combine.filter.table;
 
 import static de.gematik.utils.MockPluginLog.withMockedPluginLog;
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import de.gematik.combine.model.CombineItem;
@@ -46,7 +45,7 @@ class MaxSameColumnPropertyFilterTest {
             combineItem("F", PROPERTY_NAME, "other"))
         .map(ci -> new TableCell(COLUMN_NAME, ci))
         .map(List::of)
-        .collect(toList());
+        .toList();
   }
 
   private CombineItem combineItem(String value, String propertyName, String propValue) {
@@ -64,7 +63,7 @@ class MaxSameColumnPropertyFilterTest {
 
     // assert
     assertThat(result)
-        .flatExtracting(row -> row.stream().map(TableCell::getValue).collect(toList()))
+        .flatExtracting(row -> row.stream().map(TableCell::getValue).toList())
         .containsExactly("A", "B", "C");
   }
 
@@ -79,7 +78,7 @@ class MaxSameColumnPropertyFilterTest {
 
     // assert
     assertThat(result)
-        .flatExtracting(row -> row.stream().map(TableCell::getValue).collect(toList()))
+        .flatExtracting(row -> row.stream().map(TableCell::getValue).toList())
         .containsExactly("A", "B", "C", "D", "F");
   }
 }

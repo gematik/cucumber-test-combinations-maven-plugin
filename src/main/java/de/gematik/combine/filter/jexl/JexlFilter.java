@@ -26,10 +26,10 @@ import static de.gematik.combine.filter.jexl.JexlContextVariables.COLUMN_COUNT;
 import static de.gematik.combine.filter.jexl.JexlContextVariables.ROW_COUNT;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
 
 import de.gematik.combine.model.CombineItem;
 import de.gematik.combine.model.TableCell;
+import de.gematik.combine.util.NonNullableMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,7 +56,10 @@ public class JexlFilter {
           .safe(false)
           .permissions(
               new JexlPermissions.ClassPermissions(
-                  CombineItem.class, JexlFilterColumn.class, JexlFilterList.class))
+                  CombineItem.class,
+                  JexlFilterColumn.class,
+                  JexlFilterList.class,
+                  NonNullableMap.class))
           .create();
 
   private final JexlExpression expression;
@@ -98,7 +101,7 @@ public class JexlFilter {
     if (table.isEmpty()) {
       return;
     }
-    addToContext(COLUMN_COUNT.key, table.get(0).size());
+    addToContext(COLUMN_COUNT.key, table.getFirst().size());
     List<JexlFilterColumn> columns = toColumns(table);
     for (var col : columns) {
       addToContext(col);
@@ -139,7 +142,7 @@ public class JexlFilter {
 
     return columns.entrySet().stream()
         .map(kv -> new JexlFilterColumn(kv.getKey(), kv.getValue()))
-        .collect(toList());
+        .toList();
   }
 
   @SneakyThrows

@@ -27,7 +27,6 @@ import static de.gematik.combine.FilterTagMapper.filterToTag;
 import static de.gematik.combine.FilterTagMapper.getTagName;
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
 
 import de.gematik.combine.CombineConfiguration;
 import de.gematik.combine.filter.project.ProjectCellFilter;
@@ -98,7 +97,7 @@ public class ExamplesProcessor {
 
     getPluginLog().debug("converting table to gherkin format");
     List<TableRow> gherkinTable =
-        filteredTable.stream().map(ExamplesProcessor::toTableRow).collect(toList());
+        filteredTable.stream().map(ExamplesProcessor::toTableRow).toList();
 
     setTableBody(gherkinExample, gherkinTable);
     addAppliedProjectFilters(gherkinExample, filters);

@@ -21,7 +21,6 @@
 package de.gematik.combine.filter;
 
 import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -37,13 +36,11 @@ class FilterOrderTest {
   void enumShouldBeOrdered() {
     // arrange
     List<FilterOrder> sortedByOrdinal =
-        Stream.of(FilterOrder.values()).sorted(comparingInt(Enum::ordinal)).collect(toList());
+        Stream.of(FilterOrder.values()).sorted(comparingInt(Enum::ordinal)).toList();
 
     // act
     List<FilterOrder> sortedByOrderKey =
-        Stream.of(FilterOrder.values())
-            .sorted(comparingInt(FilterOrder::getOrderKey))
-            .collect(toList());
+        Stream.of(FilterOrder.values()).sorted(comparingInt(FilterOrder::getOrderKey)).toList();
 
     // assert
     assertThat(sortedByOrderKey)

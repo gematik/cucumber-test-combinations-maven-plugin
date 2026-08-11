@@ -4,3 +4,4 @@
 Jenkinsfile*
 .owaspignore
 /jenkinsfiles
+renovate.json

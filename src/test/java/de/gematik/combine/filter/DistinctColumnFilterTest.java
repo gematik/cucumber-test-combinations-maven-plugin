@@ -21,7 +21,6 @@
 package de.gematik.combine.filter;
 
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -58,8 +57,7 @@ class DistinctColumnFilterTest {
                     TableCell.builder()
                         .header(COLUMN_NAME)
                         .combineItem(CombineItem.builder().value(value).build())
-                        .build()))
-        .collect(toList());
+                        .build())).toList();
   }
 
   @Test
@@ -74,7 +72,7 @@ class DistinctColumnFilterTest {
 
     // assert
     assertThat(filtered)
-        .extracting(row -> row.get(0).getValue())
+        .extracting(row -> row.getFirst().getValue())
         .containsExactlyInAnyOrder("foo", "bar");
   }
 
@@ -90,7 +88,7 @@ class DistinctColumnFilterTest {
 
     // assert
     assertThat(filtered)
-        .extracting(row -> row.get(0).getValue())
+        .extracting(row -> row.getFirst().getValue())
         .containsExactlyInAnyOrder("foo", "bar");
   }
 }

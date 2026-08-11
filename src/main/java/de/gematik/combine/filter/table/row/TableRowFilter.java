@@ -24,7 +24,6 @@ import static de.gematik.combine.CombineMojo.getPluginLog;
 import static de.gematik.combine.filter.FilterOrder.ROW_ONLY;
 import static java.lang.Math.min;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 
 import de.gematik.combine.filter.FilterOrder;
 import de.gematik.combine.filter.table.AbstractTableFilter;
@@ -49,7 +48,7 @@ public abstract class TableRowFilter extends AbstractTableFilter implements RowF
     int chunkCount = tableRows.size() / CHUNK_SIZE + 1;
     for (int i = 0; i < tableRows.size(); i += CHUNK_SIZE) {
       List<List<TableCell>> chunk = tableRows.subList(i, min(i + CHUNK_SIZE, tableRows.size()));
-      List<List<TableCell>> filteredChunk = chunk.stream().filter(this).collect(toList());
+      List<List<TableCell>> filteredChunk = chunk.stream().filter(this).toList();
       result.addAll(filteredChunk);
       if (chunkCount > 1) {
         getPluginLog().debug(format("processing chunk %d of %d", i / CHUNK_SIZE + 1, chunkCount));

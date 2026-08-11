@@ -35,6 +35,7 @@ import de.gematik.prepare.pooling.PoolGroup;
 import de.gematik.prepare.pooling.PoolGroupParser;
 import de.gematik.prepare.pooling.Pooler;
 import de.gematik.utils.request.ApiRequester;
+import de.gematik.utils.request.RequesterClient;
 import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.core.JsonProcessingException;
 import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -74,6 +75,7 @@ public class PrepareItemsMojo extends BaseMojo {
   public static final String USED_GROUPS_PATH =
       GENERATED_COMBINE_ITEMS_DIR + File.separator + "usedGroups.json";
   @Getter @Setter private static PrepareItemsMojo instance;
+  private final RequesterClient requesterClient;
   private final ApiRequester apiRequester;
 
   /** Location to info */
@@ -157,9 +159,11 @@ public class PrepareItemsMojo extends BaseMojo {
     pooler = new Pooler(config);
     items = pooler.pool();
     writeUsedGroupsToFile(items);
-    apiRequester.setupProxy(getProxyHost(), getProxyPort());
-    apiRequester.setupTls(
-        getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw());
+    requesterClient
+        .proxy(getProxyHost(), getProxyPort())
+        .noProxyHosts(getNoProxyHosts())
+        .tls(getTruststore(), getTruststorePw(), getClientCertStore(), getClientCertStorePw())
+        .build();
     apiRequester.setAllowedResponses(
         config.getAcceptedResponseFamilies(), config.getAllowedResponseCodes());
     run();

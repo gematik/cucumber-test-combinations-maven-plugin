@@ -24,7 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 
 import de.gematik.combine.CombineMojo;
-import java.util.function.Supplier;
+import java.util.concurrent.Callable;
 import lombok.Getter;
 import org.apache.maven.plugin.logging.Log;
 import org.mockito.MockedStatic;
@@ -33,15 +33,17 @@ public class MockPluginLog {
 
   @Getter private static Log mock;
 
-  public static <T> T withMockedPluginLog(Supplier<T> test) {
+  public static <T> T withMockedPluginLog(Callable<T> test) throws Exception {
     mock = mock(Log.class);
     return withMockedPluginLog(test, mock);
   }
 
-  public static <T> T withMockedPluginLog(Supplier<T> test, Log log) {
+  public static <T> T withMockedPluginLog(Callable<T> test, Log log) throws Exception {
     try (MockedStatic<CombineMojo> mockedStatic = mockStatic(CombineMojo.class)) {
+      CombineMojo mockInstance = mock(CombineMojo.class);
+      mockedStatic.when(CombineMojo::getInstance).thenReturn(mockInstance);
       mockedStatic.when(CombineMojo::getPluginLog).thenReturn(log);
-      return test.get();
+      return test.call();
     }
   }
 }

@@ -147,7 +147,7 @@ public class TableGenerator {
     forEachUnusedValue(
         stateInfo,
         unusedValue -> findValidRow(stateInfo, unusedValue).ifPresent(stateInfo::addNewRow));
-    if (stateInfo.getAllMissingValues().size() != 0) {
+    if (!stateInfo.getAllMissingValues().isEmpty()) {
       stateInfo
           .getAllMissingValues()
           .forEach(
@@ -193,7 +193,7 @@ public class TableGenerator {
     List<TableCell> missingColumnValues =
         possibleValues.stream()
             .filter(val -> stateInfo.getAllMissingValues().contains(val.getCombineItem()))
-            .collect(toList());
+            .toList();
     List<RowFilter> rowFilters = new ArrayList<>(stateInfo.getFilters().getTableRowFilters());
     Optional<TableCell> newColValue =
         findNewRowValue(stateInfo, possibleValues, missingColumnValues, row, rowFilters);

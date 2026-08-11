@@ -26,7 +26,6 @@ import static de.gematik.combine.util.CompareOperator.OPERATOR_FORMAT;
 import static de.gematik.combine.util.CompareOperator.getUsableOperators;
 import static java.lang.String.format;
 import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
 
 import de.gematik.combine.filter.project.ProjectCellFilter;
 import de.gematik.combine.filter.project.ProjectVersionFilter;
@@ -56,7 +55,7 @@ public class VersionFilterParser implements SingleTagParser {
     VersionFilter filter = parseFilterValue(preParsedTag.getValue());
     filter.setSoft(preParsedTag.isSoft());
     List<String> args = checkForOperator(preParsedTag.getValue(), filter.getOperator());
-    String[] columns = args.get(0).split(",");
+    String[] columns = args.getFirst().split(",");
     if (columns.length == 0 || (columns.length == 1 && columns[0].isBlank())) {
       throw new IllegalArgumentException(
           format(
@@ -71,8 +70,7 @@ public class VersionFilterParser implements SingleTagParser {
 
   private static List<String> checkForOperator(String tagVal, CompareOperator op) {
     return stream(checkForOperatorName(tagVal, op))
-        .flatMap(s -> stream(checkForOperatorLiteral(s, op)))
-        .collect(toList());
+        .flatMap(s -> stream(checkForOperatorLiteral(s, op))).toList();
   }
 
   private static String[] checkForOperatorName(String tagVal, CompareOperator op) {

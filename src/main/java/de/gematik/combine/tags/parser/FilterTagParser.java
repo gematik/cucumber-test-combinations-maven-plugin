@@ -43,7 +43,7 @@ public class FilterTagParser implements SingleTagParser {
     List<String> columnReferences =
         countColumnReferences(preParsedTag.getValue(), parsedTags.getColumns());
     if (columnReferences.size() == 1) {
-      String column = columnReferences.get(0);
+      String column = columnReferences.getFirst();
       JexlCellFilter filter = new JexlCellFilter(column, preParsedTag.getValue());
       filter.setSoft(preParsedTag.isSoft());
       parsedTags.addCellFilter(column, filter);

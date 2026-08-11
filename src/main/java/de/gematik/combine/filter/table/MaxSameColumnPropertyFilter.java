@@ -22,7 +22,6 @@ package de.gematik.combine.filter.table;
 
 import static de.gematik.combine.CombineMojo.getPluginLog;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 
 import de.gematik.combine.model.TableCell;
 import java.util.HashMap;
@@ -51,7 +50,7 @@ public class MaxSameColumnPropertyFilter extends AbstractTableFilter {
   public List<List<TableCell>> apply(List<List<TableCell>> table) {
     getPluginLog().debug(format("applying %s on %d rows", this, table.size()));
     Map<String, AtomicInteger> propCounts = new HashMap<>();
-    return table.stream().filter(row -> checkRow(row, propCounts)).collect(toList());
+    return table.stream().filter(row -> checkRow(row, propCounts)).toList();
   }
 
   private boolean checkRow(List<TableCell> row, Map<String, AtomicInteger> propCounts) {

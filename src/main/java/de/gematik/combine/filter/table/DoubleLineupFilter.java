@@ -23,7 +23,6 @@ package de.gematik.combine.filter.table;
 import static de.gematik.combine.CombineMojo.getPluginLog;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 import de.gematik.combine.model.TableCell;
 import java.util.List;
@@ -57,7 +56,6 @@ public class DoubleLineupFilter extends AbstractTableFilter {
               String sortedCellValues =
                   row.stream().map(TableCell::getValue).sorted().collect(joining());
               return combinationSet.add(sortedCellValues);
-            })
-        .collect(toList());
+            }).toList();
   }
 }

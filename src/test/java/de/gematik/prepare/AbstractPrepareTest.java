@@ -20,11 +20,13 @@
 
 package de.gematik.prepare;
 
+import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 
 import de.gematik.utils.request.ApiRequester;
+import de.gematik.utils.request.RequesterClient;
 import lombok.SneakyThrows;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,16 +39,18 @@ public abstract class AbstractPrepareTest {
 
   @Mock ItemsCreator itemsCreator;
 
+  @Mock(answer = RETURNS_SELF)
+  RequesterClient requesterClient;
+
   @Mock ApiRequester apiRequester;
+  @Mock Log log;
 
   PrepareItemsMojo mojo;
-
-  @Mock Log log;
 
   @BeforeEach
   @SneakyThrows
   void setup() {
-    mojo = spy(new PrepareItemsMojo(apiRequester));
+    mojo = spy(new PrepareItemsMojo(requesterClient, apiRequester));
     lenient().when(mojo.getLog()).thenReturn(log);
     mojo.setItemsCreator(itemsCreator);
     mojo.setEnvVarFormat("");

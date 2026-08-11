@@ -2,6 +2,22 @@
 
 # Release notes
 
+## 2.13.0
+
+### Feature
+
+- adds a new property noProxyHosts to configure hosts that should not be accessed via proxy
+
+### Changes
+
+- Bumps com.squareup.okio:okio-jvm from 3.17.0 → 3.18.1
+- Bumps org.apache.commons:commons-jexl3 from 3.6.2 to 3.7.0.
+- Bumps io.cucumber:cucumber-bom from 7.34.3 to 7.34.6
+- Bumps org.mockito:mockito-junit-jupiter from 5.2.0 to 5.23.0.
+- Bumps org.eclipse.sisu:sisu-maven-plugin from 1.0.0 to 1.1.0
+- Bumps org.apache.maven.plugins:maven-surefire-plugin from 3.5.4 to 3.5.6.
+- Bumps org.json:json from 20260522 → 20260719
+
 ## 2.12.0
 
 ### Changes

@@ -23,7 +23,6 @@ package de.gematik.combine.filter.table;
 import static de.gematik.combine.CombineMojo.getPluginLog;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 import de.gematik.combine.model.TableCell;
 import java.util.List;
@@ -46,7 +45,7 @@ public class DistinctColumnFilter extends AbstractTableFilter {
     getPluginLog().debug(format("applying %s on %d rows", this, table.size()));
     Set<String> combinationSet = new TreeSet<>();
 
-    return table.stream().filter(row -> combinationSet.add(columnValue(row))).collect(toList());
+    return table.stream().filter(row -> combinationSet.add(columnValue(row))).toList();
   }
 
   private String columnValue(List<TableCell> row) {

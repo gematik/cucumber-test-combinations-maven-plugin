@@ -25,6 +25,7 @@ import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.startsWith;
@@ -36,6 +37,7 @@ import de.gematik.combine.model.CombineItem;
 import de.gematik.combine.model.CombineItem.CombineItemBuilder;
 import de.gematik.utils.Utils;
 import de.gematik.utils.request.ApiRequester;
+import de.gematik.utils.request.RequesterClient;
 import java.io.File;
 import java.util.List;
 import java.util.stream.Stream;
@@ -84,6 +86,10 @@ class CheckApiMojoTest {
                   "ITEM.getTags().contains(\"hasTags\") ? $.justATrueValue : $.justAFalseValue")
               .tags(List.of("hasWrongTag"))
               .build());
+
+  @Mock(answer = RETURNS_SELF)
+  RequesterClient requesterClient;
+
   @Mock ApiRequester apiRequester;
 
   static CheckMojo mojo;
@@ -124,7 +130,7 @@ class CheckApiMojoTest {
   @BeforeEach
   @SneakyThrows
   void setupMojoAndRequester() {
-    mojo = new CheckMojo(apiRequester);
+    mojo = new CheckMojo(requesterClient, apiRequester);
     mojo.setCombineItemsFile("notImportant");
     mojo.setDefaultCheckExpressions("$.justATrueValue");
     mojo.setBreakOnFailedRequest(true);

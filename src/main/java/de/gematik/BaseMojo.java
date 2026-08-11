@@ -70,6 +70,10 @@ public abstract class BaseMojo extends AbstractMojo {
   @Parameter(property = "proxyPort")
   Integer proxyPort;
 
+  /** Comma separated list of hosts that should bypass the upstream proxy */
+  @Parameter(property = "noProxyHosts")
+  String noProxyHosts;
+
   /** Parameter to decide if plugin should be executed. All executions are skipped */
   @Parameter(property = "skip", defaultValue = "false")
   boolean skip;

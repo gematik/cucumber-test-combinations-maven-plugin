@@ -26,8 +26,13 @@ import java.util.List;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import org.apache.maven.plugin.MojoExecutionException;
 
+@Named
+@Singleton
 public class ApiRequester {
 
   private final RequesterClient client;
@@ -35,6 +40,7 @@ public class ApiRequester {
   private List<StatusCodes> allowedFamilies;
   private List<Integer> allowedCodes;
 
+  @Inject
   public ApiRequester(RequesterClient client) {
     this.client = client;
   }

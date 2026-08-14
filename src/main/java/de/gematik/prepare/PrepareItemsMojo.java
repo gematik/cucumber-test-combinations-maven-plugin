@@ -112,16 +112,16 @@ public class PrepareItemsMojo extends BaseMojo {
   String poolGroupString;
 
   /** Default matching strategy. If no strategy is named in poolGroup this will be applied */
-  @Parameter(name = "defaultMatchStrategy", defaultValue = "WILDCARD")
+  @Parameter(property = "defaultMatchStrategy", defaultValue = "WILDCARD")
   @Getter
   GroupMatchStrategyType defaultMatchStrategy;
 
   /** Parameter to decide if prepare-execution should be run */
-  @Parameter(name = "skipPrep", defaultValue = "false")
+  @Parameter(property = "skipPrep", defaultValue = "false")
   boolean skipPrep;
 
   /** Parameter to decide what format the environment variables should have */
-  @Parameter(name = "envVarFormat")
+  @Parameter(property = "envVarFormat")
   String envVarFormat;
 
   /**
@@ -313,7 +313,7 @@ public class PrepareItemsMojo extends BaseMojo {
   }
 
   private String mapToString(String defaultDelimiter, List<String> usedItems) {
-    if (envVarFormat.equalsIgnoreCase("html")) {
+    if ("html".equalsIgnoreCase(envVarFormat)) {
       return usedItems.stream().map(s -> "<div>" + s + "</div>").collect(Collectors.joining());
     }
     return join(defaultDelimiter, usedItems);

@@ -2,6 +2,17 @@
 
 # Release notes
 
+## 2.13.1
+
+### Changes
+
+- Parameters envVarFormat, skipPrep, defaultMatchStrategy, skipCheck, skipComb, breakOnFailedRequest,
+  softFilterToHardFilter, countExecutions and countExecutionsFormat can now be set via command line
+
+### Bugfix
+
+- Fixes ProvisionException in goals prepare-items and check
+
 ## 2.13.0
 
 ### Feature

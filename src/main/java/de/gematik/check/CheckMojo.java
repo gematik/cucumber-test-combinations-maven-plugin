@@ -86,7 +86,7 @@ public class CheckMojo extends BaseMojo {
   String defaultCheckExpressions;
 
   /** Parameter to decide if check-execution should be run */
-  @Parameter(name = "skipCheck", defaultValue = "false")
+  @Parameter(property = "skipCheck", defaultValue = "false")
   boolean skipCheck;
 
   @SneakyThrows

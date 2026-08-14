@@ -36,6 +36,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import okhttp3.OkHttpClient;
 import okhttp3.OkHttpClient.Builder;
@@ -43,6 +45,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.apache.maven.plugin.MojoExecutionException;
 
+@Named
+@Singleton
 public class RequesterClient {
 
   private String trustStorePath;
@@ -62,7 +66,11 @@ public class RequesterClient {
   }
 
   public RequesterClient noProxyHosts(String noProxyHosts) {
-    this.noProxyHosts = Arrays.asList(noProxyHosts.split("[,|;]"));
+    if (noProxyHosts == null || noProxyHosts.isBlank()) {
+      this.noProxyHosts = new ArrayList<>();
+    } else {
+      this.noProxyHosts = Arrays.asList(noProxyHosts.split("[,|;]"));
+    }
     return this;
   }
 

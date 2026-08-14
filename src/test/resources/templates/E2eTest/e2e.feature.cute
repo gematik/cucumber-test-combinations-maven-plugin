@@ -1,0 +1,11 @@
+Feature: E2E combine
+
+  Scenario Outline: combine one client with one orgAdmin of the same homeserver
+    When I connect <client> to <admin>
+    Then it works
+
+    @Filter(client.hasTag("client"))
+    @Filter(admin.hasTag("orgAdmin"))
+    @Filter(client.properties["homeserver"].equals(admin.properties["homeserver"]))
+    Examples:
+      | client | admin |

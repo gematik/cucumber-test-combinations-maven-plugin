@@ -82,7 +82,7 @@ public abstract class BaseMojo extends AbstractMojo {
    * Decide if run should break on one or more failed requests. If set to false, will generate a
    * combine_items.json file with responding APIs only (if any).
    */
-  @Parameter(name = "breakOnFailedRequest", defaultValue = "true")
+  @Parameter(property = "breakOnFailedRequest", defaultValue = "true")
   boolean breakOnFailedRequest;
 
   /**

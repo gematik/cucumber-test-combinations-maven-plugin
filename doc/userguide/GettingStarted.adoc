@@ -78,7 +78,7 @@ For further information click <<combine_items,here>>|"./src/test/resources/ comb
 For example if the URL is localhost:8080 and the info-endpoint is at /app/info you have to provide app/info here.|
 |propertyExpressions|This is a list of complex data and define which property have to be set under what conditions.
 Read more <<Expressions, here>>|
-|skipComb|Parameter to decide if combine-execution should be run|false
+|skipPrep|Parameter to decide if prepare-execution should be run|false
 |tagExpressions|This is a list of complex data and define which tags have to be set under what conditions.
 Read more <<Expressions,here>>|
 |truststore|Path of truststore|
@@ -208,7 +208,7 @@ This example written in pom.xml:
 [source,xml]
 ----
 <configuration>
-  <defaultMatchStrategy>WILDCARD</groupMatchStrategy>
+  <defaultMatchStrategy>WILDCARD</defaultMatchStrategy>
   <poolSize>5</poolSize>
   <excludedGroups>invalid</excludedGroups>
   <poolGroups>
@@ -525,7 +525,7 @@ Read more about version filters <<version-filter, here>>
 
 |None
 
-|skipPrep|Parameter to decide if prepare-execution should be run|false
+|skipComb|Parameter to decide if combine-execution should be run|false
 |===
 
 === What else do I need?

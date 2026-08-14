@@ -158,19 +158,19 @@ public class CombineMojo extends BaseMojo {
   ProjectFilters projectFilters;
 
   /** Parameter to decide if combine-execution should be run */
-  @Parameter(name = "skipComb", defaultValue = "false")
+  @Parameter(property = "skipComb", defaultValue = "false")
   boolean skipComb;
 
   /** Parameter to decide if SoftFiler should be not considered if minimal table size not reached */
-  @Parameter(name = "softFilterToHardFilter", defaultValue = "false")
+  @Parameter(property = "softFilterToHardFilter", defaultValue = "false")
   boolean softFilterToHardFilter;
 
   /** Parameter to decide if executions should be counted and exported to file */
-  @Parameter(name = "countExecutions", defaultValue = "true")
+  @Parameter(property = "countExecutions", defaultValue = "true")
   boolean countExecutions;
 
   /** In what formats should the counted executions be exported */
-  @Parameter(name = "countExecutionsFormat", defaultValue = "json")
+  @Parameter(property = "countExecutionsFormat", defaultValue = "json")
   List<String> countExecutionsFormat;
 
   @Getter private ExecutionCounter executionCounter = null;

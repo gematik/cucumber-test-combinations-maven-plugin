@@ -53,7 +53,7 @@ import lombok.SneakyThrows;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ExamplesProcessor {
 
-  private static final Location LOCATION = new Location(0L, 0L);
+  private static final Location LOCATION = new Location(0, 0);
   private final TagParser tagParser;
   private final TableGenerator tableGenerator;
 

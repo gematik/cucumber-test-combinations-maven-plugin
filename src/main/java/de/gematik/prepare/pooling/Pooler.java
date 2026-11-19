@@ -54,13 +54,12 @@ public class Pooler {
 
   public List<CombineItem> pool() throws MojoExecutionException {
     List<CombineItem> allCombineItems =
-        getItemsToCombine(
-            new File(config.getCombineItemsFile()), PrepareItemsMojo.getInstance(), false);
+        getItemsToCombine(new File(config.getCombineItemsFile()), PrepareItemsMojo.getInstance());
     allCombineItems.removeAll(
         allCombineItems.stream()
-            .filter(
-                e -> getMatcher(config.getExcludedGroups()).order(e.getGroups()).equals(MATCHING))
-            .collect(Collectors.toList()));
+            .filter(item ->
+                getMatcher(config.getExcludedGroups()).order(item.getGroups()).equals(MATCHING))
+            .toList());
     Set<CombineItem> items = getNeededItemsFromGroup(allCombineItems);
     if (config.getPoolSize() <= 0 && !items.isEmpty()) {
       return new ArrayList<>(items);
@@ -111,16 +110,15 @@ public class Pooler {
           .collect(Collectors.toSet());
     }
     IntStream.range(0, poolGroup.getAmount())
-        .forEach(
-            i -> {
-              String randomGroup = selectRandomGroup(matchingItems, matcher);
-              List<CombineItem> randomSelectedItems =
-                  matchingItems.stream()
-                      .filter(item -> item.getGroups().contains(randomGroup))
-                      .collect(Collectors.toList());
-              matchingItems.removeAll(randomSelectedItems);
-              selectedItems.addAll(randomSelectedItems);
-            });
+        .forEach(i -> {
+          String randomGroup = selectRandomGroup(matchingItems, matcher);
+          List<CombineItem> randomSelectedItems =
+              matchingItems.stream()
+                  .filter(item -> item.getGroups().contains(randomGroup))
+                  .toList();
+          matchingItems.removeAll(randomSelectedItems);
+          selectedItems.addAll(randomSelectedItems);
+        });
     return selectedItems;
   }
 
@@ -145,8 +143,8 @@ public class Pooler {
               .get(random.nextInt(randomItem.getGroups().size()));
       List<CombineItem> newItems =
           leftItems.stream()
-              .filter(i -> getMatcher(List.of(randomGroup)).order(i).equals(MATCHING))
-              .collect(Collectors.toList());
+              .filter(item -> getMatcher(List.of(randomGroup)).order(item).equals(MATCHING))
+              .toList();
       items.addAll(newItems);
       leftItems.removeAll(newItems);
       config
@@ -165,7 +163,7 @@ public class Pooler {
   }
 
   private long countGroups(Collection<CombineItem> itemList) {
-    long itemsWithoutGroup = itemList.stream().filter(i -> i.getGroups().isEmpty()).count();
+    long itemsWithoutGroup = itemList.stream().filter(item -> item.getGroups().isEmpty()).count();
     long sumGroupsFromItems =
         itemList.stream()
             .map(CombineItem::getGroups)
@@ -189,8 +187,9 @@ public class Pooler {
     return new GroupMatcher(groups, strategy);
   }
 
-  public boolean matchAny(String s) {
+  public boolean matchAny(String group) {
     return config.getPoolGroups().stream()
-        .anyMatch(poolGroup -> !getMatcher(poolGroup).getAllMatchingGroups(Set.of(s)).isEmpty());
+        .anyMatch(
+            poolGroup -> !getMatcher(poolGroup).getAllMatchingGroups(Set.of(group)).isEmpty());
   }
 }

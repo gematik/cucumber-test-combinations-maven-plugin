@@ -20,14 +20,17 @@
 
 package de.gematik.prepare;
 
+import static de.gematik.utils.Utils.ensureDirectory;
 import static de.gematik.utils.Utils.getItemAsString;
 import static de.gematik.utils.Utils.writeErrors;
 import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toCollection;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.gematik.BaseMojo;
 import de.gematik.combine.model.CombineItem;
 import de.gematik.prepare.pooling.GroupMatchStrategyType;
@@ -36,9 +39,8 @@ import de.gematik.prepare.pooling.PoolGroupParser;
 import de.gematik.prepare.pooling.Pooler;
 import de.gematik.utils.request.ApiRequester;
 import de.gematik.utils.request.RequesterClient;
-import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.core.JsonProcessingException;
-import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -72,8 +74,8 @@ public class PrepareItemsMojo extends BaseMojo {
   public static final String CONFIG_FAIL_WARN_MESSAGE =
       "=== Caution!!! The generated file is significantly different from your input! ==="
           + "\n          === This is because of the following config errors: ===";
-  public static final String USED_GROUPS_PATH =
-      GENERATED_COMBINE_ITEMS_DIR + File.separator + "usedGroups.json";
+  public static final String USED_GROUPS_FILE_NAME = "usedGroups.json";
+
   @Getter @Setter private static PrepareItemsMojo instance;
   private final RequesterClient requesterClient;
   private final ApiRequester apiRequester;
@@ -172,20 +174,20 @@ public class PrepareItemsMojo extends BaseMojo {
   private void setDefaultForEmptyStrategyInPoolGroups() {
     poolGroups =
         poolGroups.stream()
-            .map(
-                p -> {
-                  if (p.getStrategy() == null) {
-                    p.setStrategy(defaultMatchStrategy);
-                  }
-                  return p;
-                })
-            .collect(toList());
+            .map(poolGroup -> {
+              if (poolGroup.getStrategy() == null) {
+                poolGroup.setStrategy(defaultMatchStrategy);
+              }
+              return poolGroup;
+            })
+            .collect(toCollection(ArrayList::new));
   }
 
   protected void checkExpressionSetCorrectly() throws MojoExecutionException {
     Optional<TagExpression> checkTag =
         tagExpressions.stream()
-            .filter(t -> t.getExpression() == null || t.getTag() == null)
+            .filter(tagExpression ->
+                tagExpression.getExpression() == null || tagExpression.getTag() == null)
             .findAny();
     if (checkTag.isPresent()) {
       throw new MojoExecutionException(
@@ -195,7 +197,9 @@ public class PrepareItemsMojo extends BaseMojo {
     }
     Optional<PropertyExpression> checkProperty =
         propertyExpressions.stream()
-            .filter(t -> t.getExpression() == null || t.getProperty() == null)
+            .filter(propertyExpression ->
+                propertyExpression.getExpression() == null
+                    || propertyExpression.getProperty() == null)
             .findAny();
     if (checkProperty.isPresent()) {
       throw new MojoExecutionException(
@@ -208,11 +212,17 @@ public class PrepareItemsMojo extends BaseMojo {
 
   protected void run() throws MojoExecutionException {
     List<CombineItem> processedItems =
-        items.stream().map(this::processItem).filter(Objects::nonNull).collect(Collectors.toList());
+        items.stream().map(this::processItem).filter(Objects::nonNull).toList();
     boolean requestsOk = apiErrors.isEmpty() || !isBreakOnFailedRequest();
     boolean contextOk = itemsCreator.getContextErrors().isEmpty() || !isBreakOnContextError();
-    writeErrors(getClass().getSimpleName(), apiErrors, FAILED_REQ_WARN_MESSAGE, false);
     writeErrors(
+        getGeneratedCombineItemsDir(),
+        getClass().getSimpleName(),
+        apiErrors,
+        FAILED_REQ_WARN_MESSAGE,
+        false);
+    writeErrors(
+        getGeneratedCombineItemsDir(),
         getClass().getSimpleName(),
         itemsCreator.getContextErrors(),
         CONFIG_FAIL_WARN_MESSAGE,
@@ -261,13 +271,13 @@ public class PrepareItemsMojo extends BaseMojo {
 
   @SneakyThrows
   private void writeItemsToFile(List<CombineItem> items) {
-    String fileName =
-        GENERATED_COMBINE_ITEMS_DIR + File.separator + new File(getCombineItemsFile()).getName();
-    getLog().info("Created new combine item file -> " + fileName);
+    File file =
+        new File(
+            ensureDirectory(getGeneratedCombineItemsDir()),
+            new File(getCombineItemsFile()).getName());
+    getLog().info("Created new combine item file -> " + file.getAbsolutePath());
     FileUtils.writeStringToFile(
-        new File(fileName),
-        new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(items),
-        UTF_8);
+        file, new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(items), UTF_8);
   }
 
   @SneakyThrows
@@ -281,40 +291,45 @@ public class PrepareItemsMojo extends BaseMojo {
             .collect(
                 Collectors.toMap(
                     String::toString,
-                    e ->
+                    group ->
                         finalListOfItems.stream()
-                            .filter(i -> i.getGroups().contains(e))
+                            .filter(item -> item.getGroups().contains(group))
                             .map(CombineItem::produceValueUrl)
-                            .collect(Collectors.toList())));
-    List<String> usedItems =
-        finalListOfItems.stream().map(CombineItem::produceValueUrl).collect(Collectors.toList());
+                            .toList()));
+    List<String> usedItems = finalListOfItems.stream().map(CombineItem::produceValueUrl).toList();
     JSONObject result = new JSONObject();
     result.put("usedGroups", usedGroups);
     result.put("excludedGroups", excludedGroups);
     result.put("poolGroups", poolGroups);
     result.put("usedItems", usedItems);
-    File file = new File(USED_GROUPS_PATH);
+    File file = getUsedGroupsFile();
+    ensureDirectory(file.getParentFile());
     FileUtils.writeStringToFile(file, result.toString(), UTF_8);
     System.setProperty("cutest.plugin.groups.usedGroups", mapGroupsToString(usedGroups));
     System.setProperty("cutest.plugin.groups.excluded", mapToString(",", excludedGroups));
     System.setProperty(
         "cutest.plugin.groups.poolGroupString",
-        mapToString(
-            ";",
-            poolGroups.stream().map(PoolGroup::toPoolGroupString).collect(Collectors.toList())));
+        mapToString(";", poolGroups.stream().map(PoolGroup::toPoolGroupString).toList()));
     System.setProperty("cutest.plugin.groups.usedItems", mapToString(",", usedItems));
     getLog().info("Created new used group file -> " + file.getAbsolutePath());
   }
 
+  public File getUsedGroupsFile() {
+    return new File(getGeneratedCombineItemsDir(), USED_GROUPS_FILE_NAME);
+  }
+
   private String mapGroupsToString(Map<String, List<String>> map) {
     StringBuilder sb = new StringBuilder();
-    map.forEach((k, v) -> sb.append(" [" + k + "]: " + mapToString(" | ", v)));
+    map.forEach(
+        (group, itemList) -> sb.append(" [" + group + "]: " + mapToString(" | ", itemList)));
     return sb.toString();
   }
 
   private String mapToString(String defaultDelimiter, List<String> usedItems) {
     if ("html".equalsIgnoreCase(envVarFormat)) {
-      return usedItems.stream().map(s -> "<div>" + s + "</div>").collect(Collectors.joining());
+      return usedItems.stream()
+          .map(item -> "<div>" + item + "</div>")
+          .collect(Collectors.joining());
     }
     return join(defaultDelimiter, usedItems);
   }

@@ -2,6 +2,28 @@
 
 # Release notes
 
+## 2.13.2
+
+### Changes
+
+- Bumps io.cucumber:cucumber-bom from 7.34.4 → 7.34.7
+- Bumps com.google.guava:guava from 33.6.0-jre → 33.7.1-jre
+- Bumps com.squareup.okio:okio-jvm from 3.17.0 → 3.18.1
+- Bumps com.squareup.okhttp3:okhttp-jvm from 5.4.0 → 5.5.0
+- Bumps org.eclipse.sisu:sisu-maven-plugin from 1.0.1 → 1.1.0
+- Bumps org.apache.maven.plugins:maven-surefire-plugin from 3.5.6 → 3.6.0
+- Bumps org.apache.maven.plugins:maven-compiler-plugin from 3.15.0 → 3.16.0
+- Bumps org.junit.jupiter:junit-jupiter-api from 6.1.2 → 6.1.3
+- Bumps org.junit.jupiter:junit-jupiter from 6.1.2 → 6.1.3
+- Bumps org.json:json from 20260719 → 20260814
+
+### Bugfix
+
+- Generated files (`combine_items.json`, `usedGroups.json`, `countExecution.*`, `errorLog.txt`) are now written to and
+  read from `${project.build.directory}/generated-combine` instead of a hardcoded `./target/generated-combine`.
+- `BaseMojo.GENERATED_COMBINE_ITEMS_DIR` got removed, use `getGeneratedCombineItemsDir()` instead.
+- `PrepareItemsMojo.USED_GROUPS_PATH` got removed, use `getUsedGroupsFile()` instead.
+
 ## 2.13.1
 
 ### Changes

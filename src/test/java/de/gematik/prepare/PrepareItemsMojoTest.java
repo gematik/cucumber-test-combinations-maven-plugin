@@ -20,8 +20,6 @@
 
 package de.gematik.prepare;
 
-import static de.gematik.prepare.PrepareItemsMojo.GENERATED_COMBINE_ITEMS_DIR;
-import static de.gematik.prepare.PrepareItemsMojo.USED_GROUPS_PATH;
 import static de.gematik.prepare.pooling.GroupMatchStrategyType.WILDCARD;
 import static de.gematik.utils.Utils.getItemsToCombine;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -45,6 +43,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -65,9 +64,9 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
   void shouldCreateNewCombineItemsFileAndGiveItToCombineMojo() {
     // arrange
     mojo.setCombineItemsFile(ONLY_VALUE_JSON);
-    mojo.setItems(getItemsToCombine(new File(ONLY_VALUE_JSON), mojo, false));
-    File outputDir = new File(GENERATED_COMBINE_ITEMS_DIR);
-    FileUtils.deleteDirectory(new File(GENERATED_COMBINE_ITEMS_DIR));
+    mojo.setItems(getItemsToCombine(new File(ONLY_VALUE_JSON), mojo));
+    File outputDir = mojo.getGeneratedCombineItemsDir();
+    FileUtils.deleteDirectory(mojo.getGeneratedCombineItemsDir());
     outputDir.mkdirs();
     long filesBefore =
         stream(requireNonNull(outputDir.listFiles()))
@@ -88,8 +87,8 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
   void shouldUseUrlNotValue() {
     // arrange
     mojo.setCombineItemsFile(URL_VALUE_JSON);
-    mojo.setItems(getItemsToCombine(new File(URL_VALUE_JSON), mojo, false));
-    new File(GENERATED_COMBINE_ITEMS_DIR).mkdirs();
+    mojo.setItems(getItemsToCombine(new File(URL_VALUE_JSON), mojo));
+    mojo.getGeneratedCombineItemsDir().mkdirs();
     // act
     mojo.run();
     // assert
@@ -101,8 +100,8 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
   void shouldUseValueBecauseUrlNotPresent() {
     // arrange
     mojo.setCombineItemsFile(ONLY_VALUE_JSON);
-    mojo.setItems(getItemsToCombine(new File(ONLY_VALUE_JSON), mojo, false));
-    new File(GENERATED_COMBINE_ITEMS_DIR).mkdirs();
+    mojo.setItems(getItemsToCombine(new File(ONLY_VALUE_JSON), mojo));
+    mojo.getGeneratedCombineItemsDir().mkdirs();
     // act
     mojo.run();
     // assert
@@ -113,7 +112,7 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
   @SneakyThrows
   void shouldNotThrowButDeleteNotReachableApi() {
     // arrange
-    List<CombineItem> items = getItemsToCombine(new File(ONLY_VALUE_JSON), mojo, false);
+    List<CombineItem> items = getItemsToCombine(new File(ONLY_VALUE_JSON), mojo);
     int amountBefore = items.size();
     mojo.setItems(items);
     mojo.setCombineItemsFile(ONLY_VALUE_JSON);
@@ -125,12 +124,12 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
     assertThatNoException().isThrownBy(mojo::run);
     String fileName = new File(ONLY_VALUE_JSON).getName();
     File generatedFile =
-        stream(requireNonNull(new File(GENERATED_COMBINE_ITEMS_DIR).listFiles()))
+        stream(requireNonNull(mojo.getGeneratedCombineItemsDir().listFiles()))
             .filter(e -> e.getName().endsWith(fileName))
             .max(comparing(File::getName))
             .orElseThrow();
     List<CombineItem> itemsToCombine =
-        getItemsToCombine(new File(generatedFile.getAbsolutePath()), mojo, false);
+        getItemsToCombine(new File(generatedFile.getAbsolutePath()), mojo);
     assertThat(itemsToCombine).hasSize(amountBefore - 1);
   }
 
@@ -194,7 +193,7 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
     // act
     mojo.execute();
     // assert
-    String jsonString = FileUtils.readFileToString(new File(USED_GROUPS_PATH), UTF_8);
+    String jsonString = FileUtils.readFileToString(mojo.getUsedGroupsFile(), UTF_8);
     List<String> usedItems = JsonPath.read(jsonString, "$.usedItems");
     List<PoolGroup> poolGroups = JsonPath.read(jsonString, "$.poolGroups");
     List<String> usedGroups = JsonPath.read(jsonString, "$.usedGroups.A");
@@ -219,7 +218,7 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
     // act
     mojo.execute();
     // assert
-    String jsonString = FileUtils.readFileToString(new File(USED_GROUPS_PATH), UTF_8);
+    String jsonString = FileUtils.readFileToString(mojo.getUsedGroupsFile(), UTF_8);
     System.out.println(jsonString);
     List<String> usedItems = JsonPath.read(jsonString, "$.usedItems");
     List<PoolGroup> poolGroups = JsonPath.read(jsonString, "$.poolGroups");
@@ -229,5 +228,53 @@ class PrepareItemsMojoTest extends AbstractPrepareTest {
         () -> assertThat(poolGroups).as("2").hasSize(2),
         () -> assertThat(usedGroups).containsKey("C"),
         () -> assertThat(usedGroups.keySet()).hasSize(2));
+  }
+
+  @Test
+  @SneakyThrows
+  void shouldWriteGeneratedFilesToCustomBuildDirectory(@TempDir File tempDir) {
+    // arrange
+    File buildDirectory = new File(tempDir, "targetCustom");
+    File defaultGeneratedDir = new File("target", "generated-combine");
+    FileUtils.deleteDirectory(defaultGeneratedDir);
+    mojo.setBuildDirectory(buildDirectory);
+    mojo.setCombineItemsFile(POOL_TEST);
+    mojo.setDefaultMatchStrategy(WILDCARD);
+    mojo.setPropertyExpressions(List.of());
+    mojo.setTagExpressions(List.of());
+    mojo.setExcludedGroups(List.of("excluded"));
+    mojo.setPoolGroupString("A");
+    // act
+    mojo.execute();
+    // assert
+    File expectedDir = new File(buildDirectory, "generated-combine");
+    Assertions.assertAll(
+        () -> assertThat(mojo.getGeneratedCombineItemsDir()).isEqualTo(expectedDir),
+        () -> assertThat(new File(expectedDir, new File(POOL_TEST).getName())).isFile(),
+        () -> assertThat(new File(expectedDir, "usedGroups.json")).isFile(),
+        () -> assertThat(mojo.getUsedGroupsFile()).isEqualTo(new File(expectedDir, "usedGroups.json")),
+        () -> assertThat(defaultGeneratedDir).doesNotExist());
+  }
+
+  @Test
+  @SneakyThrows
+  void shouldWriteGeneratedFilesToTargetForDefaultBuildDirectory() {
+    // arrange
+    File defaultGeneratedDir = new File("target", "generated-combine");
+    FileUtils.deleteDirectory(defaultGeneratedDir);
+    mojo.setBuildDirectory(new File("target"));
+    mojo.setCombineItemsFile(POOL_TEST);
+    mojo.setDefaultMatchStrategy(WILDCARD);
+    mojo.setPropertyExpressions(List.of());
+    mojo.setTagExpressions(List.of());
+    mojo.setExcludedGroups(List.of("excluded"));
+    mojo.setPoolGroupString("A");
+    // act
+    mojo.execute();
+    // assert
+    Assertions.assertAll(
+        () -> assertThat(mojo.getGeneratedCombineItemsDir()).isEqualTo(defaultGeneratedDir),
+        () -> assertThat(new File(defaultGeneratedDir, new File(POOL_TEST).getName())).isFile(),
+        () -> assertThat(new File(defaultGeneratedDir, "usedGroups.json")).isFile());
   }
 }

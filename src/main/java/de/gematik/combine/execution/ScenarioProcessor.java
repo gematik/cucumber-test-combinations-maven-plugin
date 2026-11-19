@@ -43,7 +43,7 @@ import lombok.SneakyThrows;
 @RequiredArgsConstructor(onConstructor_ = @Inject)
 public class ScenarioProcessor {
 
-  public static final Location LOCATION = new Location(0L, 0L);
+  public static final Location LOCATION = new Location(0, 0);
 
   private final ExamplesProcessor examplesProcessor;
 

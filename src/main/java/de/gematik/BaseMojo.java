@@ -34,11 +34,30 @@ import org.apache.maven.plugins.annotations.Parameter;
 @Setter
 public abstract class BaseMojo extends AbstractMojo {
 
-  /** Path to the directory where the combined items get stored */
-  public static final String GENERATED_COMBINE_ITEMS_DIR =
-      "." + File.separator + "target" + File.separator + "generated-combine";
+  /** Name of the subdirectory of the build directory where generated files get stored */
+  public static final String GENERATED_COMBINE_DIR_NAME = "generated-combine";
+
+  /** Maven's default build directory, used if no build directory got injected */
+  public static final String DEFAULT_BUILD_DIRECTORY = "target";
 
   protected final List<String> apiErrors = new ArrayList<>();
+
+  /** Build directory of the project. Generated files are written to its generated-combine dir */
+  @Parameter(defaultValue = "${project.build.directory}", readonly = true, required = true)
+  File buildDirectory;
+
+  /**
+   * @return directory where generated files (combine_items.json, usedGroups.json, ...) get stored:
+   *     {@code ${project.build.directory}/generated-combine}
+   */
+  public File getGeneratedCombineItemsDir() {
+    return resolveGeneratedCombineItemsDir(buildDirectory);
+  }
+
+  public static File resolveGeneratedCombineItemsDir(File buildDirectory) {
+    File buildDir = buildDirectory != null ? buildDirectory : new File(DEFAULT_BUILD_DIRECTORY);
+    return new File(buildDir, GENERATED_COMBINE_DIR_NAME);
+  }
 
   /** Path to file that contains the values to combine */
   @Parameter(

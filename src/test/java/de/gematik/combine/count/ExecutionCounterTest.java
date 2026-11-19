@@ -20,25 +20,25 @@
 
 package de.gematik.combine.count;
 
-import static de.gematik.BaseMojo.GENERATED_COMBINE_ITEMS_DIR;
+import static de.gematik.BaseMojo.resolveGeneratedCombineItemsDir;
 import static de.gematik.combine.count.ExecutionCounter.COUNT_EXECUTION_FILE_NAME;
-import static io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.gematik.combine.CombineConfiguration;
-import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -52,12 +52,14 @@ class ExecutionCounterTest {
   private static final String OUTPUT_DIR_EMPTY_SCENARIOS =
       "./src/test/resources/featureFiles/emptyScenarios";
 
+  private static final File GENERATED_DIR = resolveGeneratedCombineItemsDir(null);
+
   private final ExecutionCounter underTest = new ExecutionCounter();
 
   @BeforeEach
   void deleteOldFiles() {
     try {
-      Arrays.stream(Objects.requireNonNull(new File(GENERATED_COMBINE_ITEMS_DIR).listFiles()))
+      Arrays.stream(Objects.requireNonNull(GENERATED_DIR.listFiles()))
           .forEach(File::delete);
     } catch (Exception ex) {
       System.err.println(ex);
@@ -85,7 +87,7 @@ class ExecutionCounterTest {
     // act
     underTest.count(config);
     // assert
-    assertThat(new File(GENERATED_COMBINE_ITEMS_DIR).list())
+    assertThat(GENERATED_DIR.list())
         .containsAll(
             List.of(COUNT_EXECUTION_FILE_NAME + ".txt", COUNT_EXECUTION_FILE_NAME + ".json"));
   }
@@ -103,7 +105,7 @@ class ExecutionCounterTest {
     // act
     underTest.count(config);
     // assert
-    assertThat(new File(GENERATED_COMBINE_ITEMS_DIR)).isEmptyDirectory();
+    assertThat(GENERATED_DIR).isEmptyDirectory();
   }
 
   @Test
@@ -119,9 +121,9 @@ class ExecutionCounterTest {
     // act
     underTest.count(config);
     // assert
-    assertThat(new File(GENERATED_COMBINE_ITEMS_DIR).list())
+    assertThat(GENERATED_DIR.list())
         .contains(COUNT_EXECUTION_FILE_NAME + ".txt");
-    assertThat(new File(GENERATED_COMBINE_ITEMS_DIR).list())
+    assertThat(GENERATED_DIR.list())
         .doesNotContain(COUNT_EXECUTION_FILE_NAME + ".json");
   }
 
@@ -141,7 +143,7 @@ class ExecutionCounterTest {
     JSONObject testJson =
         new JSONObject(
             Files.readString(
-                Path.of(GENERATED_COMBINE_ITEMS_DIR + "/" + COUNT_EXECUTION_FILE_NAME + ".json")));
+                GENERATED_DIR.toPath().resolve(COUNT_EXECUTION_FILE_NAME + ".json")));
     assertThat(testJson.get("total")).isEqualTo(33);
     assertThat(testJson.getJSONArray("features").getJSONObject(0).get("total")).isEqualTo(21);
     assertThat(testJson.getJSONArray("features").getJSONObject(1).get("total")).isEqualTo(12);
@@ -187,7 +189,7 @@ class ExecutionCounterTest {
     underTest.count(config);
     String counterString =
         FileUtils.readFileToString(
-            new File(GENERATED_COMBINE_ITEMS_DIR + "/" + COUNT_EXECUTION_FILE_NAME + ".json"), UTF_8);
+            new File(GENERATED_DIR, COUNT_EXECUTION_FILE_NAME + ".json"), UTF_8);
     TotalCounter tc =
         new ObjectMapper()
             .configure(FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -201,5 +203,32 @@ class ExecutionCounterTest {
                 .mapToLong(Collection::size)
                 .sum())
         .isEqualTo(5);
+  }
+
+  @Test
+  @SneakyThrows
+  void shouldWriteToConfiguredGeneratedDirectory(@TempDir File tempDir) {
+    // arrange
+    File customDir = new File(new File(tempDir, "targetCustom"), "generated-combine");
+    CombineConfiguration config =
+        getBaseCombineConfigurationBuilder()
+            .countExecutionsFormat(List.of(ExecutionCounter.Format.values()))
+            .countExecutions(true)
+            .outputDir(OUTPUT_DIR)
+            .generatedCombineItemsDir(customDir)
+            .build();
+    // act
+    underTest.count(config);
+    // assert
+    assertThat(customDir.list())
+        .containsExactlyInAnyOrder(
+            COUNT_EXECUTION_FILE_NAME + ".txt", COUNT_EXECUTION_FILE_NAME + ".json");
+    assertThat(GENERATED_DIR.list()).isNullOrEmpty();
+  }
+
+  @Test
+  void defaultGeneratedDirectoryShouldBeTargetGeneratedCombine() {
+    assertThat(CombineConfiguration.builder().build().getGeneratedCombineItemsDir())
+        .isEqualTo(new File("target", "generated-combine"));
   }
 }

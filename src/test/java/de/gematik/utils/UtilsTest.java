@@ -21,7 +21,7 @@
 package de.gematik.utils;
 
 import static de.gematik.utils.Utils.getItemsToCombine;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -29,11 +29,14 @@ import static org.mockito.Mockito.spy;
 import de.gematik.combine.CombineMojo;
 import de.gematik.combine.model.CombineItem;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class UtilsTest {
 
@@ -54,7 +57,27 @@ class UtilsTest {
   @SneakyThrows
   void shouldKeepValue() {
     File f = new File(URL_VALUE_JSON);
-    List<CombineItem> combines = getItemsToCombine(f, mojo, false);
+    List<CombineItem> combines = getItemsToCombine(f, mojo);
+    combines.forEach(c -> assertThat(c.getValue()).startsWith("API-"));
+  }
+
+  @Test
+  @SneakyThrows
+  void shouldPreferGeneratedFileIfPresent(@TempDir File generatedDir) {
+    File f = new File(URL_VALUE_JSON);
+    FileUtils.writeStringToFile(
+        new File(generatedDir, f.getName()),
+        "[{\"value\": \"GENERATED\"}]",
+        StandardCharsets.UTF_8);
+    List<CombineItem> combines = getItemsToCombine(f, mojo, generatedDir);
+    assertThat(combines).hasSize(1);
+    assertThat(combines.getFirst().getValue()).isEqualTo("GENERATED");
+  }
+
+  @Test
+  @SneakyThrows
+  void shouldFallBackToSourceFileIfNoGeneratedFile(@TempDir File generatedDir) {
+    List<CombineItem> combines = getItemsToCombine(new File(URL_VALUE_JSON), mojo, generatedDir);
     combines.forEach(c -> assertThat(c.getValue()).startsWith("API-"));
   }
 }

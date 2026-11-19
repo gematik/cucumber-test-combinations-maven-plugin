@@ -20,13 +20,14 @@
 
 package de.gematik.combine;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import de.gematik.BaseMojo;
 import de.gematik.combine.count.ExecutionCounter;
 import io.cucumber.core.options.CucumberProperties;
 import io.cucumber.core.options.CucumberPropertiesParser;
 import io.cucumber.tagexpressions.Expression;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -41,6 +42,10 @@ public class CombineConfiguration {
   private List<String> templateSources;
   private String outputDir;
   private String combineItemFile;
+
+  @Builder.Default
+  private File generatedCombineItemsDir = BaseMojo.resolveGeneratedCombineItemsDir(null);
+
   @Builder.Default private String templateFileEnding = ".cute";
   @Builder.Default private String pluginTagCategory = "Plugin";
   @Builder.Default private String versionFilterTagCategory = "VersionFilter";
@@ -55,7 +60,8 @@ public class CombineConfiguration {
   private boolean softFilterToHardFilter;
   private boolean countExecutions;
   private List<ExecutionCounter.Format> countExecutionsFormat;
-  private final List<Expression> filterTagExpressions = new CucumberPropertiesParser().parse(CucumberProperties.create()).build().getTagExpressions();
+  private final List<Expression> filterTagExpressions =
+      new CucumberPropertiesParser().parse(CucumberProperties.create()).build().getTagExpressions();
 
   public boolean filterTagsMatch(List<String> tags) {
     return filterTagExpressions.stream().allMatch(expression -> expression.evaluate(tags));

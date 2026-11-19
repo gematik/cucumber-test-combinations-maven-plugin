@@ -20,13 +20,11 @@
 
 package de.gematik.combine.e2e;
 
-import static de.gematik.prepare.PrepareItemsMojo.GENERATED_COMBINE_ITEMS_DIR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.quality.Strictness.LENIENT;
 
 import de.gematik.combine.CombineMojo;
-import java.io.File;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -41,7 +39,7 @@ class ErrorLogTest extends AbstractCombineMojoTest {
   @SneakyThrows
   @BeforeEach
   void init() {
-    FileUtils.deleteDirectory(new File(GENERATED_COMBINE_ITEMS_DIR));
+    FileUtils.deleteDirectory(combineMojo.getGeneratedCombineItemsDir());
     combineMojo.setMinTableSize(2);
   }
 

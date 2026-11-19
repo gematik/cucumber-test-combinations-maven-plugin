@@ -32,8 +32,8 @@ import de.gematik.BaseMojo;
 import de.gematik.combine.model.CombineItem;
 import de.gematik.utils.request.ApiRequester;
 import de.gematik.utils.request.RequesterClient;
-import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.core.JsonProcessingException;
-import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -119,10 +119,13 @@ public class CheckMojo extends BaseMojo {
 
   @SneakyThrows
   private void run() {
-    List<CombineItem> items = getItemsToCombine(new File(getCombineItemsFile()), this, true);
+    List<CombineItem> items =
+        getItemsToCombine(new File(getCombineItemsFile()), this, getGeneratedCombineItemsDir());
     items.forEach(this::check);
-    writeErrors(getClass().getSimpleName(), apiErrors, "Some requests failed");
-    writeErrors(getClass().getSimpleName(), errors, "Some checks failed");
+    writeErrors(
+        getGeneratedCombineItemsDir(), getClass().getSimpleName(), apiErrors, "Some requests failed");
+    writeErrors(
+        getGeneratedCombineItemsDir(), getClass().getSimpleName(), errors, "Some checks failed");
     boolean requestsOk = apiErrors.isEmpty() || !isBreakOnFailedRequest();
     boolean checksOk = errors.isEmpty() || !isBreakOnContextError();
     List<String> allErrors =
@@ -137,7 +140,7 @@ public class CheckMojo extends BaseMojo {
       throw new MojoExecutionException(
           "Something went wrong during api check! At least one of your api could not pass "
               + "the check. See error log at "
-              + GENERATED_COMBINE_ITEMS_DIR);
+              + getGeneratedCombineItemsDir().getAbsolutePath());
     }
   }
 

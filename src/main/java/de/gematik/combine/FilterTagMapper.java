@@ -86,6 +86,6 @@ public final class FilterTagMapper {
     String s =
         format(
             "@%s(%s)", (caller instanceof String) ? caller : getTagName(caller.getClass()), value);
-    return new Tag(new Location(0L, 0L), s, s);
+    return new Tag(new Location(0, 0), s, s);
   }
 }

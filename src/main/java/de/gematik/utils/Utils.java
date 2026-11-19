@@ -20,7 +20,6 @@
 
 package de.gematik.utils;
 
-import static de.gematik.prepare.PrepareItemsMojo.GENERATED_COMBINE_ITEMS_DIR;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.nonNull;
@@ -31,9 +30,9 @@ import de.gematik.combine.CombineMojo;
 import de.gematik.combine.model.CombineItem;
 import de.gematik.prepare.PrepareItemsMojo;
 import io.cucumber.datatable.internal.difflib.StringUtills;
-import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.core.JsonParseException;
-import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.databind.JsonMappingException;
-import io.cucumber.messages.ndjson.internal.com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -42,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.Mojo;
@@ -54,20 +54,35 @@ public class Utils {
 
   private static final SystemStreamLog nullLogger = new SystemStreamLog();
 
+  public static final String ERROR_LOG_FILE_NAME = "errorLog.txt";
+
   /**
-   * read the combine_items.json file into the combineItems list
+   * read the combine_items.json file into the combineItems list, preferring a generated file
    *
+   * @param file the combine items file to read
+   * @param mojo the calling mojo (used for logging)
+   * @param generatedDir if a generated file with the same name exists in this directory, it is read
+   *     instead of {@code file}
+   * @return list of items to combine
+   */
+  public static List<CombineItem> getItemsToCombine(
+      File file, Mojo mojo, @NonNull File generatedDir) {
+    File generatedFile = new File(generatedDir, file.getName());
+    return getItemsToCombine(generatedFile.exists() ? generatedFile : file, mojo);
+  }
+
+  /**
+   * read exactly the given combine_items.json file into the combineItems list
+   *
+   * @param file the combine items file to read
+   * @param mojo the calling mojo (used for logging)
    * @return list of items to combine
    */
   @SneakyThrows
-  public static List<CombineItem> getItemsToCombine(File file, Mojo mojo, boolean useCreated) {
+  public static List<CombineItem> getItemsToCombine(File file, Mojo mojo) {
     final BufferedReader br;
     final ObjectMapper mapper = new ObjectMapper();
     final List<CombineItem> combineItems;
-    File generatedFile = new File(GENERATED_COMBINE_ITEMS_DIR + File.separator + file.getName());
-    if (useCreated && generatedFile.exists()) {
-      file = generatedFile;
-    }
     mojo.getLog().info(format("Fetching all items from input file '%s'", file.getAbsolutePath()));
     try {
       br = new BufferedReader(new FileReader(file));
@@ -102,18 +117,23 @@ public class Utils {
     }
   }
 
-  public static void writeErrors(String msgPreamble, List<String> errors) {
-    writeErrors(msgPreamble, errors, null, true);
-  }
-
-  @SneakyThrows
-  public static void writeErrors(String msgPreamble, List<String> errors, String message) {
-    writeErrors(msgPreamble, errors, message, true);
+  public static void writeErrors(File generatedDir, String msgPreamble, List<String> errors) {
+    writeErrors(generatedDir, msgPreamble, errors, null, true);
   }
 
   @SneakyThrows
   public static void writeErrors(
-      String msgPreamble, List<String> errors, String message, boolean shouldAppend) {
+      File generatedDir, String msgPreamble, List<String> errors, String message) {
+    writeErrors(generatedDir, msgPreamble, errors, message, true);
+  }
+
+  @SneakyThrows
+  public static void writeErrors(
+      File generatedDir,
+      String msgPreamble,
+      List<String> errors,
+      String message,
+      boolean shouldAppend) {
     if (errors.isEmpty()) {
       return;
     }
@@ -121,9 +141,22 @@ public class Utils {
       getLog().warn(message);
     }
     errors.forEach(e -> getLog().warn(msgPreamble + e));
-    File file = new File(GENERATED_COMBINE_ITEMS_DIR + File.separator + "errorLog.txt");
+    File file = new File(ensureDirectory(generatedDir), ERROR_LOG_FILE_NAME);
     String errorString = StringUtills.join(errors, "\n") + "\n";
     FileUtils.write(file, errorString, UTF_8, shouldAppend);
+  }
+
+  /**
+   * Creates the given directory (including parents) if it does not exist yet
+   *
+   * @return the given directory
+   */
+  @SneakyThrows
+  public static File ensureDirectory(File dir) {
+    if (!dir.isDirectory() && !dir.mkdirs() && !dir.isDirectory()) {
+      throw new MojoExecutionException("Could not create directory " + dir.getAbsolutePath());
+    }
+    return dir;
   }
 
   public static String getItemAsString(CombineItem item) {

@@ -27,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mockStatic;
@@ -99,7 +98,7 @@ class CheckApiMojoTest {
   }
 
   static void makeMockReturnItems(MockedStatic<Utils> mocked, List<CombineItem> value) {
-    mocked.when(() -> Utils.getItemsToCombine(any(), any(), anyBoolean())).thenReturn(value);
+    mocked.when(() -> Utils.getItemsToCombine(any(), any(), any())).thenReturn(value);
   }
 
   static Stream<Arguments> runSuccessfully() {

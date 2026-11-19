@@ -192,7 +192,8 @@ public class CombineMojo extends BaseMojo {
     String fileEnding = config.getTemplateFileEnding();
 
     List<CombineItem> itemsToCombine =
-        getItemsToCombine(new File(config.getCombineItemFile()), this, true);
+        getItemsToCombine(
+            new File(config.getCombineItemFile()), this, config.getGeneratedCombineItemsDir());
 
     copyTemplateFiles(config.getTemplateSources(), outDir, fileEnding);
 
@@ -211,6 +212,7 @@ public class CombineMojo extends BaseMojo {
     }
 
     writeErrors(
+        config.getGeneratedCombineItemsDir(),
         getClass().getSimpleName(),
         Stream.of(minimalTableErrorLog, tableSizeErrorLog, propertyErrorLog, warningsLog)
             .flatMap(Collection::stream)
@@ -295,6 +297,7 @@ public class CombineMojo extends BaseMojo {
         .templateFileEnding(ending)
         .outputDir(outputDir)
         .combineItemFile(getCombineItemsFile())
+        .generatedCombineItemsDir(getGeneratedCombineItemsDir())
         .pluginTagCategory(pluginTagCategory)
         .versionFilterTagCategory(versionFilterTagCategory)
         .emptyExamplesTags(emptyExamplesTags)

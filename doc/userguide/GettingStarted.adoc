@@ -17,7 +17,8 @@
 
 === Error log
 
-Every error / mismatch will be logged to console and also to the folder ./target/generated-combine.
+Every error / mismatch will be logged to console and also to the folder `${project.build.directory}/generated-combine` (by default `./target/generated-combine`).
+All other generated files (`combine_items.json`, `usedGroups.json`, `countExecution.*`) are stored in this folder as well; a custom `<build><directory>` is respected.
 This is generally for all different goals. more particularly you can decide if the plugin should break the build, or should only log errors.
 This enables you for a proper investigation.
 
@@ -139,7 +140,7 @@ Other items of the correct group are not effected
 . Exclude overrides all!
 
 An additionally summary file will be created to retrace which groups are used and which are excluded.
-This can be found at `./target/generated-combine/usedGroups.json`
+This can be found at `${project.build.directory}/generated-combine/usedGroups.json` (by default `./target/generated-combine/usedGroups.json`)
 In addition this information will be set in java runtime environment and can be accessed later via:
 
 * cutest.plugin.groups.usedGroups
@@ -267,7 +268,7 @@ This results in following table of outcomes:
 
 Everytime an expression is not successful (returns false or was not found) the build will break if `configFail` is set to true (default).
 If it's set to false the regarding tag or property will be removed if set.
-In this case an errorLog.txt file with all registered errors will be generated right next to the generated combine_items.json at `./target/generated-combine`.
+In this case an errorLog.txt file with all registered errors will be generated right next to the generated combine_items.json at `${project.build.directory}/generated-combine` (by default `./target/generated-combine`).
 
 ==== Configuration expressions in pom.xml
 
@@ -566,7 +567,7 @@ Each item needs a `value` field and can have a list of `tags` and a map of `prop
 ====
 If you want to use the <<PREPARE, Prepare Goal>>, the items must have a value that can be set and must be set as the <<infoResourceLocation, infoResourceLocation>>.
 
-You can *EITHER* use a base _combine_items.json_ file which is then completed by the <<PREPARE, Prepare Goal>>. <<PREPARE, It>> asks all the specified endpoints for the information and outputs to a file located at `.target/generated-combine/combine_items.json`.
+You can *EITHER* use a base _combine_items.json_ file which is then completed by the <<PREPARE, Prepare Goal>>. <<PREPARE, It>> asks all the specified endpoints for the information and outputs to a file located at `${project.build.directory}/generated-combine/combine_items.json` (by default `./target/generated-combine/combine_items.json`).
 You can then use that output as the <<combineItemsFile, input>> for the <<COMBINE, Combine Goal>>.
 
 *OR* you can just use a complete _combine_items.json_ file with running the <<COMBINE, Combine Goal>> only, specifying your prepared input file via <<combineItemsFile, combineItemsFile>>.
@@ -876,7 +877,7 @@ The prefix could be added to following Tags:
 === Summary about generated executions
 
 For debugging purpose a file with the number of examples for each file and szenario is build.
-This will be stored at `./target/generated-combine/countExecutions.<format>`.
+This will be stored at `${project.build.directory}/generated-combine/countExecution.<format>` (by default `./target/generated-combine/countExecution.<format>`).
 The export could be delivered in different formats <txt,json>.
 This could be configured via `countExecutionsFormat` comma separated.
 If this report is not desired it could be turned of via `countExecutions` set to false.
